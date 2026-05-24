@@ -106,5 +106,5 @@ NewtonBench 论文自己也承认了一个尴尬的发现：**给强模型加上
 
 ---
 
-*工作代号：NoetherBench（暂定）*
+*Benchmark 名：MirrorLab（锁定 2026-05-22）*
 *Program 状态：v0.x 设计阶段*
