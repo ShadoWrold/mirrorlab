@@ -44,8 +44,8 @@ flowchart LR
         TOOL[Tool Pool<br/>measure/manipulate/analyze/knowledge]
         SBX[Python Sandbox<br/>optional, monitored]
         AG((Agent / LLM))
-        SUB[Submission<br/>(formula, SI-dim, vars)]
-        EVAL[Evaluator<br/>stage-1: dim · stage-2: numeric]
+        SUB[Submission<br/>formula · SI-dim · vars]
+        EVAL[Evaluator<br/>stage-1 dim · stage-2 numeric]
         SCORE[Scorer<br/>main + bonus]
     end
 
