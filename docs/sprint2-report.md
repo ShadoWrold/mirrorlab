@@ -68,22 +68,20 @@ Breakdown of the 15 sprint-2 integration tests:
 
 ## 3. Catalog vs. implementation — discrepancies surfaced
 
-### D-1 (non-gating): loader's counterfactual whitelist not extended for two new hooke shifts
+### D-1 (RESOLVED post-report): loader's counterfactual whitelist not extended for two new hooke shifts
 
-`mirrorlab/scenarios/counterfactual.py::_LAW_PARAM_FIELDS` only registers
-`HookeParams` and `HookeGamma11Params`. The smoke run exposes:
+`mirrorlab/scenarios/counterfactual.py::_LAW_PARAM_FIELDS` originally only
+registered `HookeParams` and `HookeGamma11Params`. Initial smoke run exposed:
 
-| Pair | Registry layer | Loader layer | Cause |
+| Pair | Registry layer | Loader layer (pre-patch) | Cause |
 |---|---|---|---|
-| `hooke / delta_1_1` | PASS | **FAIL** | `TypeError: no counterfactual policy registered for HookeDelta11Params` |
-| `hooke / gamma_1_2` | PASS | **FAIL** | `TypeError: no counterfactual policy registered for HookeGamma12Params` |
+| `hooke / delta_1_1` | PASS | FAIL | `TypeError: no counterfactual policy registered for HookeDelta11Params` |
+| `hooke / gamma_1_2` | PASS | FAIL | `TypeError: no counterfactual policy registered for HookeGamma12Params` |
 
-These shifts produce **valid** SimInstances through the registry (the catalog→sim contract that §9.2 gates on), so the exit criterion is unaffected. The discrepancy is between Sprint-1's loader wiring (hooke-only, only the two then-existing dataclasses) and Sprint-2's catalog expansion. **Reported back to counterfactual-engineer via SendMessage**; fix is to extend the whitelist with:
-
-- `HookeGamma12Params`: law fields `(k0, xi, phi)`; IC `(x0, y0, vx0, vy0)`; mass `m`
-- `HookeDelta11Params`: law fields `(k, c, L)`; IC `(x0, v0)`; mass `m`
-
-Per the "don't paper over failures" rule the integrator did not silently patch the whitelist.
+**Resolution**: counterfactual-engineer extended `_LAW_PARAM_FIELDS` with
+`HookeGamma12Params → (k0, xi, phi)` and `HookeDelta11Params → (k, c, L)`.
+This is coverage, not calibration — the ±30% magnitude (CAL-3) is unchanged.
+Post-patch smoke reports **Loader 4/4 PASS**; full suite still 331/331.
 
 ### D-2 (non-gating): loader / agent-stub / eval pipeline is hooke-only
 

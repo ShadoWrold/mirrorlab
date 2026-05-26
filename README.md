@@ -212,6 +212,26 @@ eval pipeline is still hooke-only — generalizing it to the remaining 11
 domains is the headline Sprint 3 readiness item. Full numbers, evidence, and
 Sprint-3 hand-off live in [`docs/sprint2-report.md`](docs/sprint2-report.md).
 
+### Sprint 3 status
+
+Sprint 3 wires the evaluator + scoring + lookup-attacker chain end-to-end:
+real LLM agent through a local OpenAI-compatible proxy ([`mirrorlab/runners/llm_agent.py`](mirrorlab/runners/llm_agent.py)),
+universal scoring grids for all 12 domains ([`mirrorlab/scenarios/loader.py`](mirrorlab/scenarios/loader.py)),
+the locked-prompt lookup attacker ([`mirrorlab/attacker/`](mirrorlab/attacker/)),
+and a 5-knob CAL calibration sweep ([`mirrorlab/calibration/sweep.py`](mirrorlab/calibration/sweep.py)).
+
+The §9.2 exit pilot ran 5 honest scenarios + the 24-cell γ∪δ attacker slice
+end-to-end via `mirrorlab.runners.sprint3_pilot` against the local proxy
+(`gpt-4.1-20250414`, 188 LLM calls, 0 errors). Pipeline plumbing **PASS**;
+attacker `S_bench^lookup = 0.0000 < 0.50` threshold **PASS, but vacuously**
+— under the pilot's tightened tool-call budgets neither agent submitted
+before exhaustion, so the all-zero scores certify the chain rather than the
+attacker's strength. CAL-4 / CAL-9 final lock deferred to Sprint 4 along
+with a prompt-vs-budget reconciliation. Full verdict, per-scenario table,
+attacker breakdown, and Sprint-4 follow-ups live in
+[`docs/sprint3-report.md`](docs/sprint3-report.md) (data:
+[`docs/sprint3-pilot-data.json`](docs/sprint3-pilot-data.json)).
+
 ---
 
 ## Documentation
