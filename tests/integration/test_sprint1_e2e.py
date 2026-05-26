@@ -51,10 +51,33 @@ def test_gamma_1_1_robustness_mean_across_seeds():
 
 
 def test_eval_discriminates_baseline_vs_gamma_1_1():
-    """Headline Sprint 1 exit criterion: same agent, different worlds, score gap."""
+    """Headline Sprint 1 exit criterion: same agent, different worlds, score gap.
+
+    Note: Sprint 2 turned sub-grid (c) into a true CAL-3 counterfactual
+    (per-point perturbed params). This penalizes the baseline-correct stub
+    too (its locked ``k_hat`` cannot track per-point ``k``), so the seed-0
+    gap is smaller than Sprint 1's placeholder reported (~0.19 vs ~0.22) —
+    but the multi-seed mean gap is roughly *double* what it was before (see
+    ``test_eval_discriminates_mean_gap_across_seeds`` below).
+    """
     base = run_demo("hooke", "baseline", seed=0)
     gam = run_demo("hooke", "gamma_1_1", seed=0)
-    assert base["s_scen"] - gam["s_scen"] > 0.20
+    assert base["s_scen"] - gam["s_scen"] > 0.15
+
+
+def test_eval_discriminates_mean_gap_across_seeds():
+    """Multi-seed guard against single-seed flukes after CAL-3 went live."""
+    gaps = [
+        run_demo("hooke", "baseline", seed=s)["s_scen"]
+        - run_demo("hooke", "gamma_1_1", seed=s)["s_scen"]
+        for s in range(10)
+    ]
+    mean = statistics.fmean(gaps)
+    assert mean > 0.30, (
+        f"mean Δ(baseline − γ-1-1) across seeds 0..9 should exceed 0.30 "
+        f"with the CAL-3 counterfactual live; got mean={mean:.3f}\n"
+        f"gaps: {[f'{g:.3f}' for g in gaps]}"
+    )
 
 
 def test_cli_g_1_1_alias_runs_and_prints_report():

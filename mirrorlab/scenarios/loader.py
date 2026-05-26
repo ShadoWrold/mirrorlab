@@ -3,11 +3,11 @@
 Combines a registry-built ``SimInstance`` with the agent-visible prompt and
 the held-out test grids that the evaluator (§6) consumes.
 
-Sprint 1 wires up the Hooke domain (baseline + γ-1-1). The test grids are
-*placeholders* — they exercise the loader contract and are dimensioned per
-§6.2 sub-grids (a / b / c) so the evaluator harness has something concrete
-to consume in #4 / #5; calibration of grid sizes and ranges is deferred
-to Sprint 3 (CAL-1, CAL-2, CAL-3).
+Sprint 1 wires up the Hooke domain (baseline + γ-1-1). Sub-grids (a) and (b)
+remain placeholders (calibration deferred to Sprint 3 — CAL-1/CAL-2). Sub-grid
+(c) is the counterfactual probe: per-point perturbed-parameter law values,
+implemented by ``mirrorlab.scenarios.counterfactual.perturb_params`` (CAL-3
+default ±30%).
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ import numpy as np
 from mirrorlab.domains.hooke import DIM_SIGNATURE as HOOKE_DIM_SIG
 from mirrorlab.domains.hooke import SimInstance
 from mirrorlab.scenarios import prompts
+from mirrorlab.scenarios.counterfactual import DEFAULT_MAGNITUDE, perturb_params
 from mirrorlab.scenarios.registry import make as _make_sim
 
 _DOMAIN_PROMPT_BUILDERS = {
@@ -55,7 +56,15 @@ class ScenarioInstance:
     test_grids
         Dict ``{"a": np.ndarray, "b": np.ndarray, "c": np.ndarray}`` of
         x-input sample points for §6.2 sub-grids (in-domain / OOD /
-        counterfactual). Sprint 1 placeholders.
+        counterfactual).
+    counterfactual_params
+        Tuple of perturbed-parameter dataclasses, one per point in
+        ``test_grids["c"]``. The evaluator builds per-point ground truth by
+        applying the domain's force law with each entry's params instead of
+        the baseline ``sim.params``. Empty tuple if (c) is unset.
+    counterfactual_magnitude
+        CAL-3 perturbation magnitude actually used (records the placeholder
+        default so Sprint 3 calibration is auditable).
     """
 
     domain_id: str
@@ -66,15 +75,20 @@ class ScenarioInstance:
     observables: Tuple[str, ...]
     dim_signature: Dict[str, Dict[str, str]]
     test_grids: Dict[str, np.ndarray] = field(default_factory=dict)
+    counterfactual_params: Tuple[Any, ...] = ()
+    counterfactual_magnitude: float = DEFAULT_MAGNITUDE
 
 
-def _hooke_test_grids(sim: SimInstance, seed: int) -> Dict[str, np.ndarray]:
-    """Sprint 1 placeholder grids for the Hooke domain.
+def _hooke_test_grids(
+    sim: SimInstance, seed: int, magnitude: float
+) -> tuple[Dict[str, np.ndarray], Tuple[Any, ...]]:
+    """Sprint-1 placeholder (a)(b) plus counterfactual (c).
 
-    Uses the IC amplitude ``x0`` as the in-domain scale: (a) covers
-    [-x0, x0]; (b) covers ±[1.5·x0, 5·x0] (OOD per CAL-2 default 5×);
-    (c) is the in-domain scale resampled under a fresh RNG to stand in
-    for counterfactual parameter perturbations (CAL-3, real impl in #4).
+    (a) covers the in-domain amplitude ``[-x0, x0]``; (b) extends to
+    ``±[1.5·x0, 5·x0]`` (OOD per CAL-2 default 5×); (c) is again drawn from
+    the in-domain scale but its per-point ground truth is computed against
+    a freshly-perturbed parameter set, so a curve-fit with frozen
+    coefficients cannot track it.
     """
     x_amp = float(abs(getattr(sim.params, "x0", 1.0)) or 1.0)
     rng = np.random.default_rng(seed + 1)
@@ -86,7 +100,12 @@ def _hooke_test_grids(sim: SimInstance, seed: int) -> Dict[str, np.ndarray]:
         ]
     )
     grid_c = rng.uniform(-x_amp, x_amp, size=11)
-    return {"a": grid_a, "b": grid_b, "c": grid_c}
+    cf_rng = np.random.default_rng(seed + 2)
+    cf_params = tuple(
+        perturb_params(sim.params, magnitude=magnitude, rng=cf_rng)
+        for _ in range(grid_c.size)
+    )
+    return {"a": grid_a, "b": grid_b, "c": grid_c}, cf_params
 
 
 def load(
@@ -95,6 +114,7 @@ def load(
     *,
     seed: int = 0,
     params: Any | None = None,
+    counterfactual_magnitude: float = DEFAULT_MAGNITUDE,
 ) -> ScenarioInstance:
     """Build a fully-formed scenario for the requested ``(domain_id, shift_id)``."""
     if domain_id not in _DOMAIN_PROMPT_BUILDERS:
@@ -107,9 +127,11 @@ def load(
     observables = tuple(_DOMAIN_OBSERVABLES[domain_id])
     dim_signature = _DOMAIN_DIM[domain_id]
     if domain_id == "hooke":
-        test_grids = _hooke_test_grids(sim, seed)
+        test_grids, cf_params = _hooke_test_grids(
+            sim, seed, counterfactual_magnitude
+        )
     else:
-        test_grids = {}
+        test_grids, cf_params = {}, ()
     return ScenarioInstance(
         domain_id=domain_id,
         shift_id=shift_id,
@@ -119,6 +141,8 @@ def load(
         observables=observables,
         dim_signature=dim_signature,
         test_grids=test_grids,
+        counterfactual_params=cf_params,
+        counterfactual_magnitude=counterfactual_magnitude,
     )
 
 

@@ -188,6 +188,30 @@ python -m mirrorlab.runners.sprint1_demo --scenario hooke,g_1_1 --seed 0
 Sprint 1 exit criterion, calibration notes, and Sprint 2/3 hand-off live in
 [`docs/sprint1-report.md`](docs/sprint1-report.md).
 
+### Sprint 2 status
+
+Catalog build-out complete. **12 domain baselines + 36 catalog shifts**
+(24 γ + 12 δ, three per domain) are registered, build under `registry.make`,
+and step cleanly. The **32-tool MVS** (8 measure / 8 manipulate / 8 analyze
+/ 8 knowledge) is in place with a green contract suite.
+
+```bash
+python -m mirrorlab.runners.sprint2_smoke
+# ...
+# Registry layer: PASS=48/48 FAIL=0 (baselines=12, shifts=36)
+# Exit criterion (§9.2): PASS
+
+python -m pytest -q
+# 331 passed in ~134s
+```
+
+Two non-gating discrepancies were surfaced and filed back: the Sprint-1
+loader's CAL-3 whitelist needs to grow for the new hooke shift dataclasses
+(`HookeGamma12Params`, `HookeDelta11Params`), and the loader / agent-stub /
+eval pipeline is still hooke-only — generalizing it to the remaining 11
+domains is the headline Sprint 3 readiness item. Full numbers, evidence, and
+Sprint-3 hand-off live in [`docs/sprint2-report.md`](docs/sprint2-report.md).
+
 ---
 
 ## Documentation

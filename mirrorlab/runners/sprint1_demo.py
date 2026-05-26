@@ -74,10 +74,28 @@ def _grids_with_ground_truth(scenario: ScenarioInstance) -> Dict[str, list]:
     def pack(xs: np.ndarray) -> list:
         return [({"x": float(x)}, float(force(float(x), params))) for x in xs]
 
+    def pack_counterfactual(xs: np.ndarray) -> list:
+        """Per-point GT from perturbed params (CAL-3, spec §6.2 sub-grid c)."""
+        cf = scenario.counterfactual_params
+        if len(cf) != xs.size:
+            raise RuntimeError(
+                f"counterfactual_params length {len(cf)} != (c) grid size {xs.size}"
+            )
+        return [
+            ({"x": float(x)}, float(force(float(x), cf[i])))
+            for i, x in enumerate(xs)
+        ]
+
     x_scale = getattr(params, "x_scale", None)
     if x_scale is None or not np.isfinite(x_scale) or x_scale <= 0:
-        return {key: pack(grid) for key, grid in scenario.test_grids.items()}
+        out: Dict[str, list] = {}
+        for key, grid in scenario.test_grids.items():
+            out[key] = pack_counterfactual(grid) if key == "c" else pack(grid)
+        return out
 
+    # γ-1-1 path: rebuild (a)(b) referenced to ``x_scale`` so the OOD sub-grid
+    # actually reaches the saturating tail; rebuild (c) the same way *but*
+    # re-perturb the params per point so (c) is law-shifted, not just resampled.
     rng = np.random.default_rng(scenario.seed + 7)
     grid_a = np.linspace(-x_scale, x_scale, 11)
     grid_b = np.concatenate(
@@ -85,7 +103,21 @@ def _grids_with_ground_truth(scenario: ScenarioInstance) -> Dict[str, list]:
          np.linspace(1.5 * x_scale, 4.0 * x_scale, 5)]
     )
     grid_c = rng.uniform(-x_scale, x_scale, size=11)
-    return {"a": pack(grid_a), "b": pack(grid_b), "c": pack(grid_c)}
+    from mirrorlab.scenarios.counterfactual import perturb_params
+    cf_rng = np.random.default_rng(scenario.seed + 11)
+    cf_runner = [
+        perturb_params(
+            params,
+            magnitude=scenario.counterfactual_magnitude,
+            rng=cf_rng,
+        )
+        for _ in range(grid_c.size)
+    ]
+    grid_c_packed = [
+        ({"x": float(x)}, float(force(float(x), cf_runner[i])))
+        for i, x in enumerate(grid_c)
+    ]
+    return {"a": pack(grid_a), "b": pack(grid_b), "c": grid_c_packed}
 
 
 def _per_subgrid_rmsle(entry: Mapping[str, Any], grids: Mapping[str, list]) -> Dict[str, float]:

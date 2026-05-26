@@ -1,0 +1,3 @@
+[submodule "vendor/newtonbench"]
+	path = vendor/newtonbench
+	url = https://github.com/HKUST-KnowComp/NewtonBench.git
