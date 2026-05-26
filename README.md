@@ -152,6 +152,42 @@ Near-term TODO for Paper 1:
 - [ ] Wire dual API (Agent mode + Auto mode)
 - [ ] Run adversarial self-test (lookup-attacker AI) to validate benchmark hardness
 
+### Sprint 1 demo
+
+The first end-to-end slice — Hooke domain + γ-1-1 shift wired through
+loader → rule-based agent stub → two-stage evaluator → scoring — is live.
+A linear stub recovers the baseline law exactly and demonstrably mis-extrapolates
+on γ-1-1, which is the entire point of the cross-symmetry evaluator.
+
+```bash
+python -m mirrorlab.runners.sprint1_demo --scenario hooke,baseline --seed 0
+# Scenario: hooke / baseline (seed 0)
+# Stub agent submitted: F = -k*x (linear)
+# Ground truth: F = -k x
+# Stage-1 (dim): PASS
+# Stage-2 (numeric):
+#   in-domain RMSLE: 0.000
+#   OOD RMSLE: 0.000
+#   counterfactual RMSLE: 0.000
+#   s_entry: 1.000
+# S_scen: 1.000
+
+python -m mirrorlab.runners.sprint1_demo --scenario hooke,g_1_1 --seed 0
+# Scenario: hooke / gamma_1_1 (seed 0)
+# Stub agent submitted: F = -k*x (linear)
+# Ground truth: F = -k x [1 + eta tanh(x / x_scale)]
+# Stage-1 (dim): PASS
+# Stage-2 (numeric):
+#   in-domain RMSLE: 0.069
+#   OOD RMSLE: 0.213
+#   counterfactual RMSLE: 0.064
+#   s_entry: 0.778
+# S_scen: 0.778
+```
+
+Sprint 1 exit criterion, calibration notes, and Sprint 2/3 hand-off live in
+[`docs/sprint1-report.md`](docs/sprint1-report.md).
+
 ---
 
 ## Documentation
