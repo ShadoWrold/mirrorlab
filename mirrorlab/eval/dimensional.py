@@ -34,6 +34,29 @@ _UNIT_TO_INDEX = {
     "cd": 6, "J": 6,
 }
 
+# SI named/derived units expressed in the (M, L, T, I, Θ, N, J) 7-tuple.
+# Looked up by the parser BEFORE the abstract-dim symbol table so that LLM
+# submissions written in plain physics units ("N", "C", "W", ...) compare
+# correctly against scenario targets written in base SI ("kg*m*s**-2").
+# Where an SI named-unit symbol collides with an abstract-dim token (N =
+# amount, J = luminous), the named unit wins — abstract-dim consumers
+# either use the bracketed ``[...]`` form (handled below) or the bare M/L/T
+# tokens which never collide with named units.
+_NAMED_UNITS: dict[str, Dim7] = {
+    "N":  (1, 1, -2, 0, 0, 0, 0),   # newton
+    "J":  (1, 2, -2, 0, 0, 0, 0),   # joule
+    "W":  (1, 2, -3, 0, 0, 0, 0),   # watt
+    "Pa": (1, -1, -2, 0, 0, 0, 0),  # pascal
+    "Hz": (0, 0, -1, 0, 0, 0, 0),   # hertz
+    "C":  (0, 0, 1, 1, 0, 0, 0),    # coulomb
+    "V":  (1, 2, -3, -1, 0, 0, 0),  # volt
+    "Wb": (1, 2, -2, -1, 0, 0, 0),  # weber
+    "Bq": (0, 0, -1, 0, 0, 0, 0),   # becquerel
+    "ohm": (1, 2, -3, -2, 0, 0, 0),
+    "Ohm": (1, 2, -3, -2, 0, 0, 0),
+    "Ω":  (1, 2, -3, -2, 0, 0, 0),
+}
+
 _TOKEN_RE = re.compile(
     r"(?P<unit>[A-Za-zΘ]+)\s*(?:(?:\*\*|\^)\s*(?P<exp>[+-]?\d+))?"
 )
@@ -44,13 +67,15 @@ def parse_dim(spec: str) -> Dim7:
 
     Examples:
         ``"kg*m*s**-2"`` → ``(1, 1, -2, 0, 0, 0, 0)``
+        ``"N"``          → ``(1, 1, -2, 0, 0, 0, 0)`` (newton)
         ``"[M·L/T²]"``   → ``(1, 1, -2, 0, 0, 0, 0)``
         ``"1"``          → ``(0,)*7``
     """
     if spec is None:
         raise ValueError("dim spec is None")
     s = spec.strip()
-    if s.startswith("[") and s.endswith("]"):
+    abstract_form = s.startswith("[") and s.endswith("]")
+    if abstract_form:
         s = s[1:-1]
     s = s.replace("·", "*").replace("⋅", "*")
     # Unicode superscripts → ASCII exponent. Conservative: just the common ones.
@@ -60,16 +85,29 @@ def parse_dim(spec: str) -> Dim7:
         s = s.replace(k, v)
     # Fix "**-2" already, and "**2" already fine. But "⁻²" became "**-**2"; fix:
     s = s.replace("**-**", "**-")
-    if not s or s == "1":
+    if not s or s == "1" or s.lower() == "dimensionless":
         return ZERO
 
     exps = [0] * 7
+    # Treat both "/" and surrounding parentheses as div boundaries — but only
+    # at top-level. Strip ``W/(m*K)``-style parens by flattening them and
+    # remembering each inner block goes under the same divisor sign as its
+    # enclosing slash. Simplified: split on "/", treating any "(...)" inside
+    # a part as that whole part's contents.
+    s = s.replace("(", "").replace(")", "")
     parts = s.split("/")
     sign = 1
     for part in parts:
         for match in _TOKEN_RE.finditer(part):
             unit = match.group("unit")
             exp = int(match.group("exp") or "1")
+            # SI named units win over abstract-dim symbols unless we are
+            # explicitly inside the ``[...]`` abstract-dim form.
+            named = None if abstract_form else _NAMED_UNITS.get(unit)
+            if named is not None:
+                for i, e in enumerate(named):
+                    exps[i] += sign * exp * e
+                continue
             if unit not in _UNIT_TO_INDEX:
                 raise ValueError(f"unknown unit token {unit!r} in {spec!r}")
             exps[_UNIT_TO_INDEX[unit]] += sign * exp

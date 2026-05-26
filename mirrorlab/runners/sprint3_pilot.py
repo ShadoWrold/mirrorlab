@@ -82,20 +82,71 @@ PILOT_SCENARIOS: Tuple[PilotPair, ...] = (
 
 # ---- Per-scenario universal grid packer --------------------------------
 
+def _hooke_force_fn(scenario: ScenarioInstance):
+    """Resolve a (x, params) → F callable for any Hooke (baseline or shift).
+
+    The baseline ``HookeBaseline`` exposes ``sim._force`` directly. The
+    γ-1-1 shift inherits from ``SimInstance`` so it does too. The γ-1-2
+    (2-D anisotropic) and δ-1-1 (velocity-dependent) shifts use their own
+    ``_Sim`` classes that do NOT expose ``_force``, so we fall back to the
+    shift module's catalog ``shifted_force`` and project it down to the
+    1-D ``x`` channel the Hooke grid samples on:
+
+      - γ-1-2 ``shifted_force((x, y), p)`` → take x-component at y=0.
+      - δ-1-1 ``shifted_force(x, v, p)`` → evaluate at v=0.
+
+    Both projections match how the ceiling oracle's predictor maps the
+    same shift down to the grid's ``x``-only input vocabulary, so honest
+    LLM agents are scored on the same channel the ceiling reports.
+    """
+    sim = scenario.sim
+    direct = getattr(sim, "_force", None)
+    if direct is not None:
+        return direct
+    shift_id = scenario.shift_id
+    if shift_id == "gamma_1_2":
+        from mirrorlab.shifts import hooke_g_1_2
+
+        def _force(x, params):
+            fx, _ = hooke_g_1_2.shifted_force((float(x), 0.0), params)
+            return float(fx)
+
+        return _force
+    if shift_id == "delta_1_1":
+        from mirrorlab.shifts import hooke_d_1_1
+
+        def _force(x, params):
+            return float(hooke_d_1_1.shifted_force(float(x), 0.0, params))
+
+        return _force
+    if shift_id == "gamma_1_1":
+        from mirrorlab.shifts import hooke_g_1_1
+
+        def _force(x, params):
+            return float(hooke_g_1_1.shifted_force(float(x), params))
+
+        return _force
+    return None
+
+
 def pack_grids(scenario: ScenarioInstance) -> Dict[str, List[Tuple[Dict[str, float], float]]]:
     grids = scenario.test_grids
     if not grids:
         return {}
+    consts = _scenario_constants(scenario)
     if scenario.domain_id == "hooke":
         sim = scenario.sim
-        force = getattr(sim, "_force", None)
+        force = _hooke_force_fn(scenario)
         params = getattr(sim, "params", None)
         if force is None or params is None:
             return {}
         out: Dict[str, List[Tuple[Dict[str, float], float]]] = {}
         for key, arr in grids.items():
             try:
-                out[key] = [({"x": float(x)}, float(force(float(x), params))) for x in arr]
+                out[key] = [
+                    ({**consts, "x": float(x)}, float(force(float(x), params)))
+                    for x in arr
+                ]
             except Exception:  # noqa: BLE001
                 out[key] = []
         return out
@@ -107,10 +158,75 @@ def pack_grids(scenario: ScenarioInstance) -> Dict[str, List[Tuple[Dict[str, flo
         except TypeError:
             packed = []
         if packed and isinstance(packed[0], tuple):
-            out_other[key] = [(dict(ins), float(gt)) for ins, gt in packed]
+            out_other[key] = [({**consts, **dict(ins)}, float(gt)) for ins, gt in packed]
         else:
             out_other[key] = []
     return out_other
+
+
+def _scenario_constants(scenario: ScenarioInstance) -> Dict[str, float]:
+    """Extract scalar sim params so they are available to LLM predictors.
+
+    Many LLM submissions treat scenario constants (q1, q2, k_e, ...) as
+    formula inputs even though the test grid only varies one or two of
+    them. Injecting them into every grid input dict lets the predictor's
+    declared signature receive them — the eval-side signature filter then
+    drops any names the predictor does not consume.
+
+    Some shift modules rename canonical params (e.g. ``q_src`` for ``q1``);
+    we canonicalize those back to the names declared in the scenario's
+    ``dim_signature.params`` block via a small alias table so an LLM that
+    used the textbook name still hits the right value.
+    """
+    sim = getattr(scenario, "sim", None)
+    params = getattr(sim, "params", None)
+    if params is None:
+        return {}
+    raw: Dict[str, float] = {}
+    for name in dir(params):
+        if name.startswith("_"):
+            continue
+        try:
+            val = getattr(params, name)
+        except Exception:  # noqa: BLE001
+            continue
+        if callable(val):
+            continue
+        try:
+            f = float(val)
+        except (TypeError, ValueError):
+            continue
+        import math as _math
+        if not _math.isfinite(f):
+            continue
+        raw[name] = f
+
+    # Canonicalize via aliases keyed by dim_signature.params names.
+    aliases: Dict[str, Tuple[str, ...]] = {
+        "q1": ("q1", "q_src", "src1_q"),
+        "q2": ("q2", "q_test", "src2_q"),
+        "k_e": ("k_e",),
+        "G": ("G", "G0"),
+        "g_over_L": ("g_over_L", "g0_over_L"),
+        "g": ("g", "g0"),
+        "L": ("L", "L0", "L1"),
+        "R": ("R", "R0", "R1"),
+        "C": ("C", "C0", "C1"),
+        "n1": ("n1",),
+        "n2": ("n2", "n0"),
+        "lam": ("lam", "lam0", "lambda_"),
+        "k": ("k", "k0", "alpha"),
+    }
+    dim_params = (scenario.dim_signature.get("params") or {}) if scenario.dim_signature else {}
+    canon: Dict[str, float] = dict(raw)
+    for canon_name in dim_params:
+        if canon_name in canon:
+            continue
+        for alias in aliases.get(canon_name, (canon_name,)):
+            if alias in raw:
+                canon[canon_name] = raw[alias]
+                break
+    return canon
 
 
 def _target_dim(scenario: ScenarioInstance) -> Optional[str]:
@@ -132,12 +248,14 @@ def score_against_scenario(
     packed = pack_grids(scenario)
     if not packed:
         return 0.0
+    canonical = list((scenario.dim_signature.get("inputs") or {}).keys())
     return float(
         score_submission(
             submission,
             target_dim=target,
             test_grids=packed,
             gt_symmetry=gt_symmetry,
+            canonical_inputs=canonical,
         )
     )
 

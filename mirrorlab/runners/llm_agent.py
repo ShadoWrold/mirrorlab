@@ -41,6 +41,7 @@ from mirrorlab.runners.openai_client import (
     build_tool_schemas,
     unmangle_name,
 )
+from mirrorlab.runners.provider import make_client
 from mirrorlab.scenarios.loader import ScenarioInstance
 from mirrorlab.tools.registry import call as tool_call
 from mirrorlab.tools.sandbox import SandboxContext
@@ -199,8 +200,9 @@ class LLMAgent:
     """
 
     model: str = DEFAULT_MODEL
-    base_url: str = DEFAULT_BASE_URL
+    base_url: Optional[str] = None
     api_key: str = ""
+    provider: Optional[str] = None
     max_tool_calls: int = 30
     max_wall_seconds: int = 60
     llm_call: Optional[LLMCallable] = None
@@ -209,12 +211,25 @@ class LLMAgent:
     def _resolve_caller(self) -> LLMCallable:
         if self.llm_call is not None:
             return self.llm_call
-        client = OpenAIClient(
-            model=self.model,
-            base_url=self.base_url,
-            api_key=self.api_key,
-            timeout=float(self.max_wall_seconds),
-        )
+        # Provider auto-dispatch: gpt-* → openai (4142), claude-*/gemini-* →
+        # anthropic (4141). Pass ``provider`` or ``base_url`` to override.
+        try:
+            client = make_client(
+                self.provider,
+                model=self.model,
+                base_url=self.base_url,
+                api_key=self.api_key,
+                timeout=float(self.max_wall_seconds),
+            )
+        except ValueError:
+            # Unknown model prefix → fall back to OpenAI client at the
+            # configured base_url (Sprint 3.5 behavior preserved).
+            client = OpenAIClient(
+                model=self.model,
+                base_url=self.base_url or DEFAULT_BASE_URL,
+                api_key=self.api_key,
+                timeout=float(self.max_wall_seconds),
+            )
         return lambda messages, tools: client.chat(messages, tools)
 
     def run(self, scenario: ScenarioInstance) -> Submission:

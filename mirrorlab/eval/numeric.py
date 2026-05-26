@@ -14,8 +14,9 @@ NewtonBench's predictor-distance metric.
 
 from __future__ import annotations
 
+import inspect
 import math
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 import numpy as np
 
@@ -64,6 +65,30 @@ def _safe_call(predictor: Callable[..., float], inputs: Mapping[str, float]) -> 
         return CLAMP
 
 
+def _predictor_signature(f: Callable[..., float]) -> tuple[Optional[set[str]], bool]:
+    """Return (allowed_param_names, accepts_var_kw).
+
+    ``allowed_param_names`` is ``None`` when the signature cannot be
+    introspected (e.g. built-ins) — callers should then pass all kwargs
+    unchanged.
+    """
+    try:
+        sig = inspect.signature(f)
+    except (TypeError, ValueError):
+        return None, True
+    allowed: set[str] = set()
+    has_var_kw = False
+    for name, p in sig.parameters.items():
+        if p.kind == inspect.Parameter.VAR_KEYWORD:
+            has_var_kw = True
+        elif p.kind in (
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            inspect.Parameter.KEYWORD_ONLY,
+        ):
+            allowed.add(name)
+    return allowed, has_var_kw
+
+
 def _entry_predictor(entry: Mapping[str, Any]) -> Callable[..., float]:
     """Materialize the entry's predictor callable bound with its declared params.
 
@@ -71,7 +96,10 @@ def _entry_predictor(entry: Mapping[str, Any]) -> Callable[..., float]:
     block with ``code`` defining a function ``f(...)``, or attach a callable
     directly under ``entry["_predictor"]`` (test-friendly path). Declared
     parameter values from ``entry["params"]`` are partially applied so the
-    predictor only consumes input-variable kwargs at call time.
+    predictor only consumes input-variable kwargs at call time. Extra kwargs
+    (e.g. scenario constants the grid packer enriched in but the predictor
+    does not consume) are silently filtered against the predictor signature
+    so a strict positional-or-keyword signature is not poisoned by them.
     """
     if callable(entry.get("_predictor")):
         f = entry["_predictor"]
@@ -86,11 +114,51 @@ def _entry_predictor(entry: Mapping[str, Any]) -> Callable[..., float]:
             raise ValueError("predictor code defined no callable")
         f = funcs[0]
     param_values = {p["name"]: p["value"] for p in entry.get("params", [])}
+    allowed, has_var_kw = _predictor_signature(f)
 
     def bound(**kwargs):
-        return f(**kwargs, **{k: v for k, v in param_values.items() if k not in kwargs})
+        merged = {**param_values, **kwargs}
+        if allowed is not None and not has_var_kw:
+            merged = {k: v for k, v in merged.items() if k in allowed}
+        return f(**merged)
 
     return bound
+
+
+def _alias_inputs(
+    raw: Mapping[str, float],
+    *,
+    entry_inputs: Optional[Sequence[Mapping[str, Any]]],
+    canonical_order: Optional[Sequence[str]],
+) -> dict[str, float]:
+    """Rename grid keys to entry-declared input names when they disagree.
+
+    When the LLM's submission declares input names that differ from the
+    test-grid keys, the canonical order from the scenario dim signature
+    serves as the positional bridge: ``canonical_order[i]`` (the grid key)
+    is renamed to ``entry_inputs[i]['name']``. Keys not covered by the
+    canonical order are passed through untouched so scenario constants
+    (q1/q2/k_e/...) the grid packer injected remain available.
+    """
+    if not entry_inputs or not canonical_order:
+        return dict(raw)
+    pairs = list(zip(canonical_order, entry_inputs))
+    out: dict[str, float] = {}
+    renamed: set[str] = set()
+    for canon, spec in pairs:
+        if canon not in raw:
+            continue
+        try:
+            new_name = spec["name"]
+        except (KeyError, TypeError):
+            new_name = canon
+        out[str(new_name)] = raw[canon]
+        renamed.add(canon)
+    for k, v in raw.items():
+        if k in renamed:
+            continue
+        out.setdefault(k, v)
+    return out
 
 
 def evaluate_entry(
@@ -99,14 +167,22 @@ def evaluate_entry(
     *,
     tau: float = TAU_DEFAULT,
     weights: Mapping[str, float] = SUBGRID_WEIGHTS,
+    canonical_inputs: Optional[Sequence[str]] = None,
 ) -> float:
     """Per-entry score ``s_entry = exp(-R_bar / τ)`` per spec §6.2.
 
     ``test_grids`` maps sub-grid key ``"a"|"b"|"c"`` to a sequence of
     ``(inputs_dict, ground_truth_scalar)`` tuples. Missing sub-grids drop out
     of the weighted mean and the remaining weights are renormalized.
+
+    When ``canonical_inputs`` (the scenario's declared input-name order) is
+    provided and the entry declares an ``inputs`` list with names that
+    differ from the grid keys, the entry's names take over by positional
+    alias — letting an LLM that calls the spring coordinate ``q`` instead of
+    ``x`` still receive the grid's ``x`` values bound to ``q``.
     """
     predictor = _entry_predictor(entry)
+    entry_inputs = entry.get("inputs")
     rbars: list[tuple[float, float]] = []
     for key, grid in test_grids.items():
         if not grid:
@@ -114,7 +190,17 @@ def evaluate_entry(
         w = weights.get(key, 0.0)
         if w <= 0:
             continue
-        preds = [_safe_call(predictor, ins) for ins, _ in grid]
+        preds = [
+            _safe_call(
+                predictor,
+                _alias_inputs(
+                    ins,
+                    entry_inputs=entry_inputs,
+                    canonical_order=canonical_inputs,
+                ),
+            )
+            for ins, _ in grid
+        ]
         truths = [gt for _, gt in grid]
         rbars.append((w, rmsle(preds, truths)))
     if not rbars:

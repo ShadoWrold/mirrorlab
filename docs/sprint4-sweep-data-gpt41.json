@@ -1,0 +1,407 @@
+{
+  "meta": {
+    "schema_version": 1,
+    "n_models": 1,
+    "n_cells": 12,
+    "n_runs_planned": 12,
+    "seed": 0,
+    "hard_cap": 2000,
+    "hard_cap_overrun": 2400,
+    "max_tool_calls": 30,
+    "max_wall_seconds": 180,
+    "stopped_at_cap": false,
+    "started_at": "2026-05-26T13:18:58+0000",
+    "n_turns_so_far": 286,
+    "n_completed": 12,
+    "n_turns_total": 286,
+    "elapsed_s": 969.936,
+    "finished_at": "2026-05-26T13:35:08+0000"
+  },
+  "entries": [
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "hooke",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 30,
+      "n_llm_turns": 26,
+      "elapsed_s": 102.2052,
+      "terminated_by": "budget",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "error": null
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 28,
+      "n_llm_turns": 29,
+      "elapsed_s": 95.7127,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F = -k x + F0",
+          "predictor.lang": "python",
+          "predictor.code": "def f(x):\n    k = 0.018 # N/m (approx from regression)\n    F0 = -0.619 # N (approx intercept)\n    return -k*x + F0\n",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 0.018
+            },
+            {
+              "name": "F0",
+              "units": "N",
+              "value": -0.619
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "error": null
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "hooke",
+      "shift_id": "delta_1_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 30,
+      "n_llm_turns": 28,
+      "elapsed_s": 98.3516,
+      "terminated_by": "budget",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "error": null
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "coulomb",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": false,
+      "s_scen": null,
+      "n_tool_calls": 24,
+      "n_llm_turns": 25,
+      "elapsed_s": 90.0987,
+      "terminated_by": "score_error:ValueError",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F = k * q1 * q2 / r^2",
+          "predictor.lang": "python",
+          "predictor.code": "def f(q1, q2, r, k=8.9875517873681764e9):\n    return k * q1 * q2 / r**2",
+          "inputs": [
+            {
+              "name": "q1",
+              "units": "A*s"
+            },
+            {
+              "name": "q2",
+              "units": "A*s"
+            },
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "kg*m**3*A**-2*s**-4",
+              "value": 8987551787.368176
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "error": "score_against_scenario: entry has no usable predictor"
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 30,
+      "n_llm_turns": 30,
+      "elapsed_s": 92.4094,
+      "terminated_by": "budget",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "error": null
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "coulomb",
+      "shift_id": "delta_5_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 30,
+      "n_llm_turns": 30,
+      "elapsed_s": 98.7321,
+      "terminated_by": "budget",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "error": null
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "thermal",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 22,
+      "n_llm_turns": 20,
+      "elapsed_s": 65.9067,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "q = k*(T_hot - T_cold)/L",
+          "predictor.lang": "python",
+          "predictor.code": "def f(T_hot, T_cold, L, k):\n    return k*(T_hot - T_cold)/L",
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "W/(m*K)"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "error": null
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 12,
+      "n_llm_turns": 6,
+      "elapsed_s": 23.8129,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "q = k * (T_hot - T_cold) / L",
+          "predictor.lang": "python",
+          "predictor.code": "def f(T_hot, T_cold, L, k):\n    return k * (T_hot - T_cold) / L",
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W/m^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "W/(m*K)",
+              "value": "unspecified"
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "error": null
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "thermal",
+      "shift_id": "delta_7_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 11,
+      "n_llm_turns": 7,
+      "elapsed_s": 26.0525,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "q = (k / L) * (T_hot - T_cold)",
+          "predictor.lang": "python",
+          "predictor.code": "def f(T_hot, T_cold, L, k):\n    return (k / L) * (T_hot - T_cold)",
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "W/(m\u00b7K)",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "parse_errors": 0,
+      "error": null
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "decay",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 30,
+      "n_llm_turns": 29,
+      "elapsed_s": 90.516,
+      "terminated_by": "budget",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "error": null
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "decay",
+      "shift_id": "gamma_12_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 30,
+      "n_llm_turns": 29,
+      "elapsed_s": 97.2266,
+      "terminated_by": "budget",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "error": null
+    },
+    {
+      "model": "gpt-4.1-20250414",
+      "provider": "openai",
+      "domain_id": "decay",
+      "shift_id": "delta_12_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 30,
+      "n_llm_turns": 27,
+      "elapsed_s": 88.8946,
+      "terminated_by": "budget",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "error": null
+    }
+  ]
+}

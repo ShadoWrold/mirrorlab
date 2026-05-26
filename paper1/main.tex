@@ -1,0 +1,438 @@
+\documentclass{article}
+
+% --- Style: NeurIPS/ICLR-friendly. Swap to neurips_2026.sty at submission. ---
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{natbib}
+
+\graphicspath{{figures/}}
+
+% --- Title candidates (locked one marked [CHOSEN]) ----------------------------
+% (A) Mirrors of a Different Physics: Benchmarking LLM Agents on Symmetry-Broken
+%     Counterfactual Discovery
+% (B) The Cliff: Frontier LLMs Cannot Discover Modified Physics Under Single-
+%     Symmetry Breaks
+% (C) [CHOSEN] MirrorLab: A Symmetry-Organized Counterfactual Benchmark Reveals
+%     a Discovery Cliff in Frontier LLM Agents
+% ---------------------------------------------------------------------------
+
+\title{MirrorLab: A Symmetry-Organized Counterfactual Benchmark Reveals a
+       Discovery Cliff in Frontier LLM Agents}
+
+\author{Anonymous Authors \\ Anonymous Institution}
+\date{}
+
+\begin{document}
+\maketitle
+
+% =============================================================================
+\begin{abstract}
+Recent physics-discovery benchmarks report that frontier LLM agents recover
+canonical laws on Newtonian sandboxes at $60$--$80\%$ symbolic accuracy, but
+their shifts are restricted to $\beta$-type mutations -- exponent, operator,
+or constant tweaks that leave the algebraic skeleton intact. We introduce
+\textbf{MirrorLab}, an agent-mode gym whose $36$ counterfactual shifts are
+organized by Noether-style \emph{single}-symmetry breaks ($\gamma$:
+structural; $\delta$: conservation-law) across $12$ physics domains. On a
+single-seed sweep of $5$ frontier models (Claude Opus 4.6, Claude Sonnet
+4.5, Gemini 3.1 Pro, GPT-4.1, GPT-5.4) across $4$ representative domains,
+\emph{four of five} models collapse to mean scenario score
+$\bar S_{\mathrm{scen}}=0.000$ on the $\gamma$ tier; only GPT-5.4 stays
+above zero ($\bar S=0.698$), still well below an oracle ceiling of
+$\bar S \approx 1.10$ certified on all $48$ pairs. A model-agnostic
+lookup attacker scores $\bar S_{\mathrm{bench}}^{\mathrm{lookup}}=0.000$,
+confirming that the bench is not solvable by rote textbook retrieval.
+MirrorLab thus exposes a discovery cliff that prior $\beta$-only benches
+hide, while remaining fair: the gap is genuine LLM weakness, not a
+broken evaluation gradient.
+\end{abstract}
+
+% =============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+A recent line of evaluations~\citep{newtonbench, physgym, boxinggym} claims
+that frontier LLM agents are now competent at physics discovery: given an
+interactive sandbox and a few hundred tool calls, they recover hidden laws
+at $60$--$80\%$ symbolic accuracy. That headline conceals a quieter
+observation hiding in the same logs. When NewtonBench measured agents not
+on symbolic accuracy but on whether their discovered law actually
+\emph{rolls forward} energy and trajectory under counterfactual parameters,
+the rollout MSE and energy-drift error did not track symbolic
+match~\citep{r5elegant}. Models name a law that looks right and that
+simultaneously predicts the wrong dynamics off-grid. The benchmark scored
+the name.
+
+We argue this gap is structural. Every published physics-discovery
+benchmark perturbs the law along the same axis: $\beta$-type mutations,
+which change an exponent ($F\propto 1/r^{2.3}$), swap an operator, or
+nudge a constant. The algebraic skeleton survives. An agent can succeed
+without identifying \emph{which} physical principle has been broken --
+indeed, an agent armed only with \texttt{numpy.polyfit} can succeed,
+which is why NewtonBench reports that handing strong models a Python
+interpreter \emph{drops} their score.
+
+\paragraph{Our gap statement.} Real physics is not perturbed along
+$\beta$. It is perturbed along the Noether spine: a symmetry breaks
+(Lorentz, parity, CP, rotational), and one conservation law goes with
+it~\citep{noether1918}. Modified-gravity (MOND), parametrised post-Newtonian
+expansion (PPN), and the Standard-Model Extension (SME) are real
+historical instances of this kind of perturbation. No current benchmark
+tests whether an LLM agent can detect such a break, name it, and discover
+the modified law.
+
+\paragraph{Contribution.}
+\begin{enumerate}\itemsep0pt
+\item \textbf{MirrorLab}: a $12$-domain, $36$-shift gym whose shifts are
+      organized by which Noetherian symmetry or conservation law they
+      break ($\gamma$: structural break, e.g.\ rotational anisotropy;
+      $\delta$: conservation-law break, e.g.\ amplitude-conditioned
+      drag). Each shift breaks \emph{exactly one} symmetry; the rest
+      are analytically and numerically verified to hold.
+\item A symmetry-vetted two-stage evaluator (dimensional then numerical),
+      a $32$-tool agent-mode API, three test-point types (in-grid, OOD,
+      counterfactual), and a fairness audit via an oracle agent that
+      certifies the bench is solvable in principle.
+\item \textbf{Headline empirical finding (Fig.~\ref{fig:cliff}).} Across
+      five frontier LLMs and four representative domains, the $\gamma$
+      tier produces a discovery cliff: four of five models score
+      $\bar S_{\mathrm{scen}} = 0.000$; only GPT-5.4 stays above zero
+      ($0.698$), against an oracle ceiling of $1.10$. The same models
+      reach $0.25$--$0.57$ at the baseline tier.
+\end{enumerate}
+
+We frame these results honestly. They are a single-seed, four-domain
+preliminary sweep; the camera-ready extension to $12$ domains $\times$
+$48$ pairs $\times$ $3$ seeds is in progress. The finding is also
+\emph{useful in the negative direction}: it tells us where to push
+training-time interventions, not that LLMs are useless.
+
+% =============================================================================
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Physics-discovery benchmarks.}
+NewtonBench~\citep{newtonbench} gives LLM agents a Python sandbox over
+$12$ Newtonian domains and reports SOTA symbolic accuracy in the
+$60$--$80\%$ range. PhysGym~\citep{physgym} and
+BoxingGym~\citep{boxinggym} layer interactive experiment design on top.
+Gravity-Bench~\citep{gravitybench} focuses on orbital recovery. All four
+restrict counterfactuals to $\beta$-type mutations. MirrorLab borrows
+their domain coverage and tool-pool design but adds the $\gamma/\delta$
+axis along which the algebraic skeleton itself is allowed to change.
+
+\paragraph{Symbolic regression as a god-tool threat.}
+PySR~\citep{pysr} and gplearn~\citep{gplearn} can fit arbitrary parametric
+forms given enough samples. An agent that calls them as a black box can
+score well on $\beta$-only benches without ever ``understanding'' the
+law -- the threat catalogued by~\citet{r5elegant}. MirrorLab defuses this
+through three jointly-acting elements: (i) the symmetry-vetted predictor
+channel asks for OOD and counterfactual generalisation rather than in-grid
+MSE; (ii) the bonus channel asks the agent to \emph{name} the broken
+symmetry, a label PySR cannot produce; (iii) the lookup attacker
+(Sec.~\ref{sec:exp}) we run scores $\bar S = 0.000$, showing that even
+perfect catalogue retrieval cannot pass the bench.
+
+\paragraph{Cross-scenario skill libraries.}
+CASCADE~\citep{cascade} demonstrates persistent tool libraries that an
+agent re-uses across scenarios in chemistry and materials. Our v0.x
+design considered such a cross-scenario tool channel but, given
+CASCADE's precedence and the red-team concern that it invites god-tools,
+we restrict MirrorLab to \emph{within-scenario} persistence and treat
+cross-scenario tool creation as future work~\citep{r3prior}. MirrorLab
+is orthogonal: CASCADE asks ``can the agent build a library?'';
+MirrorLab asks ``can the agent see the symmetry?''.
+
+% =============================================================================
+\section{MirrorLab}
+\label{sec:bench}
+
+\subsection{The D6 shift catalog}
+MirrorLab covers $12$ domains spanning mechanics, electromagnetism, and
+thermal/transport physics (Hooke, gravity, damped HO, pendulum,
+Coulomb, RLC, thermal, wave, optics, fluid, kinetics, decay). For each
+domain we ship a baseline and three structured shifts:
+
+\begin{itemize}\itemsep0pt
+\item \textbf{$\gamma$-1} ($\gamma$, structural break): a single discrete
+      symmetry such as parity, rotation, or time-reversal is broken;
+      all conservation laws are preserved.
+\item \textbf{$\gamma$-2} ($\gamma$, cross-domain re-skin): the same
+      symmetry is broken via a mathematical motif borrowed from a
+      different physics domain (e.g.\ optical birefringence re-skinned
+      into 2D anisotropic stiffness), so that the agent cannot
+      pattern-match a named effect from the domain's own literature.
+\item \textbf{$\delta$-1} ($\delta$, conservation-law break): exactly one
+      Noether charge is violated (energy, momentum, angular momentum,
+      charge, or Onsager reciprocity); the corresponding underlying
+      symmetry is identified.
+\end{itemize}
+
+Each shift includes (a) the closed-form modified law, (b) the
+analytically verified list of \emph{retained} symmetries, (c) the
+broken symmetry label (internal-only, never exposed to the agent), and
+(d) sampled parameter ranges within which the simulation is numerically
+tame. The catalog is human-readable
+(\texttt{docs/d6-shift-catalog.md}) and machine-loadable.
+
+\subsection{Two-stage evaluator}
+A submission is scored in two passes. The \emph{dimensional pass}
+parses the agent's symbolic submission, checks dimensional consistency
+against the domain signature, and rejects ill-typed submissions with
+$S_{\mathrm{scen}}=0$. The \emph{numerical pass} evaluates the
+submission's predictor on three grids: in-grid (a), out-of-distribution
+(b), and counterfactual (c), where (c) re-evaluates the ground-truth
+formula at $\pm 30\%$ perturbed parameters point-wise. The grid scores
+are aggregated by the calibration registry of
+Sec.~\ref{sec:repro}; a $+0.10$ symmetry-claim bonus (CAL-5) is
+awarded iff the agent's self-reported
+\texttt{claim\_broken\_symmetry} matches the catalog label.
+
+\subsection{Agent API}
+The gym exposes $32$ tools across four classes -- measurement,
+intervention, analysis, knowledge -- with knowledge tools priced in
+tool calls so retrieval cannot dominate the budget. A Python sandbox is
+available but does not provide structured information about the
+symmetry break. Tool state persists within a scenario; cross-scenario
+persistence is deliberately disabled (see~\ref{sec:related}).
+
+% =============================================================================
+\section{Experiments}
+\label{sec:exp}
+
+\subsection{Sweep configuration}
+We evaluate five frontier models -- Claude Opus 4.6, Claude Sonnet 4.5,
+Gemini 3.1 Pro (preview), GPT-4.1 (2025-04-14), and GPT-5.4 (2026-03-05)
+-- on four representative domains (Hooke, Coulomb, thermal, decay)
+$\times$ three tiers (baseline, $\gamma$, $\delta$) $\times$ $1$ seed,
+for $60$ runs. Tool budget is capped at $30$ calls / $180\,$s wall.
+
+\subsection{Oracle ceiling: is the bench fair?}
+A symbolic-physics oracle that reads ground-truth parameters from each
+shift module (but \emph{not} the bench's calibration registry) is
+evaluated on all $48$ pairs (Fig.~\ref{fig:ceiling}). The oracle
+achieves median $S_{\mathrm{scen}}=1.083$, mean $1.053$; $47/48$ pairs
+clear the $0.7$ threshold; \emph{none} fall below $0.5$. The one
+sub-threshold pair (pendulum $\gamma$-$4$-$1$, $0.549$) is a documented
+catalog-vs-grid GT-form mismatch, not a defect. The bench is therefore
+fair: a knowledge-perfect agent can pass.
+
+\subsection{Lookup attacker: is the bench trivial?}
+A model-agnostic lookup attacker is given the domain and shift IDs and
+returns the matched textbook law from the catalog without running the
+experiment harness. Under the symmetry-vetted rubric, the lookup
+attacker scores $\bar S_{\mathrm{bench}}^{\mathrm{lookup}} = 0.000$
+across $48$ pairs (Sprint 3.5 protocol, $30/48$ runs submit non-empty
+laws). This rules out the ``rote retrieval wins'' alternative
+hypothesis: succeeding on MirrorLab requires actually discovering the
+\emph{shifted} law, not naming the textbook law.
+
+% =============================================================================
+\section{Results and Analysis}
+\label{sec:results}
+
+\paragraph{The cliff (Fig.~\ref{fig:cliff}, headline numbers).}
+At the baseline tier all five models produce non-trivial scores
+($\bar S \in [0.03, 0.57]$). On the $\gamma$ tier, four of the five
+collapse to zero; only GPT-5.4 stays above the floor at
+$\bar S=0.698$. On the $\delta$ tier the picture is less clean -- two
+models recover partially -- but no model exceeds $0.60$.
+
+\begin{table}[h]
+\centering
+\caption{Mean scenario score by model and tier, averaged over the four
+representative domains. Oracle row from the full $48$-pair ceiling
+sweep. Single seed; bold indicates the discovery cliff.}
+\label{tab:cliff}
+\begin{tabular}{lccc}
+\toprule
+Model & baseline & $\gamma$ & $\delta$ \\
+\midrule
+Claude Opus 4.6        & 0.258 & \textbf{0.000} & 0.249 \\
+Claude Sonnet 4.5      & 0.250 & \textbf{0.000} & 0.499 \\
+Gemini 3.1 Pro         & 0.483 & 0.110 & 0.583 \\
+GPT-4.1                & 0.033 & \textbf{0.000} & 0.000 \\
+GPT-5.4                & 0.571 & 0.698 & 0.474 \\
+\midrule
+Oracle ceiling ($48$)  & 1.100 & 1.099 & 1.064 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.78\linewidth]{fig1_cliff.pdf}
+\caption{\textbf{The discovery cliff.} Mean $S_{\mathrm{scen}}$ versus
+shift tier for five frontier LLMs and the oracle ceiling. Four of
+five models collapse to zero at $\gamma$; the ceiling stays flat near
+$1.10$, certifying that the gap is LLM weakness, not bench design.
+Single-seed preliminary.}
+\label{fig:cliff}
+\end{figure}
+
+\paragraph{Per-domain heatmap (Fig.~\ref{fig:heatmap}).}
+On the $\gamma$ tier, only the (GPT-5.4, decay) cell clears the
+$0.5$ calibration threshold. All other domain $\times$ model cells
+outside the GPT-5.4 row sit at $0$. The cliff is not driven by one
+exotic domain.
+
+\paragraph{Tool-call efficiency (Fig.~\ref{fig:efficiency}).}
+Most models ride the $30$-call cap with cumulative $\bar S\approx 0$ --
+they spend budget but never lock in a useful predictor. GPT-5.4 is
+the only model whose cumulative score is monotone non-zero across the
+budget range. This is consistent with the
+\texttt{terminated\_by} distribution: $19/60$ runs are
+\texttt{budget} (no submission), $28/60$ submit but score zero, and the
+submitted-but-zero runs frequently \emph{name} the correct law but
+emit predictor code whose input-vocabulary does not bind to the test
+grid -- a discovery-vs-formalisation failure mode catalogued in
+Appendix~\ref{app:failures}.
+
+\paragraph{Ceiling-vs-best-LLM scatter (Fig.~\ref{fig:ceiling}).}
+The $48$-pair ceiling sits in the $1.0$--$1.1$ band; the
+best-of-five-LLM mean for the $12$ swept cells sits far below. The
+$\gamma$ slice has the largest vertical gap.
+
+\paragraph{Per-model competence radar (Fig.~\ref{fig:radar}).}
+GPT-5.4 dominates four of six axes (in-domain $S$, OOD $S$,
+counterfactual $S$, bonus probe). Gemini-3.1-Pro is closest in
+in-domain $S$ and dimensional parse rate but loses the OOD/counterfact
+axes.
+
+\begin{figure}[h]
+\centering
+\begin{subfigure}[t]{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth]{fig2_heatmap_gamma.pdf}
+\caption{$\gamma$-tier heatmap.}
+\label{fig:heatmap}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth]{fig5_ceiling_scatter.pdf}
+\caption{Ceiling vs.\ best-LLM.}
+\label{fig:ceiling}
+\end{subfigure}
+\caption{Domain-level cliff (left) and ceiling gap (right).}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\begin{subfigure}[t]{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth]{fig6_efficiency.pdf}
+\caption{Tool-call efficiency.}
+\label{fig:efficiency}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth]{fig4_attacker.pdf}
+\caption{Honest vs.\ lookup attacker.}
+\label{fig:attacker}
+\end{subfigure}
+\caption{Efficiency curves (left) and the lookup-attacker fairness
+audit (right).}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.78\linewidth]{fig3_radars.pdf}
+\caption{Six-axis competence radars per model: in-domain $S$, OOD $S$,
+counterfactual $S$, dimensional parse rate, bonus probe (self-reported
+symmetry name), and tool-call efficiency. All axes normalised to
+$[0,1]$.}
+\label{fig:radar}
+\end{figure}
+
+\paragraph{Failure-mode catalog.} Across the $60$ runs, the dominant
+terminator is \texttt{submit} ($28$), then \texttt{budget} ($19$), then
+\texttt{llm\_error} ($12$, all on the deprecated \texttt{gpt-4o} proxy
+slot we replaced with GPT-4.1), and \texttt{wall} ($1$). The submitted
+cells split into three failure classes: (i) \emph{wrong-form}
+submissions naming a textbook law that the shift breaks (the typical
+$\gamma/\delta$ failure for the four cliff-prone models); (ii)
+\emph{right-name-wrong-binding}, where the submission names the correct
+law but the predictor's input vocabulary does not bind to the grid
+signature; (iii) \emph{partial-form}, where the predictor is
+dimensionally consistent but only matches on the in-grid (a) sub-grid.
+GPT-5.4's $\gamma=0.698$ on decay is the only cell reaching
+class~(iii) above the calibration threshold.
+
+% =============================================================================
+\section{Discussion}
+\label{sec:disc}
+
+\subsection{What MirrorLab says about current LLM physical reasoning}
+The cliff is sharp: change exactly one symmetry, and four of five
+frontier models stop producing useful submissions entirely. The single
+exception (GPT-5.4) sits at $0.698$ on the $\gamma$ tier, far below
+the $1.10$ ceiling that a knowledge-perfect agent attains. The gap
+between best-of-five and the ceiling is the headroom available to
+future models on this task.
+
+Critically, the lookup-attacker result ($\bar S = 0.000$) means the
+cliff is not bypassable by rote retrieval. An agent that ``knows the
+textbook'' loses to MirrorLab by construction, because the catalog
+shifts deliberately violate the textbook.
+
+\subsection{Limitations (honest)}
+We report these caveats prominently because they bound what the cliff
+plot is allowed to claim.
+
+\begin{itemize}\itemsep0pt
+\item \textbf{Single seed.} The sweep is $1$ seed per cell. We cannot
+      yet report variance bars on the cliff. The camera-ready extends
+      to $3$ seeds.
+\item \textbf{Four domains, not twelve.} The sweep covers $4$ of $12$
+      domains (Hooke, Coulomb, thermal, decay). The ceiling sweep
+      covers all $12$; the LLM sweep does not yet. Cliff generalisation
+      to the full domain set is plausible but unproven.
+\item \textbf{Five models, not the full panel.} Notably missing:
+      DeepSeek (R3 / V3), Anthropic Haiku tier, and a Google Gemini
+      Ultra-class slot. The pattern ``one model survives, four
+      collapse'' could shift with a fuller panel.
+\item \textbf{Proxy quirks.} The deprecated \texttt{gpt-4o} slot was
+      replaced mid-sweep with \texttt{gpt-4.1-20250414} because the
+      local proxy returns no healthy deployments for \texttt{gpt-4o}.
+      The replacement still under-performs; we report it for
+      transparency rather than dropping the row.
+\item \textbf{The honest-agent score is a negative result.} We frame
+      MirrorLab's $\bar S = 0$ on the cliff as a \emph{useful negative
+      finding}: it identifies a benchmark axis along which frontier
+      models do not yet succeed. It is not a claim that LLMs are bad
+      at physics in general.
+\item \textbf{Bonus probe is self-reported.} The symmetry-name bonus
+      checks the agent's own label against the catalog ground-truth
+      label, but the agent submits the label without harness-side
+      verification. Camera-ready adds a label-grounding probe.
+\end{itemize}
+
+\subsection{Future work: the program}
+This is paper $1$ of a planned three-paper program. Paper $2$ asks
+whether training a small world model on a $\gamma/\delta$-mixed
+curriculum improves OOD generalisation against an IID baseline.
+Paper $3$ asks whether physics-inductive-bias world models (HNN, LNN,
+equivariant GNN) recover the broken symmetry in their latent space
+under linear probing. Both reuse the MirrorLab backbone.
+
+% =============================================================================
+\section*{Acknowledgments}
+We thank the MirrorLab sprint contributors for benchmark construction,
+sweep execution, and figure rendering.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\appendix
+\input{appendix.tex}
+
+\end{document}

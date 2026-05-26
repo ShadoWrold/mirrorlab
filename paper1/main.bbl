@@ -1,0 +1,59 @@
+\begin{thebibliography}{10}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Authors(2024)]{boxinggym}
+BoxingGym Authors.
+\newblock Boxinggym: Interactive scientific discovery benchmarks for llm agents.
+\newblock \emph{arXiv preprint}, 2024.
+
+\bibitem[Authors(2025{\natexlab{a}})]{cascade}
+CASCADE Authors.
+\newblock Cascade: Persistent skill libraries for chemistry and materials agents.
+\newblock \emph{arXiv preprint arXiv:2512.23880}, 2025{\natexlab{a}}.
+
+\bibitem[Authors(2025{\natexlab{b}})]{gravitybench}
+Gravity-Bench Authors.
+\newblock Gravity-bench: Benchmarking orbital mechanics recovery from agentic experimentation.
+\newblock \emph{arXiv preprint}, 2025{\natexlab{b}}.
+
+\bibitem[Authors(2025{\natexlab{c}})]{newtonbench}
+NewtonBench Authors.
+\newblock Newtonbench: Benchmarking physical reasoning of frontier llm agents on newtonian sandboxes.
+\newblock \emph{arXiv preprint}, 2025{\natexlab{c}}.
+\newblock Code: \url{https://github.com/HKUST-KnowComp/NewtonBench}.
+
+\bibitem[Authors(2025{\natexlab{d}})]{physgym}
+PhysGym Authors.
+\newblock Physgym: Interactive physics experiment design for llm agents.
+\newblock \emph{arXiv preprint}, 2025{\natexlab{d}}.
+
+\bibitem[Cranmer(2023)]{pysr}
+Miles Cranmer.
+\newblock Interpretable machine learning for science with pysr and symbolicregression.jl.
+\newblock \emph{arXiv preprint arXiv:2305.01582}, 2023.
+
+\bibitem[{MirrorLab program}(2026{\natexlab{a}})]{r3prior}
+{MirrorLab program}.
+\newblock Mirrorlab r3 prior-art audit: cross-scenario tool libraries and the cascade precedence, 2026{\natexlab{a}}.
+\newblock Internal note, \texttt{docs/r3-prior-art-audit.md}.
+
+\bibitem[{MirrorLab program}(2026{\natexlab{b}})]{r5elegant}
+{MirrorLab program}.
+\newblock Mirrorlab r5 prior-art audit: rollout-mse vs.\ symbolic-accuracy decoupling in newtonbench-class benches, 2026{\natexlab{b}}.
+\newblock Internal note, \texttt{docs/r5-elegant-defense.md}.
+
+\bibitem[Noether(1918)]{noether1918}
+Emmy Noether.
+\newblock Invariante variationsprobleme.
+\newblock \emph{Nachr. d. K\"onig. Gesellsch. d. Wiss. zu G\"ottingen, Math-phys. Klasse}, pages 235--257, 1918.
+
+\bibitem[Stephens(2015)]{gplearn}
+Trevor Stephens.
+\newblock {gplearn}: Genetic programming in python, with a scikit-learn inspired api, 2015.
+\newblock \url{https://github.com/trevorstephens/gplearn}.
+
+\end{thebibliography}

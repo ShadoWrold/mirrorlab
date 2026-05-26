@@ -1,0 +1,149 @@
+% Appendix is \input{} from main.tex; do not include \documentclass or \begin{document}.
+
+\section{Full sweep score table}
+\label{app:fulltable}
+
+Table~\ref{tab:cells} lists all $60$ runs from the $5$-model $\times$
+$12$-cell sweep, rescored with the post-Sprint-4 scoring patch
+(\texttt{docs/sprint4-sweep-data-final.json}). Cells are labelled
+\texttt{<domain>/<tier>\_<shift\_id>}; tier-baseline cells share the
+\texttt{baseline} suffix. Empty rows do not occur: all $60$ runs
+completed \texttt{ok=true}.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Per-cell rescored $S_{\mathrm{scen}}$ for $5$ models $\times$
+$12$ representative cells. Bold marks cells $\geq 0.5$ (calibration
+threshold).}
+\label{tab:cells}
+\begin{tabular}{lccccc}
+\toprule
+Cell & Opus 4.6 & Sonnet 4.5 & Gemini 3.1 Pro & GPT-4.1 & GPT-5.4 \\
+\midrule
+hooke/baseline       & 0.100 & 0.100 & 0.100 & 0.100 & 0.100 \\
+hooke/$\gamma$-1-1   & 0.000 & 0.000 & 0.000 & 0.000 & \textbf{0.700} \\
+hooke/$\delta$-1-1   & 0.000 & 0.000 & 0.000 & 0.000 & 0.000 \\
+coulomb/baseline     & 0.000 & 0.000 & 0.733 & 0.000 & \textbf{0.733} \\
+coulomb/$\gamma$-5-1 & 0.000 & 0.000 & 0.000 & 0.000 & 0.000 \\
+coulomb/$\delta$-5-1 & 0.000 & 0.000 & 0.000 & 0.000 & 0.000 \\
+thermal/baseline     & 0.733 & 0.733 & 0.733 & 0.000 & 0.733 \\
+thermal/$\gamma$-7-1 & 0.000 & 0.000 & 0.000 & 0.000 & 0.000 \\
+thermal/$\delta$-7-1 & 0.000 & \textbf{0.997} & \textbf{0.997} & 0.000 & 0.000 \\
+decay/baseline       & 0.200 & 0.167 & \textbf{0.367} & 0.033 & \textbf{0.717} \\
+decay/$\gamma$-12-1  & 0.000 & 0.000 & \textbf{0.440} & 0.000 & \textbf{2.094} \\
+decay/$\delta$-12-1  & \textbf{0.997} & \textbf{0.997} & \textbf{1.333} & 0.000 & \textbf{1.897} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Reading the table.} The bold cells in the GPT-5.4 column on
+the decay row carry most of the $\gamma$-tier mass; without that row,
+GPT-5.4 also collapses to near zero on $\gamma$. The decay-domain
+result is genuine but narrow. Cells exceeding $1.0$ include the
+$+0.10$ symmetry-claim bonus (CAL-5) and the predictor channel's full
+$1.0$.
+
+\section{Shift catalog summary}
+\label{app:catalog}
+
+Table~\ref{tab:catalog} lists the broken symmetry of each shift used in
+the sweep. Full closed-form expressions, retained invariants, and safe
+parameter ranges live in \texttt{docs/d6-shift-catalog.md}.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Sweep shifts and their broken Noether symmetry. PAR = parity;
+ROT = rotational; T-rev = time-reversal; E = energy.}
+\label{tab:catalog}
+\begin{tabular}{llll}
+\toprule
+Shift ID & Domain & Tier & Broken \\
+\midrule
+$\gamma$-1-1  & Hooke    & $\gamma$ & PAR  \\
+$\delta$-1-1  & Hooke    & $\delta$ & E (via velocity-coupled drag) \\
+$\gamma$-5-1  & Coulomb  & $\gamma$ & inverse-power-law (SCALE) \\
+$\delta$-5-1  & Coulomb  & $\delta$ & charge conservation \\
+$\gamma$-7-1  & Thermal  & $\gamma$ & Onsager reciprocity \\
+$\delta$-7-1  & Thermal  & $\delta$ & E (heat-flux non-Fourier) \\
+$\gamma$-12-1 & Decay    & $\gamma$ & T-rev (non-Markov memory) \\
+$\delta$-12-1 & Decay    & $\delta$ & particle-number conservation \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Calibration registry (final values)}
+\label{app:cal}
+
+\begin{table}[h]
+\centering
+\small
+\caption{Calibration registry locked at end of Sprint 4.}
+\begin{tabular}{lll}
+\toprule
+ID & Name & Value \\
+\midrule
+CAL-1 & in-grid sub-grid weight     & $0.5$ \\
+CAL-2 & OOD sub-grid weight         & $0.3$ \\
+CAL-3 & counterfactual sub-grid wt  & $0.2$ \\
+CAL-4 & numerical-score temp $\tau$ & $0.30$ (provisional) \\
+CAL-5 & symmetry-bonus              & $+0.10$ \\
+CAL-6 & dimensional gate            & strict \\
+CAL-7 & honest tool-call cap        & $30$ \\
+CAL-8 & attacker tool-call cap      & $8$ \\
+CAL-9 & attacker pass threshold     & $S_{\mathrm{bench}}^{\mathrm{lookup}} < 0.50$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Failure-mode catalog}
+\label{app:failures}
+
+\begin{itemize}\itemsep0pt
+\item \textbf{Class A -- wrong-form.} Agent submits a textbook law that
+      the shift breaks (e.g.\ submits $F=-kx$ on $\gamma$-1-1 where
+      the true law is $F = -kx(1+\eta\tanh(x/x_0))$). Scores zero on
+      the OOD sub-grid by construction.
+\item \textbf{Class B -- right-name-wrong-binding.} Agent submits the
+      correct symbolic law but the \texttt{def f(...)} predictor's
+      argument names do not match the harness's grid input vocabulary.
+      The two-stage scorer marks dimensional pass, numerical zero.
+      Common on Claude variants.
+\item \textbf{Class C -- partial-form.} Agent submits a predictor that
+      matches the in-grid (a) sub-grid but fails on (b)/(c). Drives
+      GPT-5.4's non-trivial $\gamma$ scores when present.
+\item \textbf{Class D -- budget-out.} Agent never calls
+      \texttt{submit\_answer}; \texttt{terminated\_by=budget}.
+      Empty submission, $S=0$.
+\end{itemize}
+
+\section{Reproducibility}
+\label{app:repro}
+
+\paragraph{Environment.} Python $\geq 3.11$, requirements pinned in
+\texttt{pyproject.toml}.
+
+\paragraph{Commands.}
+\begin{verbatim}
+# Ceiling sweep (48 pairs, oracle agent)
+python -m mirrorlab.runners.ceiling_sweep \
+    --out docs/ceiling-data.json --seed 0
+
+# 5-model x 12-cell honest sweep
+python -m mirrorlab.runners.sprint4_full_sweep \
+    --models claude-opus-4.6 claude-sonnet-4.5 \
+             gemini-3.1-pro-preview gpt-4.1-20250414 \
+             gpt-5.4-20260305 \
+    --out docs/sprint4-sweep-data-final.json --seed 0
+
+# Lookup attacker (Sprint 3.5 protocol)
+python -m mirrorlab.runners.sprint35_pilot \
+    --attacker-only --out docs/sprint35-pilot-data.json
+
+# Figures
+python -m mirrorlab.reports.figures
+\end{verbatim}
+
+The proxy endpoint and API key live in the project's local secret store;
+they are not committed.

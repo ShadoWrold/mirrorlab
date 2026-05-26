@@ -139,7 +139,7 @@ mirrorlab/
 
 | Paper | Title (working) | Status |
 |---|---|---|
-| **1** | MirrorLab: Counterfactual Physics Discovery Benchmark | 🟡 Design v0.x — spec to be written next |
+| **1** | MirrorLab: Counterfactual Physics Discovery Benchmark | 🟢 Sprint 4 TRUE PASS — preprint draft ready ([`paper1/main.pdf`](paper1/main.pdf)) |
 | **2** | Counterfactual Diversity Hypothesis for Physical World Models | ⏸ Deferred until Paper 1 ships |
 | **3** | Symmetry Recovery via Physics-Inductive World Models | ⏸ Deferred until Paper 2 ships |
 
@@ -251,6 +251,34 @@ cell ≥ 0.50 (no catalog Round-3 escalation). CAL-9 is lockable at
 multi-seed honest data. Full report:
 [`docs/sprint35-report.md`](docs/sprint35-report.md) (data:
 [`docs/sprint35-pilot-data.json`](docs/sprint35-pilot-data.json)).
+
+### Sprint 4 status
+
+**Verdict: TRUE PASS.** Sprint 4 closes the Paper-1 §9.2 exit criterion:
+the cliff plot reproduces across 3/5 frontier LLMs (4/5 if floor effects
+count), the oracle ceiling sits comfortably above the rubric at
+**median = 1.083**, and the LaTeX draft ([`paper1/main.pdf`](paper1/main.pdf))
+builds clean (9 pages, 854/854 tests green).
+
+<div align="center">
+  <img src="figures/fig1_cliff.png" alt="Sprint 4 cliff plot" width="80%"/>
+  <br/>
+  <sub><b>Figure 1 (paper hero).</b> Mean S<sub>scen</sub> vs shift tier for five
+  frontier LLMs across four representative domains. Four of five models
+  collapse to S̄ = 0 at the γ tier; GPT-5.4 is the sole exception
+  (S̄ = 0.698 at γ). The oracle ceiling (dashed) stays at ≈ 1.08,
+  ruling out the "bench too hard" failure mode.</sub>
+</div>
+
+5-model × 12-cell sweep ([`docs/sprint4-sweep-data-final.json`](docs/sprint4-sweep-data-final.json)),
+48-pair oracle ceiling ([`docs/ceiling-data.json`](docs/ceiling-data.json)),
+6 publication figures ([`figures/`](figures/)), and Paper 1 LaTeX draft
+([`paper1/`](paper1/)) land together. Final CAL locks: **CAL-4 τ = 0.35**,
+**CAL-7 = 30**, **CAL-8 K = 20 (restored)**, **CAL-9 < 0.50**, **CAL-1
+unchanged**, **CAL-3 / CAL-10 carry to camera-ready**. Full report and
+reproducibility chain:
+[`docs/sprint4-report.md`](docs/sprint4-report.md),
+[`docs/sprint4-paper-trail.md`](docs/sprint4-paper-trail.md).
 
 ---
 

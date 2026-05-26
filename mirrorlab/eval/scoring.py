@@ -33,6 +33,7 @@ def score_submission(
     gt_symmetry: Optional[str] = None,
     rho: float = RHO_DEFAULT,
     bonus: float = BONUS_DEFAULT,
+    canonical_inputs: Optional[Sequence[str]] = None,
 ) -> float:
     """Return ``S_scen`` per spec §7.
 
@@ -55,7 +56,7 @@ def score_submission(
     bonus_fires = False
     for e in entries:
         if match_dim(e, target_dim):
-            s = evaluate_entry(e, test_grids)
+            s = evaluate_entry(e, test_grids, canonical_inputs=canonical_inputs)
         else:
             s = 0.0
         if s > best:
