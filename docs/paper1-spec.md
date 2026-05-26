@@ -335,8 +335,8 @@ Single registry of all **[CAL]** placeholders. Each is a value the v1 framework 
 | CAL-4 | Score temperature $\tau$ | 0.5 | calibrate so a trivial-constant predictor scores ~0 and the GT law scores > 0.9 |
 | CAL-5 | Symmetry-bonus weight $b$ | 0.10 | small enough that it can't substitute for a wrong formula |
 | CAL-6 | Shotgun penalty $\rho$ | 0.05 / extra entry | tune against attacker submitting 5× textbook laws |
-| CAL-7 | Per-scenario tool budget | 30 tool calls + 60 s sandbox wall-clock | revisit if frontier models hit ceiling on baseline tier |
-| CAL-8 | Attacker tool-call budget $K$ | 20 | set so the attacker can identify a *named* law but can't fit a non-textbook one |
+| CAL-7 | Per-scenario tool budget | 30 tool calls + 60 s sandbox wall-clock | revisit if frontier models hit ceiling on baseline tier; **the value is communicated to the agent in-prompt at run time** (`build_system_prompt(max_tool_calls, max_wall_seconds)`) so the runner budget and the prompt budget can never drift — Sprint-3 mismatch (prompt: 30, runner: 20) cost 0/0 on the pilot |
+| CAL-8 | Attacker tool-call budget $K$ | 20 | set so the attacker can identify a *named* law but can't fit a non-textbook one; **value is communicated to the attacker in-prompt at run time** (`build_attacker_system_prompt(K, wall_seconds)`) — same invariant as CAL-7 |
 | CAL-9 | Lookup-attacker pass threshold | < 0.50 $S_{bench}$ on γ ∪ δ | gate value — if loose, harder; if tight, may force catalog round-3 |
 | CAL-10 | Per-cell scenarios | 3 random seeds per cell ⇒ 108 scenarios total | enough for cell-level mean ± std; expand if variance dominates |
 | CAL-11 | Frontier-model panel | Claude Opus, GPT-5, Gemini 2.5 Pro, DeepSeek-R2, o-series | confirm versions at Sprint 4 launch (API drift risk) |

@@ -65,7 +65,7 @@ log = logging.getLogger(__name__)
 #
 # Token-equivalent length is logged at every release; keep edits minimal.
 
-ATTACKER_SYSTEM_PROMPT = (
+ATTACKER_SYSTEM_PROMPT_TEMPLATE = (
     "You are an expert physicist with deep textbook knowledge. You will "
     "observe a physical system through tool calls. Your STRATEGY IS "
     "LOCKED: identify the closest matching known law from your training "
@@ -76,21 +76,43 @@ ATTACKER_SYSTEM_PROMPT = (
     "higher-order corrections, or speculative parameter additions "
     "beyond the canonical law.\n"
     "\n"
-    "Budget: at most 20 tool calls and 60 s wall-clock. Use the first "
-    "few measurements to confirm which textbook law applies, then call "
-    "`submit_answer` exactly once.\n"
+    "Budget: at most {max_tool_calls} tool calls and {max_wall_seconds} s "
+    "wall-clock. Use the first few measurements to confirm which textbook "
+    "law applies, then call `submit_answer` exactly once. Plan to submit "
+    "by tool call #{submit_by} (budget minus 3) so you keep a safety "
+    "margin before the runner cuts you off.\n"
     "\n"
     "Submission schema (each entry, list length ≤ 5):\n"
     "  - law_id: a textbook law label (e.g. 'hooke', 'coulomb')\n"
     "  - formula: the canonical textbook formula string\n"
     "  - predictor.lang: 'python'\n"
     "  - predictor.code: a `def f(...):` returning a float\n"
-    "  - inputs: list of {name, units} (SI)\n"
-    "  - outputs: list of {name, units} (SI)\n"
-    "  - params: list of {name, units, value}\n"
+    "  - inputs: list of {{name, units}} (SI)\n"
+    "  - outputs: list of {{name, units}} (SI)\n"
+    "  - params: list of {{name, units, value}}\n"
     "  - claim_broken_symmetry (optional): 'none' if you believe the "
     "    canonical law applies unmodified.\n"
 )
+
+
+def build_attacker_system_prompt(
+    max_tool_calls: int = 20, max_wall_seconds: int = 60,
+) -> str:
+    """Render the locked attacker prompt against the active runtime budget.
+
+    The runtime ``K`` enforced by :class:`LookupAttacker` MUST match the
+    ``K`` advertised in-prompt to the model.
+    """
+    submit_by = max(1, int(max_tool_calls) - 3)
+    return ATTACKER_SYSTEM_PROMPT_TEMPLATE.format(
+        max_tool_calls=int(max_tool_calls),
+        max_wall_seconds=int(max_wall_seconds),
+        submit_by=submit_by,
+    )
+
+
+# Backwards-compatible default-budget rendering (CAL-8 K=20 / 60 s).
+ATTACKER_SYSTEM_PROMPT = build_attacker_system_prompt()
 
 
 # ---- Attack result -----------------------------------------------------
@@ -183,7 +205,9 @@ class LookupAttacker:
             scenario_id=f"attacker/{scenario.domain_id}/{scenario.shift_id}/{scenario.seed}",
         )
         messages: List[Dict[str, Any]] = [
-            {"role": "system", "content": ATTACKER_SYSTEM_PROMPT},
+            {"role": "system", "content": build_attacker_system_prompt(
+                self.max_tool_calls, self.max_wall_seconds,
+            )},
             {"role": "user", "content": scenario.prompt},
         ]
         deadline = time.monotonic() + float(self.max_wall_seconds)
@@ -304,6 +328,8 @@ class LookupAttacker:
 
 __all__ = [
     "ATTACKER_SYSTEM_PROMPT",
+    "ATTACKER_SYSTEM_PROMPT_TEMPLATE",
+    "build_attacker_system_prompt",
     "AttackResult",
     "LookupAttacker",
 ]

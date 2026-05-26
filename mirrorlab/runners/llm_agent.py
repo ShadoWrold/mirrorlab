@@ -49,7 +49,7 @@ log = logging.getLogger(__name__)
 
 Submission = List[Dict[str, Any]]
 
-SYSTEM_PROMPT = (
+SYSTEM_PROMPT_TEMPLATE = (
     "You are a physics-discovery agent. Given a scenario description and a "
     "toolbox of measurement / manipulation / analysis / knowledge tools, "
     "you must propose one or more candidate laws describing the system "
@@ -60,15 +60,37 @@ SYSTEM_PROMPT = (
     "  - formula: human-readable formula string\n"
     "  - predictor.lang: 'python'\n"
     "  - predictor.code: a `def f(...):` returning a float\n"
-    "  - inputs: list of {name, units} (SI)\n"
-    "  - outputs: list of {name, units} (SI)\n"
-    "  - params: list of {name, units, value}\n"
+    "  - inputs: list of {{name, units}} (SI)\n"
+    "  - outputs: list of {{name, units}} (SI)\n"
+    "  - params: list of {{name, units, value}}\n"
     "  - claim_broken_symmetry (optional): e.g. 'PAR', 'TR', 'none'\n"
     "\n"
-    "Budgets: at most 30 tool calls and 60s wall-clock. Be efficient. "
+    "Budgets: at most {max_tool_calls} tool calls and {max_wall_seconds}s "
+    "wall-clock. Be efficient. Plan to call `submit_answer` by tool call "
+    "#{submit_by} (i.e. budget minus 3) so you keep a safety margin "
+    "before the runner cuts you off. "
     "When you have a candidate law, call `submit_answer` exactly once. "
     "Submission set is capped at 5 entries (declaration order)."
 )
+
+
+def build_system_prompt(max_tool_calls: int = 30, max_wall_seconds: int = 60) -> str:
+    """Render the LLMAgent system prompt against the active runtime budget.
+
+    The runtime budget enforced by :class:`LLMAgent` MUST match the budget
+    advertised to the model in-prompt; otherwise the model paces for the
+    wrong horizon and gets cut off before submitting (Sprint-3 incident).
+    """
+    submit_by = max(1, int(max_tool_calls) - 3)
+    return SYSTEM_PROMPT_TEMPLATE.format(
+        max_tool_calls=int(max_tool_calls),
+        max_wall_seconds=int(max_wall_seconds),
+        submit_by=submit_by,
+    )
+
+
+# Backwards-compatible default-budget rendering (30 / 60 per CAL-7).
+SYSTEM_PROMPT = build_system_prompt()
 
 
 # ---- Helpers -----------------------------------------------------------
@@ -208,7 +230,9 @@ class LLMAgent:
         )
         trace = AgentTrace()
         messages: List[Dict[str, Any]] = [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": build_system_prompt(
+                self.max_tool_calls, self.max_wall_seconds,
+            )},
             {"role": "user", "content": scenario.prompt},
         ]
         deadline = time.monotonic() + float(self.max_wall_seconds)
@@ -396,4 +420,6 @@ __all__ = [
     "LLMAgent",
     "Submission",
     "SYSTEM_PROMPT",
+    "SYSTEM_PROMPT_TEMPLATE",
+    "build_system_prompt",
 ]

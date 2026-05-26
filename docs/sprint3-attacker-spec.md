@@ -68,7 +68,7 @@ the build.
 | Sub-field enumeration (mechanics / EM / thermo / optics / fluids / kinetics / nuclear) | Primes the lookup behavior without naming specific laws — listing eponyms (Hooke, Newton, Coulomb, ...) would leak the 12-domain catalog identity to the attacker, since those eponyms map 1-to-1 onto the named domains. Sub-field framing is neutral while preserving the threat model. |
 | `Prefer canonical textbook forms` | Forces the lookup behavior — the whole point of the test. |
 | `Do not propose novel modifications` | Closes the obvious escape hatch (model adds a Yukawa-style ε-correction and re-claims textbook). |
-| `20 tool calls` | Hard-codes CAL-8 budget inline so the model can plan within the budget. |
+| `20 tool calls` | Hard-codes CAL-8 budget inline so the model can plan within the budget. The literal `20` is no longer hard-coded in source — the prompt is rendered by `build_attacker_system_prompt(max_tool_calls, max_wall_seconds)` at construction time so the in-prompt budget always matches the runtime `K` the runner will actually enforce. See **§4.1 below**. |
 | Submission schema verbatim | Mirrors the honest-agent schema so the comparison is fair: same evaluator, same dim-check, same scoring. |
 
 ---
@@ -124,6 +124,44 @@ more knob the integrator has to manage.
 | RMSLE clamp | 1e6 | CAL-13 |
 | Score temperature τ | 0.5 | CAL-4 |
 | Set-cap | 5 | spec §5.2 |
+
+### 4.1 Budget invariant (Sprint-3 incident, 2026-05)
+
+The Sprint-3 pilot scored 0/0 because the attacker prompt advertised
+"20 tool calls" while the pilot wrapper had tightened the runtime `K`
+to **6**. The model paced its discovery for 20 calls and was guillotined
+mid-investigation, with an empty submission as the deterministic
+result. Honest agent had the analogous mismatch (prompt: 30, runner: 20).
+
+**Invariant (locked).** The number rendered in the system prompt MUST
+equal the runtime budget the runner will enforce. Implementation:
+
+- `LLMAgent` calls `build_system_prompt(self.max_tool_calls, self.max_wall_seconds)`
+  on every `run_with_trace`.
+- `LookupAttacker` calls `build_attacker_system_prompt(self.max_tool_calls, self.max_wall_seconds)`
+  on every `run`.
+- Both renderers also inject a "submit by call #(N-3)" hint so the model
+  pro-actively leaves a 3-call safety margin before the budget cuts in.
+
+Unit tests `test_system_prompt_renders_runtime_budget` /
+`test_attacker_prompt_renders_runtime_budget` guard the invariant.
+
+### 4.2 Default LLM model
+
+Default model resolves to **`gpt-5.4`** via
+`mirrorlab.runners.openai_client.DEFAULT_MODEL`. Known-incompatible
+models on the local proxy (do NOT use without harness changes):
+
+| Model | Failure mode |
+|---|---|
+| `o4-mini` | rejects the OpenAI-SDK `max_tokens` field |
+| `gpt-5-mini` | rejects the OpenAI-SDK `tool_choice` field |
+
+The harness deliberately keeps both `max_tokens` and `tool_choice` set
+(see `openai_client.OpenAIClient.chat`) because removing them would
+silently degrade frontier-model behavior to "use any tool / unbounded
+output", which masks budget exhaustion as model laziness in the
+trace. Document the incompatibility instead of papering over it.
 
 ---
 

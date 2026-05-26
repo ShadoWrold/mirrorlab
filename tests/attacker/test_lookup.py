@@ -21,6 +21,7 @@ from mirrorlab.attacker import (
     PASS_THRESHOLD,
     run_attack_sweep,
 )
+from mirrorlab.attacker.lookup import build_attacker_system_prompt
 from mirrorlab.attacker.runner import _aggregate, _score_attack
 from mirrorlab.runners.openai_client import SUBMIT_TOOL, mangle_name
 from mirrorlab.scenarios.loader import load as load_scenario
@@ -179,6 +180,43 @@ def test_attacker_budget_is_k20_per_cal8():
     """Defaults must not drift away from CAL-8."""
     attacker = LookupAttacker(llm_call=lambda m, t: FakeMsg())
     assert attacker.max_tool_calls == 20
+
+
+# ---- Prompt-vs-runtime budget invariant ---------------------------------
+
+def test_attacker_prompt_default_advertises_cal8_budget():
+    p = build_attacker_system_prompt()
+    assert "20 tool calls" in p
+    assert "60 s" in p
+    assert "#17" in p  # 20 - 3
+
+
+def test_attacker_prompt_renders_runtime_budget():
+    """Sprint-3 incident: prompt said 20, runner allowed 6 → confused attacker."""
+    p = build_attacker_system_prompt(max_tool_calls=6, max_wall_seconds=45)
+    assert "6 tool calls" in p
+    assert "45 s" in p
+    assert "20 tool calls" not in p
+    assert "#3" in p  # 6 - 3
+
+
+def test_attacker_system_message_uses_runtime_budget():
+    """The system message LookupAttacker sends must reflect runner K."""
+    scenario = load_scenario("hooke", "baseline", seed=0)
+    captured: dict = {}
+
+    def llm_call(messages, tools):
+        captured.setdefault("sys", messages[0]["content"])
+        return FakeMsg(tool_calls=[_tc("c1", SUBMIT_TOOL,
+                                       {"submission": CANONICAL_HOOKE})])
+
+    attacker = LookupAttacker(
+        llm_call=llm_call, max_tool_calls=6, max_wall_seconds=45,
+    )
+    attacker.run(scenario)
+    assert "6 tool calls" in captured["sys"]
+    assert "45 s" in captured["sys"]
+    assert "#3" in captured["sys"]
 
 
 def test_attacker_records_tool_calls_then_submits():

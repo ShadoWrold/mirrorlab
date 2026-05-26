@@ -232,6 +232,26 @@ attacker breakdown, and Sprint-4 follow-ups live in
 [`docs/sprint3-report.md`](docs/sprint3-report.md) (data:
 [`docs/sprint3-pilot-data.json`](docs/sprint3-pilot-data.json)).
 
+### Sprint 3.5 status
+
+Sprint 3.5 re-runs the §9.2 exit pilot after the budget-contract fix:
+the agent system prompt now renders against the runtime `max_tool_calls`
+(no more advertised-vs-actual mismatch), and the runner default model is
+the gpt-5.4 family. The re-pilot via
+[`mirrorlab/runners/sprint35_pilot.py`](mirrorlab/runners/sprint35_pilot.py)
+runs 5 honest scenarios + 48 attacker runs (24 cells × 2 seeds) in
+**361 LLM calls** against `gpt-5.4-20260305` on the local proxy.
+
+**Verdict: TRUE PASS.** 4/5 honest cells now submit under the proper
+CAL-7=30 budget (vs 0/5 in Sprint 3); the lookup attacker submits real
+textbook claims in 30/48 runs and **`S_bench^lookup = 0.0000` is now
+non-vacuous** — γ/δ shifts correctly defeat textbook recall, with no
+cell ≥ 0.50 (no catalog Round-3 escalation). CAL-9 is lockable at
+`< 0.50`; CAL-4 τ stays direction-locked (0.25-0.35) pending Sprint 4
+multi-seed honest data. Full report:
+[`docs/sprint35-report.md`](docs/sprint35-report.md) (data:
+[`docs/sprint35-pilot-data.json`](docs/sprint35-pilot-data.json)).
+
 ---
 
 ## Documentation

@@ -27,7 +27,7 @@ from unittest.mock import patch
 import pytest
 
 from mirrorlab.runners import llm_agent as agent_mod
-from mirrorlab.runners.llm_agent import LLMAgent
+from mirrorlab.runners.llm_agent import LLMAgent, build_system_prompt
 from mirrorlab.runners.openai_client import (
     SUBMIT_TOOL,
     build_tool_schemas,
@@ -239,6 +239,50 @@ def test_default_budgets_match_cal7():
     agent = LLMAgent(llm_call=lambda m, t: FakeMsg())
     assert agent.max_tool_calls == 30
     assert agent.max_wall_seconds == 60
+
+
+# ---- Prompt-vs-runtime budget invariant -------------------------------
+
+def test_system_prompt_default_advertises_cal7_budget():
+    prompt = build_system_prompt()  # defaults 30 / 60
+    assert "30 tool calls" in prompt
+    assert "60s" in prompt
+    # submit-by hint = budget - 3
+    assert "#27" in prompt
+
+
+def test_system_prompt_renders_runtime_budget():
+    """Sprint-3 incident: prompt said 30, runner allowed 20 → 0/0.
+
+    Guard the invariant: any non-default budget must flow into the prompt.
+    """
+    prompt = build_system_prompt(max_tool_calls=12, max_wall_seconds=90)
+    assert "12 tool calls" in prompt
+    assert "90s" in prompt
+    assert "30 tool calls" not in prompt
+    assert "#9" in prompt  # 12 - 3
+
+
+def test_agent_system_message_uses_runtime_budget():
+    """The system message LLMAgent actually sends must reflect runner budget."""
+    scenario = load_scenario("hooke", "baseline", seed=0)
+    captured: Dict[str, Any] = {}
+
+    def llm_call(messages, tools):
+        captured.setdefault("sys", messages[0]["content"])
+        return FakeMsg(tool_calls=[_tc("c1", SUBMIT_TOOL, {"submission": VALID_SUBMISSION})])
+
+    agent = LLMAgent(
+        llm_call=llm_call,
+        max_tool_calls=12,
+        max_wall_seconds=45,
+        fallback_to_stub=False,
+    )
+    agent.run(scenario)
+    assert "12 tool calls" in captured["sys"]
+    assert "45s" in captured["sys"]
+    # Submit-by-N-3 hint present.
+    assert "#9" in captured["sys"]
 
 
 # ---- Wall-clock -------------------------------------------------------

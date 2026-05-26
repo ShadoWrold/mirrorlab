@@ -29,7 +29,7 @@ from mirrorlab.tools.registry import REGISTRY, ToolSpec
 log = logging.getLogger(__name__)
 
 DEFAULT_BASE_URL = "http://127.0.0.1:4142/v1"
-DEFAULT_MODEL = "claude-sonnet-4-6"
+DEFAULT_MODEL = "gpt-5.4"
 DEFAULT_API_KEY_ENV = "MIRRORLAB_LLM_API_KEY"
 
 # Synthetic terminal tool the agent calls to submit its final answer.
@@ -183,13 +183,17 @@ class OpenAIClient:
         model_id = model or self.model
         log.debug("openai chat: model=%s tools=%d msgs=%d",
                   model_id, len(tools), len(messages))
-        resp = client.chat.completions.create(
-            model=model_id,
-            messages=list(messages),
-            tools=list(tools),
-            tool_choice=tool_choice,
-            max_tokens=self.max_tokens,
-        )
+        # gpt-5.x family on this proxy rejects `tool_choice` and `max_tokens`
+        # (litellm UnsupportedParamsError). Drop them for those models.
+        params: Dict[str, Any] = {
+            "model": model_id,
+            "messages": list(messages),
+            "tools": list(tools),
+        }
+        if not model_id.startswith("gpt-5"):
+            params["tool_choice"] = tool_choice
+            params["max_tokens"] = self.max_tokens
+        resp = client.chat.completions.create(**params)
         return resp.choices[0].message
 
 
