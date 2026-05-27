@@ -145,4 +145,101 @@ def gamma_2_1_grids(sim: Any, seed: int, magnitude: float):
 _shifts.register("gravity", "gamma_2_1", gamma_2_1_grids)
 
 
-__all__ = ["gamma_2_1_grids"]
+# ---- baseline (Newton inverse-square) --------------------------------------
+
+def baseline_grids(sim, seed: int, magnitude: float):
+    r0 = abs(_attr(sim.params, ("r0",), 1.0e7)) or 1.0e7
+
+    def gt(inputs):
+        r = inputs["r"]
+
+        def fn(p):
+            G = _attr(p, ("G", "G0"), 6.6743e-11)
+            M = _attr(p, ("M",), 1.0)
+            m = _attr(p, ("m",), 1.0)
+            return -G * M * m / (r * r)
+
+        return fn
+
+    def build(rng, mode):
+        if mode == "b":
+            rs = np.linspace(1.5 * r0, _OOD_FACTOR * r0, _GRID_SIZE)
+        else:
+            rs = np.linspace(0.5 * r0, 1.5 * r0, _GRID_SIZE)
+        return [({"r": float(r)}, gt({"r": float(r)})) for r in rs]
+
+    return _pack(seed, magnitude, sim, build)
+
+
+# ---- γ-2-2 (Lorentzian range bump, 1D) -------------------------------------
+
+def gamma_2_2_grids(sim, seed: int, magnitude: float):
+    from mirrorlab.shifts import gravity_g_2_2 as _g22
+    r0 = abs(_attr(sim.params, ("r0", "r_scale"), 1.0e7)) or 1.0e7
+
+    def gt(inputs):
+        r = inputs["r"]
+
+        def fn(p):
+            return float(_g22.shifted_force(r, p))
+
+        return fn
+
+    def build(rng, mode):
+        # Span 0.1·r_scale to 5·r_scale so the Lorentzian bump's peak
+        # (around r ≈ r_scale) is sampled both below and above.
+        if mode == "b":
+            rs = np.geomspace(5.0 * r0, 50.0 * r0, _GRID_SIZE)
+        else:
+            rs = np.geomspace(0.1 * r0, 5.0 * r0, _GRID_SIZE)
+        return [({"r": float(r)}, gt({"r": float(r)})) for r in rs]
+
+    return _pack(seed, magnitude, sim, build)
+
+
+# ---- δ-2-1 (G(t) modulation, 1D + t) ---------------------------------------
+
+def delta_2_1_grids(sim, seed: int, magnitude: float):
+    from mirrorlab.shifts import gravity_d_2_1 as _d21
+    r0 = abs(_attr(sim.params, ("r0",), 1.0e7)) or 1.0e7
+    omega_G = float(_attr(sim.params, ("omega_G",), 1.0)) or 1.0
+    # Sample t across a couple modulation periods so β·cos(ω_G t) takes
+    # both signs.
+    period = 2.0 * math.pi / omega_G
+
+    def gt(inputs):
+        r = inputs["r"]
+        t = inputs["t"]
+
+        def fn(p):
+            return float(_d21.shifted_force(r, t, p))
+
+        return fn
+
+    def build(rng: np.random.Generator, mode: str):
+        if mode == "b":
+            rs = np.linspace(1.5 * r0, _OOD_FACTOR * r0, _GRID_SIZE)
+            ts = np.linspace(2.0 * period, 5.0 * period, _GRID_SIZE)
+        else:
+            rs = np.linspace(0.5 * r0, 1.5 * r0, _GRID_SIZE)
+            ts = np.linspace(0.0, 2.0 * period, _GRID_SIZE)
+        pts = []
+        for r, t in zip(rs, ts):
+            ins = {"r": float(r), "t": float(t)}
+            pts.append((ins, gt(ins)))
+        return pts
+
+    return _pack(seed, magnitude, sim, build)
+
+
+_shifts.register("gravity", "baseline", baseline_grids)
+_shifts.register("gravity", "gamma_2_2", gamma_2_2_grids)
+_shifts.register("gravity", "delta_2_1", delta_2_1_grids)
+
+
+__all__ = [
+    "gamma_2_1_grids",
+    "baseline_grids",
+    "gamma_2_2_grids",
+    "delta_2_1_grids",
+]

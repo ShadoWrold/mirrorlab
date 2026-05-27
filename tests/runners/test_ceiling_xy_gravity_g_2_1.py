@@ -50,12 +50,14 @@ def test_ceiling_gamma_2_1_full_score(seed):
 
 
 def test_other_gravity_branches_unchanged():
-    """T4 scope is γ-2-1 only; baseline / γ-2-2 / δ-2-1 must still build."""
+    """T4 scope was γ-2-1 only. Post-T11 the other 3 gravity cells have
+    also been migrated to truth-form with non-empty params — assert
+    each still builds with a callable predictor."""
     for shift in ("baseline", "gamma_2_2", "delta_2_1"):
         sc = load("gravity", shift, seed=0)
         sub = build_submission(sc)
         assert sub[0]["_predictor"] is not None
-        # Pre-T4 behavior: params list is empty (closure-based predictor).
-        # T12 will migrate the remaining shifts.
-        if shift != "gamma_2_1":
-            assert sub[0]["params"] == []
+        # Post-T11 all 4 gravity cells expose law coefficients via params.
+        assert sub[0]["params"], (
+            f"gravity/{shift}: params unexpectedly empty post-T11"
+        )

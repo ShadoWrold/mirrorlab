@@ -244,35 +244,40 @@ def _gravity_pred(scenario: ScenarioInstance) -> PredictorFn:
         return pred
 
     if shift_id == "gamma_2_2":
-        def pred(**kw):
-            r = float(kw.get("r", 1.0))
-            try:
-                return float(gravity_g_2_2.shifted_force(r, p))
-            except Exception:
-                G = _attr(p, ("G", "G0"), 6.6743e-11)
-                M = _attr(p, ("M",), 1.0)
-                m = _attr(p, ("m",), 1.0)
-                return -G * M * m / (r * r)
+        # 1-D Lorentzian range bump. Reads via **kw; the t kwarg from
+        # other branches is harmlessly absorbed by **_.
+        _G0 = float(_attr(p, ("G", "G0"), 6.6743e-11))
+        _M0 = float(_attr(p, ("M",), 1.0))
+        _m0 = float(_attr(p, ("m",), 1.0))
+        _a0 = float(_attr(p, ("alpha",), 0.0))
+        _rs0 = float(_attr(p, ("r_scale",), 1.0e7)) or 1.0e7
+
+        def pred(*, r,
+                 G=_G0, M=_M0, m=_m0, alpha=_a0, r_scale=_rs0, **_):
+            ratio = r / r_scale
+            return -G * M * m / (r * r) * (1.0 + alpha * ratio / (1.0 + ratio * ratio))
         return pred
 
     if shift_id == "delta_2_1":
-        def pred(**kw):
-            r = float(kw.get("r", 1.0))
-            try:
-                return float(gravity_d_2_1.shifted_force(r, 0.0, p))
-            except Exception:
-                G = _attr(p, ("G", "G0"), 6.6743e-11)
-                M = _attr(p, ("M",), 1.0)
-                m = _attr(p, ("m",), 1.0)
-                return -G * M * m / (r * r)
+        # G(t) = G₀·(1 + β·cos(ω_G t)); ignore φ (catalog locks φ ≡ 0).
+        _G0 = float(_attr(p, ("G0", "G"), 6.6743e-11))
+        _M0 = float(_attr(p, ("M",), 1.0))
+        _m0 = float(_attr(p, ("m",), 1.0))
+        _b0 = float(_attr(p, ("beta",), 0.0))
+        _w0 = float(_attr(p, ("omega_G",), 0.0))
+
+        def pred(*, r, t,
+                 G=_G0, M=_M0, m=_m0, beta=_b0, omega_G=_w0, **_):
+            G_t = G * (1.0 + beta * math.cos(omega_G * t))
+            return -G_t * M * m / (r * r)
         return pred
 
     # baseline (γ-2-1 handled above with full truth-form projection).
-    def pred(**kw):
-        r = float(kw.get("r", 1.0))
-        G = _attr(p, ("G", "G0"), 6.6743e-11)
-        M = _attr(p, ("M",), 1.0)
-        m = _attr(p, ("m",), 1.0)
+    _G0 = float(_attr(p, ("G", "G0"), 6.6743e-11))
+    _M0 = float(_attr(p, ("M",), 1.0))
+    _m0 = float(_attr(p, ("m",), 1.0))
+
+    def pred(*, r, G=_G0, M=_M0, m=_m0, **_):
         return -G * M * m / (r * r)
     return pred
 
@@ -698,6 +703,37 @@ _DISPATCH: Dict[str, Callable[[ScenarioInstance], PredictorFn]] = {
 # populated from here so Y plumbing on sub-grid (c) has names to
 # override with per-point cf_params. Entries not listed get an empty
 # params list (legacy closure-based predictors).
+def _gravity_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "G", "value": float(getattr(p, "G"))},
+        {"name": "M", "value": float(getattr(p, "M"))},
+        {"name": "m", "value": float(getattr(p, "m"))},
+    ]
+
+
+def _gravity_gamma_2_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "G", "value": float(getattr(p, "G"))},
+        {"name": "M", "value": float(getattr(p, "M"))},
+        {"name": "m", "value": float(getattr(p, "m"))},
+        {"name": "alpha", "value": float(getattr(p, "alpha"))},
+        {"name": "r_scale", "value": float(getattr(p, "r_scale"))},
+    ]
+
+
+def _gravity_delta_2_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "G", "value": float(getattr(p, "G0"))},
+        {"name": "M", "value": float(getattr(p, "M"))},
+        {"name": "m", "value": float(getattr(p, "m"))},
+        {"name": "beta", "value": float(getattr(p, "beta"))},
+        {"name": "omega_G", "value": float(getattr(p, "omega_G"))},
+    ]
+
+
 def _gravity_gamma_2_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
     p = scenario.sim.params
     return [
@@ -854,7 +890,10 @@ def _decay_delta_12_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]
 
 
 _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[str, Any]]]] = {
+    ("gravity", "baseline"): _gravity_baseline_params,
     ("gravity", "gamma_2_1"): _gravity_gamma_2_1_params,
+    ("gravity", "gamma_2_2"): _gravity_gamma_2_2_params,
+    ("gravity", "delta_2_1"): _gravity_delta_2_1_params,
     ("hooke", "baseline"): _hooke_baseline_params,
     ("hooke", "gamma_1_1"): _hooke_gamma_1_1_params,
     ("hooke", "gamma_1_2"): _hooke_gamma_1_2_params,
