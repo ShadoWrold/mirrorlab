@@ -91,8 +91,12 @@ __all__ = [
 from mirrorlab.scenarios.loader_shifts import coulomb as _coulomb  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import damped_ho as _damped_ho  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import decay as _decay  # noqa: E402,F401
+from mirrorlab.scenarios.loader_shifts import fluid as _fluid  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import gravity as _gravity  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import hooke as _hooke  # noqa: E402,F401
+from mirrorlab.scenarios.loader_shifts import kinetics as _kinetics  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import optics as _optics  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import pendulum as _pendulum  # noqa: E402,F401
+from mirrorlab.scenarios.loader_shifts import rlc as _rlc  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import thermal as _thermal  # noqa: E402,F401
+from mirrorlab.scenarios.loader_shifts import wave as _wave  # noqa: E402,F401

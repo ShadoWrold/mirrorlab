@@ -467,23 +467,77 @@ def _pendulum_pred(scenario: ScenarioInstance) -> PredictorFn:
 
 
 def _rlc_pred(scenario: ScenarioInstance) -> PredictorFn:
-    p = scenario.sim.params
+    """rlc ceiling predictors. T20 truth-form returns di/dt.
 
-    # Test-grid GT for RLC uses the Kirchhoff voltage form
-    # V = L·didt + R·i + q/C with the shift's L,R,C plugged in. The catalog
-    # shifted_law functions for rlc_g_6_1 / rlc_d_6_1 return didt
-    # (an acceleration), not V, so wrapping them here would mismatch the
-    # eval channel. The strongest predictor expressible in the grid's
-    # input vocabulary ({q, i, didt}) is the baseline Kirchhoff sum with
-    # shift-provided params — i.e. exactly what GT computes.
-    def pred(**kw):
-        q = float(kw.get("q", 0.0))
-        i = float(kw.get("i", 0.0))
-        didt = float(kw.get("didt", 0.0))
-        L = _attr(p, ("L", "L0", "L1"), 1.0e-3)
-        R = _attr(p, ("R", "R1"), 1.0)
-        C = _attr(p, ("C", "C1"), 1.0e-6)
-        return L * didt + R * i + q / max(C, 1e-30)
+    Output channel migrated from V (Kirchhoff sum) to di/dt to align
+    with the truth-form builders in loader_shifts/rlc.py.
+    """
+    p = scenario.sim.params
+    shift_id = scenario.shift_id
+
+    if shift_id == "gamma_6_1":
+        from mirrorlab.shifts import rlc_g_6_1 as _g61_m
+        _L0 = float(_attr(p, ("L0",), 1.0e-3))
+        _R0 = float(_attr(p, ("R",), 1.0))
+        _C0 = float(_attr(p, ("C",), 1.0e-6))
+        _Is0 = float(_attr(p, ("I_sat",), 1.0))
+
+        def pred(*, q, i,
+                 L_0=_L0, R=_R0, C=_C0, I_sat=_Is0, **_):
+            p_eff = _g61_m.RLCGamma61Params(
+                L0=L_0, R=R, C=C, I_sat=I_sat,
+                q0=getattr(p, "q0", 0.0), i0=getattr(p, "i0", 0.0),
+            )
+            return float(_g61_m.shifted_law(q, i, p_eff))
+        return pred
+
+    if shift_id == "gamma_6_2":
+        from mirrorlab.shifts import rlc_g_6_2 as _g62_m
+        _L10 = float(_attr(p, ("L1",), 1.0e-3))
+        _L20 = float(_attr(p, ("L2",), 1.0e-3))
+        _R10 = float(_attr(p, ("R1",), 1.0))
+        _R20 = float(_attr(p, ("R2",), 1.0))
+        _C10 = float(_attr(p, ("C1",), 1.0e-6))
+        _C20 = float(_attr(p, ("C2",), 1.0e-6))
+        _M00 = float(_attr(p, ("M0",), 0.0))
+        _dM0 = float(_attr(p, ("dM",), 0.0))
+
+        def pred(*, q_1, i_1, q_2, i_2,
+                 L_1=_L10, L_2=_L20, R_1=_R10, R_2=_R20,
+                 C_1=_C10, C_2=_C20, M_0=_M00, dM=_dM0, **_):
+            p_eff = _g62_m.RLCGamma62Params(
+                L1=L_1, L2=L_2, R1=R_1, R2=R_2,
+                C1=C_1, C2=C_2, M0=M_0, dM=dM,
+                q1_0=0.0, q2_0=0.0, i1_0=0.0, i2_0=0.0,
+            )
+            di1, _ = _g62_m.shifted_law(q_1, i_1, q_2, i_2, p_eff)
+            return float(di1)
+        return pred
+
+    if shift_id == "delta_6_1":
+        from mirrorlab.shifts import rlc_d_6_1 as _d61_m
+        _L0 = float(_attr(p, ("L0",), 1.0e-3))
+        _R0 = float(_attr(p, ("R",), 1.0))
+        _C0 = float(_attr(p, ("C",), 1.0e-6))
+        _e0 = float(_attr(p, ("eps",), 0.0))
+        _Op = float(_attr(p, ("Omega_p",), 0.0))
+
+        def pred(*, q, i, t,
+                 L_0=_L0, R=_R0, C=_C0, eps=_e0, Omega_p=_Op, **_):
+            p_eff = _d61_m.RLCDelta61Params(
+                L0=L_0, R=R, C=C, eps=eps, Omega_p=Omega_p,
+                q0=getattr(p, "q0", 0.0), i0=getattr(p, "i0", 0.0),
+            )
+            return float(_d61_m.shifted_law(q, i, t, p_eff))
+        return pred
+
+    # baseline: di/dt = -(R·i + q/C) / L
+    _L0 = float(_attr(p, ("L", "L0"), 1.0e-3))
+    _R0 = float(_attr(p, ("R",), 1.0))
+    _C0 = float(_attr(p, ("C",), 1.0e-6))
+
+    def pred(*, q, i, L=_L0, R=_R0, C=_C0, **_):
+        return -(R * i + q / max(C, 1e-30)) / max(L, 1e-12)
     return pred
 
 
@@ -562,16 +616,69 @@ def _thermal_pred(scenario: ScenarioInstance) -> PredictorFn:
 
 
 def _wave_pred(scenario: ScenarioInstance) -> PredictorFn:
+    """wave ceiling predictors. T21 truth-form returns u(t) at probe."""
     p = scenario.sim.params
+    shift_id = scenario.shift_id
+    x_probe = float(_attr(p, ("x_probe",), 0.0))
 
-    def pred(**kw):
-        x = float(kw.get("x", 0.0))
-        t = float(kw.get("t", 0.0))
-        A = _attr(p, ("A",), 1.0)
-        k = _attr(p, ("k",), 1.0)
-        c = _attr(p, ("c",), 1.0)
-        phi = _attr(p, ("phi",), 0.0)
-        return A * math.cos(k * x - c * k * t + phi)
+    if shift_id == "gamma_8_1":
+        from mirrorlab.shifts import wave_g_8_1 as _g81_m
+        _A0 = float(_attr(p, ("A",), 1.0))
+        _k0 = float(_attr(p, ("k",), 1.0))
+        _c0 = float(_attr(p, ("c",), 1.0))
+        _g0 = float(_attr(p, ("gamma",), 0.0))
+
+        def pred(*, t, A=_A0, k=_k0, c=_c0, gamma=_g0, **_):
+            p_eff = _g81_m.WaveGamma81Params(A=A, k=k, c=c, gamma=gamma, x_probe=x_probe)
+            w2 = _g81_m.shifted_omega_squared(p_eff)
+            omega = math.sqrt(max(w2, 0.0))
+            return A * math.sin(k * x_probe - omega * t)
+        return pred
+
+    if shift_id == "gamma_8_2":
+        from mirrorlab.shifts import wave_g_8_2 as _g82_m
+        _A0 = float(_attr(p, ("A",), 1.0))
+        _k0 = float(_attr(p, ("k",), 1.0))
+        _c0 = float(_attr(p, ("c",), 1.0))
+        _b0 = float(_attr(p, ("beta",), 0.0))
+        _tk0 = float(_attr(p, ("theta_k",), 0.0))
+        _t00 = float(_attr(p, ("theta0",), 0.0))
+
+        def pred(*, t, A=_A0, k=_k0, c=_c0, beta=_b0, **_):
+            p_eff = _g82_m.WaveGamma82Params(
+                A=A, k=k, theta_k=_tk0, c=c, beta=beta, theta0=_t00, x_probe=x_probe,
+            )
+            w2 = _g82_m.shifted_omega_squared(p_eff)
+            omega = math.sqrt(max(w2, 0.0))
+            return A * math.sin(k * x_probe - omega * t)
+        return pred
+
+    if shift_id == "delta_8_1":
+        from mirrorlab.shifts import wave_d_8_1 as _d81_m
+        _A0 = float(_attr(p, ("A",), 1.0))
+        _k0 = float(_attr(p, ("k",), 1.0))
+        _c0 = float(_attr(p, ("c",), 1.0))
+        _a0 = float(_attr(p, ("alpha0",), 0.0))
+        _ur0 = float(_attr(p, ("u_ref",), 1.0))
+
+        def pred(*, t, A=_A0, k=_k0, c=_c0, alpha=_a0, u_ref=_ur0, **_):
+            try:
+                p_eff = _d81_m.WaveDelta81Params(A=A, k=k, c=c, alpha0=alpha, u_ref=u_ref)
+                inst = _d81_m.WaveDelta81Instance(p_eff)
+                return inst.step(t)["u"]
+            except (ValueError, TypeError):
+                # Validator rejected cf-perturbed params; baseline tie.
+                return A * math.sin(k * x_probe - c * k * t)
+        return pred
+
+    # baseline
+    _A0 = float(_attr(p, ("A",), 1.0))
+    _k0 = float(_attr(p, ("k",), 1.0))
+    _c0 = float(_attr(p, ("c",), 1.0))
+    _ph0 = float(_attr(p, ("phi",), 0.0))
+
+    def pred(*, t, A=_A0, k=_k0, c=_c0, phi=_ph0, **_):
+        return A * math.sin(k * x_probe - c * k * t + phi)
     return pred
 
 
@@ -624,28 +731,167 @@ def _optics_pred(scenario: ScenarioInstance) -> PredictorFn:
 
 
 def _fluid_pred(scenario: ScenarioInstance) -> PredictorFn:
+    """fluid ceiling predictors. T19 truth-form for all 4 cells."""
     p = scenario.sim.params
+    shift_id = scenario.shift_id
 
-    def pred(**kw):
-        p1 = float(kw.get("p1", 0.0))
-        v1 = float(kw.get("v1", 0.0))
-        v2 = float(kw.get("v2", 0.0))
-        h1 = float(kw.get("h1", 0.0))
-        h2 = float(kw.get("h2", 0.0))
-        rho = _attr(p, ("rho",), 1000.0)
-        g = _attr(p, ("g",), 9.81)
+    if shift_id == "gamma_10_1":
+        # 3-vector v1/v2 + α-anisotropic M tensor; rebuild Params per call.
+        from mirrorlab.shifts import fluid_g_10_1 as _g101_m
+        _rho0 = float(_attr(p, ("rho",), 1000.0))
+        _g0 = float(_attr(p, ("g",), 9.81))
+        _a0 = float(_attr(p, ("alpha",), 0.0))
+        _n0 = tuple(float(x) for x in getattr(p, "n", (1.0, 0.0, 0.0)))
+        _v1f = tuple(float(x) for x in getattr(p, "v1", (0.0, 0.0, 0.0)))
+        _v2f = tuple(float(x) for x in getattr(p, "v2", (0.0, 0.0, 0.0)))
+
+        def pred(*, p1, h1, h2,
+                 rho=_rho0, g=_g0, alpha=_a0, **_):
+            p_eff = _g101_m.FluidGamma101Params(
+                rho=rho, alpha=alpha, n=_n0, g=g,
+                h1=h1, p1=p1, v1=_v1f, h2=h2, v2=_v2f,
+            )
+            return float(_g101_m.shifted_pressure(p_eff))
+        return pred
+
+    if shift_id == "gamma_10_2":
+        from mirrorlab.shifts import fluid_g_10_2 as _g102_m
+        _rho0 = float(_attr(p, ("rho",), 1000.0))
+        _g0 = float(_attr(p, ("g",), 9.81))
+        _h00 = float(_attr(p, ("h0",), 8000.0))
+        _l0 = float(_attr(p, ("lam",), 0.0))
+        _q0 = float(_attr(p, ("q",), 1.0))
+
+        def pred(*, p1, v1, v2, h1, h2,
+                 rho=_rho0, g=_g0, h_0=_h00, lam=_l0, q=_q0, **_):
+            p_eff = _g102_m.FluidGamma102Params(
+                rho=rho, g=g, h0=h_0, lam=lam, q=q,
+                h1=h1, v1=v1, p1=p1, h2=h2, v2=v2,
+            )
+            return float(_g102_m.shifted_pressure(p_eff))
+        return pred
+
+    if shift_id == "delta_10_1":
+        from mirrorlab.shifts import fluid_d_10_1 as _d101_m
+        _rho0 = float(_attr(p, ("rho",), 1000.0))
+        _g0 = float(_attr(p, ("g",), 9.81))
+        _z0 = float(_attr(p, ("zeta",), 0.0))
+        _m0 = float(_attr(p, ("m",), 1.0))
+        _vi0 = float(_attr(p, ("v_inf",), 1.0))
+        _Lp0 = float(_attr(p, ("L_path",), 1.0))
+
+        def pred(*, p1, v1, v2, h1, h2,
+                 rho=_rho0, g=_g0, zeta=_z0, **_):
+            p_eff = _d101_m.FluidDelta101Params(
+                rho=rho, g=g,
+                h1=h1, v1=v1, p1=p1, h2=h2, v2=v2,
+                zeta=zeta, m=_m0, v_inf=_vi0, L_path=_Lp0,
+            )
+            return float(_d101_m.shifted_pressure(p_eff))
+        return pred
+
+    # baseline Bernoulli
+    _rho0 = float(_attr(p, ("rho",), 1000.0))
+    _g0 = float(_attr(p, ("g",), 9.81))
+
+    def pred(*, p1, v1, v2, h1, h2, rho=_rho0, g=_g0, **_):
         return p1 + 0.5 * rho * (v1 * v1 - v2 * v2) + rho * g * (h1 - h2)
     return pred
 
 
 def _kinetics_pred(scenario: ScenarioInstance) -> PredictorFn:
-    p = scenario.sim.params
+    """kinetics ceiling predictors. T22 truth-form returns C(t) (or C_A
+    for δ-11-1's branching). All 4 cells step()-based."""
+    from mirrorlab.domains.kinetics import KineticsBaseline, KineticsParams
+    from mirrorlab.shifts import (
+        kinetics_d_11_1 as _d111_m,
+        kinetics_g_11_1 as _g111_m,
+        kinetics_g_11_2 as _g112_m,
+    )
 
-    def pred(**kw):
-        C = max(float(kw.get("C", 0.0)), 0.0)
-        k = _attr(p, ("k",), 0.1)
-        n = _attr(p, ("n",), 1.0)
-        return -k * (C ** n)
+    p = scenario.sim.params
+    shift_id = scenario.shift_id
+
+    def _baseline_C_closed(k, n, C0, t):
+        if n == 1.0:
+            return C0 * math.exp(-k * t)
+        base = C0 ** (1.0 - n) + (n - 1.0) * k * t
+        if base <= 0:
+            return 0.0
+        return base ** (1.0 / (1.0 - n))
+
+    if shift_id == "gamma_11_1":
+        _k0 = float(_attr(p, ("k",), 1.0))
+        _n0 = float(_attr(p, ("n",), 1.0))
+        _b0 = float(_attr(p, ("beta",), 0.0))
+        _C00 = float(_attr(p, ("C0",), 1.0))
+        _tau0 = float(_attr(p, ("tau_min",), 1e-3))
+        _dt0 = float(_attr(p, ("dt",), 1e-3))
+        _MAX_STEPS = 200
+
+        def pred(*, t, k=_k0, n=_n0, beta=_b0,
+                 C0=_C00, tau_min=_tau0, dt=_dt0, **_):
+            try:
+                # Cap fractional Adams-Moulton step count (O(n²) per call).
+                dt_eff = max(dt, abs(t) / _MAX_STEPS)
+                p_eff = _g111_m.KineticsGamma111Params(
+                    k=k, n=n, beta=beta, C0=C0, tau_min=tau_min, dt=dt_eff,
+                )
+                inst = _g111_m.KineticsGamma111Instance(p_eff)
+                return inst.step(t)["C"]
+            except (ValueError, TypeError):
+                return _baseline_C_closed(k, n, C0, t)
+        return pred
+
+    if shift_id == "gamma_11_2":
+        _k0 = float(_attr(p, ("k",), 1.0))
+        _n0 = float(_attr(p, ("n",), 1.0))
+        _m0 = float(_attr(p, ("m",), 1.0))
+        _Cs0 = float(_attr(p, ("C_sat",), 1.0))
+        _C00 = float(_attr(p, ("C0",), 1.0))
+
+        def pred(*, t, k=_k0, n=_n0, m_exp=_m0,
+                 C_sat=_Cs0, C0=_C00, **_):
+            try:
+                p_eff = _g112_m.KineticsGamma112Params(
+                    k=k, n=n, m=m_exp, C_sat=C_sat, C0=C0,
+                )
+                inst = _g112_m.KineticsGamma112Instance(p_eff)
+                return inst.step(t)["C"]
+            except (ValueError, TypeError):
+                return _baseline_C_closed(k, n, C0, t)
+        return pred
+
+    if shift_id == "delta_11_1":
+        _k0 = float(_attr(p, ("k",), 1.0))
+        _n0 = float(_attr(p, ("n",), 1.0))
+        _e0 = float(_attr(p, ("eta",), 0.0))
+        _CA0 = float(_attr(p, ("C_A0",), 1.0))
+        _CB0 = float(_attr(p, ("C_B0",), 0.0))
+
+        def pred(*, t, k=_k0, n=_n0, eta=_e0,
+                 C_A0=_CA0, C_B0=_CB0, **_):
+            try:
+                p_eff = _d111_m.KineticsDelta111Params(
+                    k=k, n=n, eta=eta, C_A0=C_A0, C_B0=C_B0,
+                )
+                inst = _d111_m.KineticsDelta111Instance(p_eff)
+                return inst.step(t)["C_A"]
+            except (ValueError, TypeError):
+                return _baseline_C_closed(k, n, C_A0, t)
+        return pred
+
+    # baseline n-th order
+    _k0 = float(_attr(p, ("k",), 1.0))
+    _n0 = float(_attr(p, ("n",), 1.0))
+    _C00 = float(_attr(p, ("C0",), 1.0))
+
+    def pred(*, t, k=_k0, n=_n0, C0=_C00, **_):
+        try:
+            inst = KineticsBaseline(KineticsParams(k=k, n=n, C0=C0))
+            return inst.step(t)["C"]
+        except (ValueError, TypeError):
+            return _baseline_C_closed(k, n, C0, t)
     return pred
 
 
@@ -1045,6 +1291,165 @@ def _optics_delta_9_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]
     ]
 
 
+def _fluid_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "rho", "value": float(getattr(p, "rho"))},
+        {"name": "g", "value": float(getattr(p, "g"))},
+    ]
+
+
+def _fluid_gamma_10_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "rho", "value": float(getattr(p, "rho"))},
+        {"name": "g", "value": float(getattr(p, "g"))},
+        {"name": "alpha", "value": float(getattr(p, "alpha"))},
+    ]
+
+
+def _fluid_gamma_10_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "rho", "value": float(getattr(p, "rho"))},
+        {"name": "g", "value": float(getattr(p, "g"))},
+        {"name": "h_0", "value": float(getattr(p, "h0"))},
+        {"name": "lam", "value": float(getattr(p, "lam"))},
+        {"name": "q", "value": float(getattr(p, "q"))},
+    ]
+
+
+def _fluid_delta_10_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "rho", "value": float(getattr(p, "rho"))},
+        {"name": "g", "value": float(getattr(p, "g"))},
+        {"name": "zeta", "value": float(getattr(p, "zeta"))},
+    ]
+
+
+def _rlc_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "L", "value": float(getattr(p, "L"))},
+        {"name": "R", "value": float(getattr(p, "R"))},
+        {"name": "C", "value": float(getattr(p, "C"))},
+    ]
+
+
+def _rlc_gamma_6_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "L_0", "value": float(getattr(p, "L0"))},
+        {"name": "R", "value": float(getattr(p, "R"))},
+        {"name": "C", "value": float(getattr(p, "C"))},
+        {"name": "I_sat", "value": float(getattr(p, "I_sat"))},
+    ]
+
+
+def _rlc_gamma_6_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "L_1", "value": float(getattr(p, "L1"))},
+        {"name": "L_2", "value": float(getattr(p, "L2"))},
+        {"name": "R_1", "value": float(getattr(p, "R1"))},
+        {"name": "R_2", "value": float(getattr(p, "R2"))},
+        {"name": "C_1", "value": float(getattr(p, "C1"))},
+        {"name": "C_2", "value": float(getattr(p, "C2"))},
+        {"name": "M_0", "value": float(getattr(p, "M0"))},
+        {"name": "dM", "value": float(getattr(p, "dM"))},
+    ]
+
+
+def _rlc_delta_6_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "L_0", "value": float(getattr(p, "L0"))},
+        {"name": "R", "value": float(getattr(p, "R"))},
+        {"name": "C", "value": float(getattr(p, "C"))},
+        {"name": "eps", "value": float(getattr(p, "eps"))},
+        {"name": "Omega_p", "value": float(getattr(p, "Omega_p"))},
+    ]
+
+
+def _wave_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "A", "value": float(getattr(p, "A"))},
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "c", "value": float(getattr(p, "c"))},
+        {"name": "phi", "value": float(getattr(p, "phi"))},
+    ]
+
+
+def _wave_gamma_8_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "A", "value": float(getattr(p, "A"))},
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "c", "value": float(getattr(p, "c"))},
+        {"name": "gamma", "value": float(getattr(p, "gamma"))},
+    ]
+
+
+def _wave_gamma_8_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "A", "value": float(getattr(p, "A"))},
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "c", "value": float(getattr(p, "c"))},
+        {"name": "beta", "value": float(getattr(p, "beta"))},
+    ]
+
+
+def _wave_delta_8_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "A", "value": float(getattr(p, "A"))},
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "c", "value": float(getattr(p, "c"))},
+        {"name": "alpha", "value": float(getattr(p, "alpha0"))},
+        {"name": "u_ref", "value": float(getattr(p, "u_ref"))},
+    ]
+
+
+def _kinetics_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "n", "value": float(getattr(p, "n"))},
+        {"name": "C0", "value": float(getattr(p, "C0"))},
+    ]
+
+
+def _kinetics_gamma_11_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "n", "value": float(getattr(p, "n"))},
+        {"name": "beta", "value": float(getattr(p, "beta"))},
+    ]
+
+
+def _kinetics_gamma_11_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "n", "value": float(getattr(p, "n"))},
+        {"name": "m_exp", "value": float(getattr(p, "m"))},
+        {"name": "C_sat", "value": float(getattr(p, "C_sat"))},
+    ]
+
+
+def _kinetics_delta_11_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "n", "value": float(getattr(p, "n"))},
+        {"name": "eta", "value": float(getattr(p, "eta"))},
+    ]
+
+
 _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[str, Any]]]] = {
     ("gravity", "baseline"): _gravity_baseline_params,
     ("gravity", "gamma_2_1"): _gravity_gamma_2_1_params,
@@ -1078,6 +1483,22 @@ _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[s
     ("optics", "gamma_9_1"): _optics_gamma_9_1_params,
     ("optics", "gamma_9_2"): _optics_gamma_9_2_params,
     ("optics", "delta_9_1"): _optics_delta_9_1_params,
+    ("fluid", "baseline"): _fluid_baseline_params,
+    ("fluid", "gamma_10_1"): _fluid_gamma_10_1_params,
+    ("fluid", "gamma_10_2"): _fluid_gamma_10_2_params,
+    ("fluid", "delta_10_1"): _fluid_delta_10_1_params,
+    ("rlc", "baseline"): _rlc_baseline_params,
+    ("rlc", "gamma_6_1"): _rlc_gamma_6_1_params,
+    ("rlc", "gamma_6_2"): _rlc_gamma_6_2_params,
+    ("rlc", "delta_6_1"): _rlc_delta_6_1_params,
+    ("wave", "baseline"): _wave_baseline_params,
+    ("wave", "gamma_8_1"): _wave_gamma_8_1_params,
+    ("wave", "gamma_8_2"): _wave_gamma_8_2_params,
+    ("wave", "delta_8_1"): _wave_delta_8_1_params,
+    ("kinetics", "baseline"): _kinetics_baseline_params,
+    ("kinetics", "gamma_11_1"): _kinetics_gamma_11_1_params,
+    ("kinetics", "gamma_11_2"): _kinetics_gamma_11_2_params,
+    ("kinetics", "delta_11_1"): _kinetics_delta_11_1_params,
 }
 
 
