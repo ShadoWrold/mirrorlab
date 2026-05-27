@@ -1,0 +1,402 @@
+{
+  "summary": {
+    "n_pairs": 48,
+    "mean": 1.0528367496900262,
+    "median": 1.0833776000847013,
+    "stdev": 0.09195146127176523,
+    "q25": 1.0473018022427019,
+    "q75": 1.099749409250881,
+    "min": 0.5487140580265306,
+    "max": 1.1,
+    "above_0_7": 47,
+    "below_0_5": 0,
+    "elapsed_s": 0.035
+  },
+  "rows": [
+    {
+      "domain_id": "hooke",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.1,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_1",
+      "seed": 0,
+      "s_scen": 1.1,
+      "claim_broken_symmetry": "PAR",
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_2",
+      "seed": 0,
+      "s_scen": 1.1,
+      "claim_broken_symmetry": "ROT",
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "delta_1_1",
+      "seed": 0,
+      "s_scen": 1.1,
+      "claim_broken_symmetry": "TR",
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.0964665204665356,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_1",
+      "seed": 0,
+      "s_scen": 1.0998258305009405,
+      "claim_broken_symmetry": "ROT",
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_2",
+      "seed": 0,
+      "s_scen": 1.0998260653860903,
+      "claim_broken_symmetry": "SCALE",
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "delta_2_1",
+      "seed": 0,
+      "s_scen": 1.0997475476557481,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.0719030885404996,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_1",
+      "seed": 0,
+      "s_scen": 1.060434806865854,
+      "claim_broken_symmetry": "SCALE",
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_2",
+      "seed": 0,
+      "s_scen": 1.0132280997098346,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "delta_3_1",
+      "seed": 0,
+      "s_scen": 1.0373235700521717,
+      "claim_broken_symmetry": "TR",
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.0475950745668419,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_1",
+      "seed": 0,
+      "s_scen": 0.5487140580265306,
+      "claim_broken_symmetry": "PAR",
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_2",
+      "seed": 0,
+      "s_scen": 0.8750225686590972,
+      "claim_broken_symmetry": "SCALE",
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "delta_4_1",
+      "seed": 0,
+      "s_scen": 0.9673867181198027,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.0997549940362799,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_1",
+      "seed": 0,
+      "s_scen": 1.0989537285854885,
+      "claim_broken_symmetry": "ROT",
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_2",
+      "seed": 0,
+      "s_scen": 1.0999980022758127,
+      "claim_broken_symmetry": "ROT",
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "delta_5_1",
+      "seed": 0,
+      "s_scen": 1.0999999989734934,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.08274770694498,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_1",
+      "seed": 0,
+      "s_scen": 0.8202935643865954,
+      "claim_broken_symmetry": "SCALE",
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_2",
+      "seed": 0,
+      "s_scen": 1.0835519726927205,
+      "claim_broken_symmetry": "ROT",
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "delta_6_1",
+      "seed": 0,
+      "s_scen": 1.0472401785437626,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.0321907693682821,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_1",
+      "seed": 0,
+      "s_scen": 1.0473223434756818,
+      "claim_broken_symmetry": "ROT",
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_2",
+      "seed": 0,
+      "s_scen": 1.0474288689360745,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "delta_7_1",
+      "seed": 0,
+      "s_scen": 1.0958847073076408,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 0.9789892814520862,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "gamma_8_1",
+      "seed": 0,
+      "s_scen": 1.0796721964653797,
+      "claim_broken_symmetry": "SCALE",
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "gamma_8_2",
+      "seed": 0,
+      "s_scen": 1.0796721964653797,
+      "claim_broken_symmetry": "ROT",
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "delta_8_1",
+      "seed": 0,
+      "s_scen": 1.0647533513502414,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.083203227476682,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "gamma_9_1",
+      "seed": 0,
+      "s_scen": 1.0959780642078505,
+      "claim_broken_symmetry": "ROT",
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "gamma_9_2",
+      "seed": 0,
+      "s_scen": 1.0785944811205515,
+      "claim_broken_symmetry": "PAR",
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "delta_9_1",
+      "seed": 0,
+      "s_scen": 1.0911959336915888,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.0854656067187312,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_1",
+      "seed": 0,
+      "s_scen": 1.0904960827495986,
+      "claim_broken_symmetry": "SCALE",
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_2",
+      "seed": 0,
+      "s_scen": 1.0903579999830955,
+      "claim_broken_symmetry": "ROT",
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "delta_10_1",
+      "seed": 0,
+      "s_scen": 1.0884964684747298,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.092473849583957,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_1",
+      "seed": 0,
+      "s_scen": 1.099995538528534,
+      "claim_broken_symmetry": "SCALE",
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_2",
+      "seed": 0,
+      "s_scen": 1.0999964196859895,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "delta_11_1",
+      "seed": 0,
+      "s_scen": 1.0999777273334728,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "baseline",
+      "seed": 0,
+      "s_scen": 1.032190809652532,
+      "claim_broken_symmetry": "none",
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "gamma_12_1",
+      "seed": 0,
+      "s_scen": 1.0403473395162273,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "gamma_12_2",
+      "seed": 0,
+      "s_scen": 1.0439913008791601,
+      "claim_broken_symmetry": "SCALE",
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "delta_12_1",
+      "seed": 0,
+      "s_scen": 1.0474753257087064,
+      "claim_broken_symmetry": "T_TRANS",
+      "error": null
+    }
+  ],
+  "seed": 0
+}

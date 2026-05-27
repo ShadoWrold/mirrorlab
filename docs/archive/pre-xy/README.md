@@ -19,5 +19,6 @@ These JSONs therefore have **incompatible grid keys, GT semantics, and submissio
 | `sprint4-sweep-data-gpt41.json` | 4 | GPT-4.1 follow-up subset |
 | `sprint4-sweep-data-merged.json` | 4 | Merged multi-pass |
 | `sprint4-sweep-data-rescored.json` | 4 | Re-rescore against later `eval/scoring.py` revision |
+| `ceiling-data.json` | 4 | 48-pair ceiling oracle sweep (pre-XY GT, baseline-form closures) |
 
 Introducing commit: see `docs/blueprint-xy.md` and the X+Y T0 archival commit.

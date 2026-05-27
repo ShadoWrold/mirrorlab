@@ -1,402 +1,1314 @@
 {
+  "xy_version": 1,
+  "schema": "ceiling+stub per (domain,shift,seed)",
+  "elapsed_s": 165.536,
   "summary": {
-    "n_pairs": 48,
-    "mean": 1.0528367496900262,
-    "median": 1.0833776000847013,
-    "stdev": 0.09195146127176523,
-    "q25": 1.0473018022427019,
-    "q75": 1.099749409250881,
-    "min": 0.5487140580265306,
-    "max": 1.1,
-    "above_0_7": 47,
-    "below_0_5": 0,
-    "elapsed_s": 0.035
+    "n_rows": 144,
+    "n_errors": 0,
+    "n_cells": 48,
+    "ceiling_overall_median": 0.991696372725113,
+    "ceiling_mean": 0.9741636194177272,
+    "stub_mean": 0.6166978287022724,
+    "spread_mean": 0.35746579071545465,
+    "spread_median": 0.11557853446811756,
+    "worst_cells_below_0_7": []
   },
   "rows": [
     {
       "domain_id": "hooke",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.1,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.9700358940213607,
+      "s_scen_stub": 0.9700358940213607,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.973007800013616,
+      "s_scen_stub": 0.973007800013616,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.9864997198704262,
+      "s_scen_stub": 0.9864997198704262,
+      "spread": 0.0,
       "error": null
     },
     {
       "domain_id": "hooke",
       "shift_id": "gamma_1_1",
       "seed": 0,
-      "s_scen": 1.1,
-      "claim_broken_symmetry": "PAR",
+      "s_scen_ceiling": 0.979702326539555,
+      "s_scen_stub": 0.7635336873912284,
+      "spread": 0.21616863914832662,
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9762414727109084,
+      "s_scen_stub": 0.49172955146241115,
+      "spread": 0.4845119212484973,
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9497398585902271,
+      "s_scen_stub": 0.6775267438183135,
+      "spread": 0.2722131147719137,
       "error": null
     },
     {
       "domain_id": "hooke",
       "shift_id": "gamma_1_2",
       "seed": 0,
-      "s_scen": 1.1,
-      "claim_broken_symmetry": "ROT",
+      "s_scen_ceiling": 0.965478403053213,
+      "s_scen_stub": 0.020648329695315607,
+      "spread": 0.9448300733578974,
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9585835061817283,
+      "s_scen_stub": 0.06644726238356562,
+      "spread": 0.8921362437981627,
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9735128606211534,
+      "s_scen_stub": 0.23184566050600122,
+      "spread": 0.7416672001151522,
       "error": null
     },
     {
       "domain_id": "hooke",
       "shift_id": "delta_1_1",
       "seed": 0,
-      "s_scen": 1.1,
-      "claim_broken_symmetry": "TR",
+      "s_scen_ceiling": 0.9514313509548097,
+      "s_scen_stub": 0.9502207492937166,
+      "spread": 0.0012106016610931025,
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "delta_1_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9479585352725327,
+      "s_scen_stub": 0.6973595766721457,
+      "spread": 0.25059895860038706,
+      "error": null
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "delta_1_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9424778170165355,
+      "s_scen_stub": 0.9335567124174892,
+      "spread": 0.008921104599046381,
       "error": null
     },
     {
       "domain_id": "gravity",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.0964665204665356,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.9964665204665356,
+      "s_scen_stub": 0.9964665204665356,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.9984414877691148,
+      "s_scen_stub": 0.9984414877691148,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.9998880230413709,
+      "s_scen_stub": 0.9998880230413709,
+      "spread": 0.0,
       "error": null
     },
     {
       "domain_id": "gravity",
       "shift_id": "gamma_2_1",
       "seed": 0,
-      "s_scen": 1.0998258305009405,
-      "claim_broken_symmetry": "ROT",
+      "s_scen_ceiling": 0.999822602877729,
+      "s_scen_stub": 9.982481887705267e-13,
+      "spread": 0.9998226028767307,
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9589532720305808,
+      "s_scen_stub": 5.607842186163548e-13,
+      "spread": 0.95895327203002,
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9998268530553054,
+      "s_scen_stub": 9.983557416104123e-13,
+      "spread": 0.9998268530543071,
       "error": null
     },
     {
       "domain_id": "gravity",
       "shift_id": "gamma_2_2",
       "seed": 0,
-      "s_scen": 1.0998260653860903,
-      "claim_broken_symmetry": "SCALE",
+      "s_scen_ceiling": 0.9971132518285453,
+      "s_scen_stub": 0.9965694485206881,
+      "spread": 0.0005438033078571936,
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9346412870740088,
+      "s_scen_stub": 0.9323512729532913,
+      "spread": 0.0022900141207174984,
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9964765341779872,
+      "s_scen_stub": 0.9911161326631984,
+      "spread": 0.005360401514788782,
       "error": null
     },
     {
       "domain_id": "gravity",
       "shift_id": "delta_2_1",
       "seed": 0,
-      "s_scen": 1.0997475476557481,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9998458552990361,
+      "s_scen_stub": 0.9997860624687082,
+      "spread": 5.9792830327976e-05,
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "delta_2_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9603646091884114,
+      "s_scen_stub": 0.9434467558472953,
+      "spread": 0.016917853341116063,
+      "error": null
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "delta_2_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9998107545726893,
+      "s_scen_stub": 0.9994795543314151,
+      "spread": 0.0003312002412741988,
       "error": null
     },
     {
       "domain_id": "damped_ho",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.0719030885404996,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.9717058495310466,
+      "s_scen_stub": 0.9717058495310466,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.9672346767408274,
+      "s_scen_stub": 0.9672346767408274,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.9850779714839378,
+      "s_scen_stub": 0.9850779714839378,
+      "spread": 0.0,
       "error": null
     },
     {
       "domain_id": "damped_ho",
       "shift_id": "gamma_3_1",
       "seed": 0,
-      "s_scen": 1.060434806865854,
-      "claim_broken_symmetry": "SCALE",
+      "s_scen_ceiling": 0.9954598950370724,
+      "s_scen_stub": 0.5426483454835714,
+      "spread": 0.452811549553501,
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9916412743605606,
+      "s_scen_stub": 0.45131875430613105,
+      "spread": 0.5403225200544295,
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9930631318397863,
+      "s_scen_stub": 0.2623150242608335,
+      "spread": 0.7307481075789528,
       "error": null
     },
     {
       "domain_id": "damped_ho",
       "shift_id": "gamma_3_2",
       "seed": 0,
-      "s_scen": 1.0132280997098346,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9972396833809047,
+      "s_scen_stub": 0.9189957442707831,
+      "spread": 0.07824393911012162,
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9905184525641124,
+      "s_scen_stub": 0.8826806874406091,
+      "spread": 0.10783776512350329,
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9974647789248734,
+      "s_scen_stub": 0.9649194807957878,
+      "spread": 0.032545298129085576,
       "error": null
     },
     {
       "domain_id": "damped_ho",
       "shift_id": "delta_3_1",
       "seed": 0,
-      "s_scen": 1.0373235700521717,
-      "claim_broken_symmetry": "TR",
+      "s_scen_ceiling": 0.9996818459592687,
+      "s_scen_stub": 0.9274335275855091,
+      "spread": 0.07224831837375956,
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "delta_3_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9974648184037033,
+      "s_scen_stub": 0.8843570896311439,
+      "spread": 0.11310772877255937,
+      "error": null
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "delta_3_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9987679846223185,
+      "s_scen_stub": 0.8984328393431747,
+      "spread": 0.10033514527914378,
       "error": null
     },
     {
       "domain_id": "pendulum",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.0475950745668419,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.968504782663401,
+      "s_scen_stub": 0.968504782663401,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.936816134859451,
+      "s_scen_stub": 0.936816134859451,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.9293031177877686,
+      "s_scen_stub": 0.9293031177877686,
+      "spread": 0.0,
       "error": null
     },
     {
       "domain_id": "pendulum",
       "shift_id": "gamma_4_1",
       "seed": 0,
-      "s_scen": 0.5487140580265306,
-      "claim_broken_symmetry": "PAR",
+      "s_scen_ceiling": 0.9600663692547289,
+      "s_scen_stub": 0.877835640531016,
+      "spread": 0.08223072872371284,
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9520299025468412,
+      "s_scen_stub": 0.7445753290597371,
+      "spread": 0.20745457348710405,
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9701583339893686,
+      "s_scen_stub": 0.9024822320369085,
+      "spread": 0.0676761019524601,
       "error": null
     },
     {
       "domain_id": "pendulum",
       "shift_id": "gamma_4_2",
       "seed": 0,
-      "s_scen": 0.8750225686590972,
-      "claim_broken_symmetry": "SCALE",
+      "s_scen_ceiling": 0.9995247506191922,
+      "s_scen_stub": 0.9178161869150553,
+      "spread": 0.08170856370413693,
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9999909516481256,
+      "s_scen_stub": 0.9973899978341157,
+      "spread": 0.002600953814009821,
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9996608391529102,
+      "s_scen_stub": 0.9480382056171875,
+      "spread": 0.051622633535722606,
       "error": null
     },
     {
       "domain_id": "pendulum",
       "shift_id": "delta_4_1",
       "seed": 0,
-      "s_scen": 0.9673867181198027,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9926883833024114,
+      "s_scen_stub": 0.0015804607115169316,
+      "spread": 0.9911079225908944,
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "delta_4_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.994578304908543,
+      "s_scen_stub": 0.003909069143874895,
+      "spread": 0.9906692357646681,
+      "error": null
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "delta_4_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9663977928767681,
+      "s_scen_stub": 0.05466305459862948,
+      "spread": 0.9117347382781386,
       "error": null
     },
     {
       "domain_id": "coulomb",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.0997549940362799,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.9998014798005598,
+      "s_scen_stub": 0.9997549940362799,
+      "spread": 4.648576427990214e-05,
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.9994224653916389,
+      "s_scen_stub": 0.9992862815484918,
+      "spread": 0.00013618384314717513,
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.9998633252618573,
+      "s_scen_stub": 0.9997615750389868,
+      "spread": 0.00010175022287051139,
       "error": null
     },
     {
       "domain_id": "coulomb",
       "shift_id": "gamma_5_1",
       "seed": 0,
-      "s_scen": 1.0989537285854885,
-      "claim_broken_symmetry": "ROT",
+      "s_scen_ceiling": 0.998807696522107,
+      "s_scen_stub": 9.792578981230385e-13,
+      "spread": 0.9988076965211278,
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9982677780063519,
+      "s_scen_stub": 9.812287641970549e-13,
+      "spread": 0.9982677780053707,
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9988253490549602,
+      "s_scen_stub": 9.862138080749847e-13,
+      "spread": 0.998825349053974,
       "error": null
     },
     {
       "domain_id": "coulomb",
       "shift_id": "gamma_5_2",
       "seed": 0,
-      "s_scen": 1.0999980022758127,
-      "claim_broken_symmetry": "ROT",
+      "s_scen_ceiling": 0.9999916682610204,
+      "s_scen_stub": 1.000048157127169e-12,
+      "spread": 0.9999916682600203,
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9999921617318323,
+      "s_scen_stub": 1.0000341550690574e-12,
+      "spread": 0.9999921617308322,
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9999963873813006,
+      "s_scen_stub": 9.999662654521015e-13,
+      "spread": 0.9999963873803006,
       "error": null
     },
     {
       "domain_id": "coulomb",
       "shift_id": "delta_5_1",
       "seed": 0,
-      "s_scen": 1.0999999989734934,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9999999998387865,
+      "s_scen_stub": 9.999980174147696e-13,
+      "spread": 0.9999999998377865,
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "delta_5_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9999999988881659,
+      "s_scen_stub": 9.99998141892569e-13,
+      "spread": 0.999999998887166,
+      "error": null
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "delta_5_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9999999823047009,
+      "s_scen_stub": 9.999986786078523e-13,
+      "spread": 0.9999999823037009,
       "error": null
     },
     {
       "domain_id": "rlc",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.08274770694498,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.8852685825287764,
+      "s_scen_stub": 0.8852685825287764,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.895387481968783,
+      "s_scen_stub": 0.895387481968783,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.8974243772829842,
+      "s_scen_stub": 0.8974243772829842,
+      "spread": 0.0,
       "error": null
     },
     {
       "domain_id": "rlc",
       "shift_id": "gamma_6_1",
       "seed": 0,
-      "s_scen": 0.8202935643865954,
-      "claim_broken_symmetry": "SCALE",
+      "s_scen_ceiling": 0.885674758550251,
+      "s_scen_stub": 7.539883364125478e-18,
+      "spread": 0.885674758550251,
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.8338406527965256,
+      "s_scen_stub": 4.521143605717192e-18,
+      "spread": 0.8338406527965256,
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.8839726693529414,
+      "s_scen_stub": 1.1403442835531922e-16,
+      "spread": 0.8839726693529413,
       "error": null
     },
     {
       "domain_id": "rlc",
       "shift_id": "gamma_6_2",
       "seed": 0,
-      "s_scen": 1.0835519726927205,
-      "claim_broken_symmetry": "ROT",
+      "s_scen_ceiling": 0.993811156929757,
+      "s_scen_stub": 2.4418888608683403e-17,
+      "spread": 0.993811156929757,
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_2",
+      "seed": 1,
+      "s_scen_ceiling": 1.0,
+      "s_scen_stub": 3.157586599561522e-16,
+      "spread": 0.9999999999999997,
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9997531673906122,
+      "s_scen_stub": 7.831091587934657e-18,
+      "spread": 0.9997531673906122,
       "error": null
     },
     {
       "domain_id": "rlc",
       "shift_id": "delta_6_1",
       "seed": 0,
-      "s_scen": 1.0472401785437626,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9159142995169026,
+      "s_scen_stub": 7.28558725079401e-16,
+      "spread": 0.9159142995169018,
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "delta_6_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.900759916867593,
+      "s_scen_stub": 6.180285209223708e-10,
+      "spread": 0.9007599162495645,
+      "error": null
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "delta_6_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.8915134383532706,
+      "s_scen_stub": 1.368750469471438e-15,
+      "spread": 0.8915134383532692,
       "error": null
     },
     {
       "domain_id": "thermal",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.0321907693682821,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.9321909504800722,
+      "s_scen_stub": 0.9321909504800722,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.9297777997407162,
+      "s_scen_stub": 0.9297777997407162,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.9287730518511496,
+      "s_scen_stub": 0.9287730518511496,
+      "spread": 0.0,
       "error": null
     },
     {
       "domain_id": "thermal",
       "shift_id": "gamma_7_1",
       "seed": 0,
-      "s_scen": 1.0473223434756818,
-      "claim_broken_symmetry": "ROT",
+      "s_scen_ceiling": 0.945312433067805,
+      "s_scen_stub": 0.7750852067898231,
+      "spread": 0.17022722627798192,
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9188029313017858,
+      "s_scen_stub": 0.06450538612137602,
+      "spread": 0.8542975451804098,
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9248615787378317,
+      "s_scen_stub": 0.7165953847527927,
+      "spread": 0.20826619398503898,
       "error": null
     },
     {
       "domain_id": "thermal",
       "shift_id": "gamma_7_2",
       "seed": 0,
-      "s_scen": 1.0474288689360745,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9088322256779732,
+      "s_scen_stub": 0.03885832635147951,
+      "spread": 0.8699738993264936,
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9023228864662568,
+      "s_scen_stub": 0.027067338420825322,
+      "spread": 0.8752555480454315,
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9302590502366697,
+      "s_scen_stub": 0.018906090688471263,
+      "spread": 0.9113529595481984,
       "error": null
     },
     {
       "domain_id": "thermal",
       "shift_id": "delta_7_1",
       "seed": 0,
-      "s_scen": 1.0958847073076408,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9985446050948974,
+      "s_scen_stub": 1.1587100874945031e-07,
+      "spread": 0.9985444892238886,
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "delta_7_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9979605783970937,
+      "s_scen_stub": 1.1374049620927172e-07,
+      "spread": 0.9979604646565975,
+      "error": null
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "delta_7_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.999099033982619,
+      "s_scen_stub": 1.1179156198785577e-07,
+      "spread": 0.999098922191057,
       "error": null
     },
     {
       "domain_id": "wave",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 0.9789892814520862,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.7980926138699937,
+      "s_scen_stub": 0.7980926138699937,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.9000485896584667,
+      "s_scen_stub": 0.9000485896584667,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.9203143955556877,
+      "s_scen_stub": 0.9203143955556877,
+      "spread": 0.0,
       "error": null
     },
     {
       "domain_id": "wave",
       "shift_id": "gamma_8_1",
       "seed": 0,
-      "s_scen": 1.0796721964653797,
-      "claim_broken_symmetry": "SCALE",
+      "s_scen_ceiling": 0.9611423754664599,
+      "s_scen_stub": 0.9556236346218153,
+      "spread": 0.005518740844644543,
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "gamma_8_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9690123933047485,
+      "s_scen_stub": 0.9640837233525245,
+      "spread": 0.004928669952224074,
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "gamma_8_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.970632530694474,
+      "s_scen_stub": 0.9702537698709377,
+      "spread": 0.0003787608235362727,
       "error": null
     },
     {
       "domain_id": "wave",
       "shift_id": "gamma_8_2",
       "seed": 0,
-      "s_scen": 1.0796721964653797,
-      "claim_broken_symmetry": "ROT",
+      "s_scen_ceiling": 0.9638451239491089,
+      "s_scen_stub": 0.8390537805642602,
+      "spread": 0.12479134338484876,
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "gamma_8_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9750451799594607,
+      "s_scen_stub": 0.8687401784465484,
+      "spread": 0.10630500151291233,
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "gamma_8_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9768183486949361,
+      "s_scen_stub": 0.8337326721509869,
+      "spread": 0.14308567654394921,
       "error": null
     },
     {
       "domain_id": "wave",
       "shift_id": "delta_8_1",
       "seed": 0,
-      "s_scen": 1.0647533513502414,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9582347078720105,
+      "s_scen_stub": 0.8332930647711089,
+      "spread": 0.12494164310090161,
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "delta_8_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9721868683828401,
+      "s_scen_stub": 0.823629237773509,
+      "spread": 0.14855763060933103,
+      "error": null
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "delta_8_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.971602802818508,
+      "s_scen_stub": 0.8318037926851792,
+      "spread": 0.13979901013332874,
       "error": null
     },
     {
       "domain_id": "optics",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.083203227476682,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 1.0,
+      "s_scen_stub": 0.5917199015486528,
+      "spread": 0.40828009845134716,
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 1.0,
+      "s_scen_stub": 0.663867266793883,
+      "spread": 0.33613273320611703,
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 1.0,
+      "s_scen_stub": 0.6319048227911768,
+      "spread": 0.36809517720882323,
       "error": null
     },
     {
       "domain_id": "optics",
       "shift_id": "gamma_9_1",
       "seed": 0,
-      "s_scen": 1.0959780642078505,
-      "claim_broken_symmetry": "ROT",
+      "s_scen_ceiling": 0.9996766185546667,
+      "s_scen_stub": 0.7497968591828772,
+      "spread": 0.24987975937178952,
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "gamma_9_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.999288558200559,
+      "s_scen_stub": 0.7505901432349227,
+      "spread": 0.24869841496563627,
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "gamma_9_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9992422523851914,
+      "s_scen_stub": 0.7176999125673429,
+      "spread": 0.2815423398178485,
       "error": null
     },
     {
       "domain_id": "optics",
       "shift_id": "gamma_9_2",
       "seed": 0,
-      "s_scen": 1.0785944811205515,
-      "claim_broken_symmetry": "PAR",
+      "s_scen_ceiling": 0.9999945409343454,
+      "s_scen_stub": 2.7926052780605023e-12,
+      "spread": 0.9999945409315527,
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "gamma_9_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9999950168202594,
+      "s_scen_stub": 2.0454844670845238e-12,
+      "spread": 0.9999950168182139,
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "gamma_9_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9999357358632712,
+      "s_scen_stub": 2.2973470260850166e-12,
+      "spread": 0.9999357358609738,
       "error": null
     },
     {
       "domain_id": "optics",
       "shift_id": "delta_9_1",
       "seed": 0,
-      "s_scen": 1.0911959336915888,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 1.0,
+      "s_scen_stub": 2.7980727225476247e-12,
+      "spread": 0.9999999999972019,
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "delta_9_1",
+      "seed": 1,
+      "s_scen_ceiling": 1.0,
+      "s_scen_stub": 1.9847486718359805e-12,
+      "spread": 0.9999999999980153,
+      "error": null
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "delta_9_1",
+      "seed": 2,
+      "s_scen_ceiling": 1.0,
+      "s_scen_stub": 2.303813430626146e-12,
+      "spread": 0.9999999999976962,
       "error": null
     },
     {
       "domain_id": "fluid",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.0854656067187312,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.9907899875888835,
+      "s_scen_stub": 0.9907899875888835,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.9913624615038824,
+      "s_scen_stub": 0.9913624615038824,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.9882435513278461,
+      "s_scen_stub": 0.9882435513278461,
+      "spread": 0.0,
       "error": null
     },
     {
       "domain_id": "fluid",
       "shift_id": "gamma_10_1",
       "seed": 0,
-      "s_scen": 1.0904960827495986,
-      "claim_broken_symmetry": "SCALE",
+      "s_scen_ceiling": 0.9930195167530271,
+      "s_scen_stub": 0.014240622590017881,
+      "spread": 0.9787788941630092,
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.997632750235001,
+      "s_scen_stub": 0.017372333908842512,
+      "spread": 0.9802604163261585,
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9967415327608257,
+      "s_scen_stub": 0.02444273041389844,
+      "spread": 0.9722988023469272,
       "error": null
     },
     {
       "domain_id": "fluid",
       "shift_id": "gamma_10_2",
       "seed": 0,
-      "s_scen": 1.0903579999830955,
-      "claim_broken_symmetry": "ROT",
+      "s_scen_ceiling": 0.9954707470870912,
+      "s_scen_stub": 0.6516224032236131,
+      "spread": 0.34384834386347807,
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9909420685798814,
+      "s_scen_stub": 0.9868127375859618,
+      "spread": 0.004129330993919655,
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9849847455176141,
+      "s_scen_stub": 0.8405086744762297,
+      "spread": 0.14447607104138438,
       "error": null
     },
     {
       "domain_id": "fluid",
       "shift_id": "delta_10_1",
       "seed": 0,
-      "s_scen": 1.0884964684747298,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9924506768703446,
+      "s_scen_stub": 0.9924496652908474,
+      "spread": 1.0115794971676806e-06,
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "delta_10_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9907703227086241,
+      "s_scen_stub": 0.9907699551466709,
+      "spread": 3.675619532073071e-07,
+      "error": null
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "delta_10_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9925153917150883,
+      "s_scen_stub": 0.9925153838910221,
+      "spread": 7.824066172723576e-09,
       "error": null
     },
     {
       "domain_id": "kinetics",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.092473849583957,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.9970542807520839,
+      "s_scen_stub": 0.9970542807102736,
+      "spread": 4.181033297356862e-11,
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.9931321789650703,
+      "s_scen_stub": 0.9931321789257406,
+      "spread": 3.932976166964863e-11,
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.9945930905144317,
+      "s_scen_stub": 0.9945930903761754,
+      "spread": 1.3825629530117567e-10,
       "error": null
     },
     {
       "domain_id": "kinetics",
       "shift_id": "gamma_11_1",
       "seed": 0,
-      "s_scen": 1.099995538528534,
-      "claim_broken_symmetry": "SCALE",
+      "s_scen_ceiling": 0.9938196411580588,
+      "s_scen_stub": 0.6936609201147841,
+      "spread": 0.3001587210432747,
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9872241396246937,
+      "s_scen_stub": 0.7666888519433548,
+      "spread": 0.2205352876813389,
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9835735961053942,
+      "s_scen_stub": 0.7486739145208822,
+      "spread": 0.23489968158451202,
       "error": null
     },
     {
       "domain_id": "kinetics",
       "shift_id": "gamma_11_2",
       "seed": 0,
-      "s_scen": 1.0999964196859895,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9967140448290125,
+      "s_scen_stub": 0.9380440849642592,
+      "spread": 0.05866995986475332,
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9957593244669052,
+      "s_scen_stub": 0.9940279110013929,
+      "spread": 0.0017314134655123103,
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9969370017370609,
+      "s_scen_stub": 0.9969166440067169,
+      "spread": 2.0357730344033875e-05,
       "error": null
     },
     {
       "domain_id": "kinetics",
       "shift_id": "delta_11_1",
       "seed": 0,
-      "s_scen": 1.0999777273334728,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9944915147480242,
+      "s_scen_stub": 0.9944915147137999,
+      "spread": 3.422429006860739e-11,
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "delta_11_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.994705778682882,
+      "s_scen_stub": 0.9947057786468989,
+      "spread": 3.598310538421856e-11,
+      "error": null
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "delta_11_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9946107276872039,
+      "s_scen_stub": 0.994610727633468,
+      "spread": 5.37359046148822e-11,
       "error": null
     },
     {
       "domain_id": "decay",
       "shift_id": "baseline",
       "seed": 0,
-      "s_scen": 1.032190809652532,
-      "claim_broken_symmetry": "none",
+      "s_scen_ceiling": 0.9918570670238523,
+      "s_scen_stub": 0.9918570670238523,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "baseline",
+      "seed": 1,
+      "s_scen_ceiling": 0.9883659057331056,
+      "s_scen_stub": 0.9883659057331056,
+      "spread": 0.0,
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "baseline",
+      "seed": 2,
+      "s_scen_ceiling": 0.983660817410895,
+      "s_scen_stub": 0.983660817410895,
+      "spread": 0.0,
       "error": null
     },
     {
       "domain_id": "decay",
       "shift_id": "gamma_12_1",
       "seed": 0,
-      "s_scen": 1.0403473395162273,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9823864310143801,
+      "s_scen_stub": 0.21732554275720437,
+      "spread": 0.7650608882571757,
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "gamma_12_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9847988917109121,
+      "s_scen_stub": 0.8667495515472363,
+      "spread": 0.11804934016367574,
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "gamma_12_1",
+      "seed": 2,
+      "s_scen_ceiling": 1.0,
+      "s_scen_stub": 0.10811712507944429,
+      "spread": 0.8918828749205557,
       "error": null
     },
     {
       "domain_id": "decay",
       "shift_id": "gamma_12_2",
       "seed": 0,
-      "s_scen": 1.0439913008791601,
-      "claim_broken_symmetry": "SCALE",
+      "s_scen_ceiling": 0.9881548965848674,
+      "s_scen_stub": 0.8762951597036188,
+      "spread": 0.11185973688124862,
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "gamma_12_2",
+      "seed": 1,
+      "s_scen_ceiling": 0.9873307940300788,
+      "s_scen_stub": 0.9275418684695125,
+      "spread": 0.059788925560566364,
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "gamma_12_2",
+      "seed": 2,
+      "s_scen_ceiling": 0.9875047107866547,
+      "s_scen_stub": 0.9874937986673569,
+      "spread": 1.091211929782343e-05,
       "error": null
     },
     {
       "domain_id": "decay",
       "shift_id": "delta_12_1",
       "seed": 0,
-      "s_scen": 1.0474753257087064,
-      "claim_broken_symmetry": "T_TRANS",
+      "s_scen_ceiling": 0.9900337189299712,
+      "s_scen_stub": 0.9900337188141008,
+      "spread": 1.1587031334414633e-10,
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "delta_12_1",
+      "seed": 1,
+      "s_scen_ceiling": 0.9809469995991612,
+      "s_scen_stub": 0.9809469994829644,
+      "spread": 1.1619682993568858e-10,
+      "error": null
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "delta_12_1",
+      "seed": 2,
+      "s_scen_ceiling": 0.9854866967230602,
+      "s_scen_stub": 0.9854866966055497,
+      "spread": 1.1751055684072753e-10,
       "error": null
     }
-  ],
-  "seed": 0
+  ]
 }
