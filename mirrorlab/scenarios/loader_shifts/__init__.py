@@ -88,5 +88,6 @@ __all__ = [
 # then called by ``loader.py`` and uses ``setdefault`` so these
 # registrations are preserved.
 # Keep alphabetical so the dispatch table is built deterministically.
+from mirrorlab.scenarios.loader_shifts import coulomb as _coulomb  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import gravity as _gravity  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import hooke as _hooke  # noqa: E402,F401

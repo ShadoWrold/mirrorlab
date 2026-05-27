@@ -73,10 +73,11 @@ def test_inputs_match_observables(domain_id: str, shift_id: str) -> None:
         sample_keys = set(grid[0][0].keys())
         # Agent-stub predictors also declare derived inputs not in OBSERVABLES
         # (e.g. ``didt`` for RLC; ``p1``/``h1``/``h2``/``v1``/``v2`` for fluid).
-        # Post-XY: ROT shifts add 3-D position keys; T_TRANS shifts add ``t``.
+        # Post-XY: ROT shifts add 3-D position keys; T_TRANS shifts add ``t``;
+        # δ-5-1 charge dynamics expose charges {q1, q2} as inputs.
         allowed_extras = {
             "didt", "p1", "h1", "h2", "v1", "v2", "L", "T_hot", "T_cold",
-            "x", "y", "z", "t",
+            "x", "y", "z", "t", "q1", "q2",
         }
         leaked = sample_keys - obs - allowed_extras
         assert not leaked, (

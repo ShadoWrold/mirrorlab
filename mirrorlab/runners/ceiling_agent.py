@@ -278,14 +278,129 @@ def _gravity_pred(scenario: ScenarioInstance) -> PredictorFn:
 
 
 def _coulomb_pred(scenario: ScenarioInstance) -> PredictorFn:
-    p = scenario.sim.params
+    """Coulomb ceiling predictors.
 
-    def pred(**kw):
-        r = float(kw.get("r", 1.0))
-        k_e = _attr(p, ("k_e",), 8.9875517873681764e9)
-        q1 = _attr(p, ("q1", "q_src", "src1_q"), 1.0e-9)
-        q2 = _attr(p, ("q2", "q_test", "src2_q"), 1.0e-9)
-        return k_e * q1 * q2 / (r * r)
+    T8 (blueprint §3.5). Truth-form for baseline + γ-5-1 + γ-5-2 + δ-5-1;
+    each reads law coefficients via ``**kw`` with defaults bound to
+    sim.params so Y plumbing on (c) flows through.
+    """
+    p = scenario.sim.params
+    shift_id = scenario.shift_id
+
+    if shift_id == "gamma_5_1":
+        # 3-D anisotropic pair force, signed-|F|·r̂ projection.
+        _ke0 = float(_attr(p, ("k_e",), 8.9875517873681764e9))
+        _q10 = float(_attr(p, ("q_src",), 1.0e-9))
+        _q20 = float(_attr(p, ("q_test",), 1.0e-9))
+        _chi0 = float(_attr(p, ("chi",), 0.0))
+        _mx0 = float(_attr(p, ("mx",), 0.0))
+        _my0 = float(_attr(p, ("my",), 0.0))
+        _mz0 = float(_attr(p, ("mz",), 1.0))
+
+        def pred(*, x, y, z,
+                 k_e=_ke0, q_1=_q10, q_2=_q20, chi=_chi0,
+                 mx=_mx0, my=_my0, mz=_mz0, **_):
+            r2 = x * x + y * y + z * z
+            r = math.sqrt(r2)
+            if r == 0.0:
+                return 0.0
+            rhat_x, rhat_y, rhat_z = x / r, y / r, z / r
+            nu = rhat_x * mx + rhat_y * my + rhat_z * mz
+            A = k_e * q_1 * q_2
+            rad = A * (1.0 + chi * (nu * nu - 1.0 / 3.0)) / r2
+            perp_coef = -2.0 * A * chi * nu / r2
+            Fx = rad * rhat_x + perp_coef * (mx - nu * rhat_x)
+            Fy = rad * rhat_y + perp_coef * (my - nu * rhat_y)
+            Fz = rad * rhat_z + perp_coef * (mz - nu * rhat_z)
+            dot = Fx * rhat_x + Fy * rhat_y + Fz * rhat_z
+            mag = math.sqrt(Fx * Fx + Fy * Fy + Fz * Fz)
+            return math.copysign(mag, dot) if dot != 0.0 else mag
+        return pred
+
+    if shift_id == "gamma_5_2":
+        # 2 fixed source charges + 1 mobile test charge with saturating
+        # potential nonlinearity. Source positions are BC (closure-only),
+        # the law coefficients (k_e, xi, phi_0, charges) are kwargs.
+        from mirrorlab.shifts import coulomb_g_5_2 as _g52_mod
+
+        _ke0 = float(_attr(p, ("k_e",), 8.9875517873681764e9))
+        _xi0 = float(_attr(p, ("xi",), 0.0))
+        _phi00 = float(_attr(p, ("phi0",), 1.0))
+        _q10 = float(_attr(p, ("src1_q",), 1.0e-6))
+        _q20 = float(_attr(p, ("src2_q",), -1.0e-6))
+        _q30 = float(_attr(p, ("q_test",), 1.0e-9))
+        _src1 = (
+            float(_attr(p, ("src1_x",), -0.5)),
+            float(_attr(p, ("src1_y",), 0.0)),
+            float(_attr(p, ("src1_z",), 0.0)),
+        )
+        _src2 = (
+            float(_attr(p, ("src2_x",), 0.5)),
+            float(_attr(p, ("src2_y",), 0.0)),
+            float(_attr(p, ("src2_z",), 0.0)),
+        )
+        # Capture the midpoint for the signed-|F|·r̂ projection.
+        _mid = (
+            (_src1[0] + _src2[0]) / 2,
+            (_src1[1] + _src2[1]) / 2,
+            (_src1[2] + _src2[2]) / 2,
+        )
+
+        def pred(*, x, y, z,
+                 k_e=_ke0, xi=_xi0, phi_0=_phi00,
+                 q_1=_q10, q_2=_q20, q_3=_q30, **_):
+            # Build a temporary params object so we can reuse the shift
+            # module's vector force routine without duplicating it.
+            # Source positions are taken from the closure (sim params),
+            # only law coefficients come from kwargs.
+            p_eff = _g52_mod.CoulombGamma52Params(
+                k_e=k_e, xi=xi, phi0=phi_0, q_test=q_3, m=p.m,
+                src1_q=q_1, src1_x=_src1[0], src1_y=_src1[1], src1_z=_src1[2],
+                src2_q=q_2, src2_x=_src2[0], src2_y=_src2[1], src2_z=_src2[2],
+                x0=p.x0, y0=p.y0, z0=p.z0,
+                vx0=p.vx0, vy0=p.vy0, vz0=p.vz0,
+            )
+            F = _g52_mod.shifted_force((x, y, z), p_eff)
+            dx, dy, dz = x - _mid[0], y - _mid[1], z - _mid[2]
+            r = math.sqrt(dx * dx + dy * dy + dz * dz)
+            if r == 0.0:
+                return math.sqrt(F[0] ** 2 + F[1] ** 2 + F[2] ** 2)
+            rhat = (dx / r, dy / r, dz / r)
+            dot = F[0] * rhat[0] + F[1] * rhat[1] + F[2] * rhat[2]
+            mag = math.sqrt(F[0] ** 2 + F[1] ** 2 + F[2] ** 2)
+            return math.copysign(mag, dot) if dot != 0.0 else mag
+        return pred
+
+    if shift_id == "delta_5_1":
+        # Charge-leakage dynamics: GT is ‖(dq1/dt, dq2/dt)‖.
+        # Positions are fixed BC; only k_e/α/n/E_ref are law coefficients.
+        from mirrorlab.shifts import coulomb_d_5_1 as _d51_mod
+
+        _ke0 = float(_attr(p, ("k_e",), 8.9875517873681764e9))
+        _a0 = float(_attr(p, ("alpha",), 1e-3))
+        _n0 = float(_attr(p, ("n_exp",), 1.0))
+        _Er0 = float(_attr(p, ("E_ref",), 1.0))
+
+        def pred(*, q1, q2,
+                 k_e=_ke0, alpha=_a0, n_exp=_n0, E_ref=_Er0, **_):
+            p_eff = _d51_mod.CoulombDelta51Params(
+                k_e=k_e, alpha=alpha, n_exp=n_exp, E_ref=E_ref,
+                q1_0=q1, q2_0=q2,
+                x1=p.x1, y1=p.y1, z1=p.z1,
+                x2=p.x2, y2=p.y2, z2=p.z2,
+                T_sim=p.T_sim,
+            )
+            dq1, dq2 = _d51_mod.shifted_law(q1, q2, p_eff)
+            return math.sqrt(dq1 * dq1 + dq2 * dq2)
+        return pred
+
+    # Baseline: F = k_e q1 q2 / r².
+    _ke0 = float(_attr(p, ("k_e",), 8.9875517873681764e9))
+    _q10 = float(_attr(p, ("q1", "q_src", "src1_q"), 1.0e-9))
+    _q20 = float(_attr(p, ("q2", "q_test", "src2_q"), 1.0e-9))
+
+    def pred(*, r, k_e=_ke0, q_1=_q10, q_2=_q20, **_):
+        return k_e * q_1 * q_2 / (r * r)
     return pred
 
 
@@ -496,12 +611,60 @@ def _hooke_delta_1_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
     ]
 
 
+def _coulomb_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k_e", "value": float(getattr(p, "k_e"))},
+        {"name": "q_1", "value": float(getattr(p, "q1"))},
+        {"name": "q_2", "value": float(getattr(p, "q2"))},
+    ]
+
+
+def _coulomb_gamma_5_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k_e", "value": float(getattr(p, "k_e"))},
+        {"name": "q_1", "value": float(getattr(p, "q_src"))},
+        {"name": "q_2", "value": float(getattr(p, "q_test"))},
+        {"name": "chi", "value": float(getattr(p, "chi"))},
+        {"name": "mx", "value": float(getattr(p, "mx"))},
+        {"name": "my", "value": float(getattr(p, "my"))},
+        {"name": "mz", "value": float(getattr(p, "mz"))},
+    ]
+
+
+def _coulomb_gamma_5_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k_e", "value": float(getattr(p, "k_e"))},
+        {"name": "xi", "value": float(getattr(p, "xi"))},
+        {"name": "phi_0", "value": float(getattr(p, "phi0"))},
+        {"name": "q_1", "value": float(getattr(p, "src1_q"))},
+        {"name": "q_2", "value": float(getattr(p, "src2_q"))},
+        {"name": "q_3", "value": float(getattr(p, "q_test"))},
+    ]
+
+
+def _coulomb_delta_5_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k_e", "value": float(getattr(p, "k_e"))},
+        {"name": "alpha", "value": float(getattr(p, "alpha"))},
+        {"name": "n_exp", "value": float(getattr(p, "n_exp"))},
+        {"name": "E_ref", "value": float(getattr(p, "E_ref"))},
+    ]
+
+
 _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[str, Any]]]] = {
     ("gravity", "gamma_2_1"): _gravity_gamma_2_1_params,
     ("hooke", "baseline"): _hooke_baseline_params,
     ("hooke", "gamma_1_1"): _hooke_gamma_1_1_params,
     ("hooke", "gamma_1_2"): _hooke_gamma_1_2_params,
     ("hooke", "delta_1_1"): _hooke_delta_1_1_params,
+    ("coulomb", "baseline"): _coulomb_baseline_params,
+    ("coulomb", "gamma_5_1"): _coulomb_gamma_5_1_params,
+    ("coulomb", "gamma_5_2"): _coulomb_gamma_5_2_params,
+    ("coulomb", "delta_5_1"): _coulomb_delta_5_1_params,
 }
 
 

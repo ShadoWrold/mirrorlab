@@ -182,5 +182,9 @@ def test_pack_grids_enriches_with_canonical_constants():
         assert canon in consts, f"missing canonical const {canon}"
     packed = pack_grids(scenario)
     a0 = packed["a"][0][0]
-    for canon in ("q1", "q2", "k_e", "r"):
+    # Constants are enriched into every input dict; the loader-provided
+    # axes for γ-5-1 are {x, y, z} (post-T8 truth-form), not {r}.
+    for canon in ("q1", "q2", "k_e"):
         assert canon in a0
+    for axis in ("x", "y", "z"):
+        assert axis in a0
