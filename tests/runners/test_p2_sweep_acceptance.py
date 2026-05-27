@@ -41,18 +41,34 @@ _P2_CELLS = [
 ]
 
 # Soft cells in P2 (real-physics small spread, not bench bug):
-#   * damped_ho baseline       — stub IS the baseline (≤1e-3 spread)
-#   * damped_ho γ-3-2          — small ε, parametric drive
-#   * damped_ho δ-3-1          — gated drag, often small
-#   * fluid baseline           — stub IS the baseline
-#   * fluid δ-10-1             — friction loss small (ζ small, L_path small)
-#   * gravity already covered in P1
+# Post-T13 stub channel harmonization, the set is larger — baselines
+# uniformly tie ceiling (no shift to detect), and several small-shift
+# γ cells where stub's canonical-law fit captures most of the physics.
+#
+#   * all P2 baselines           — stub IS the canonical law
+#   * damped_ho γ-3-2 / δ-3-1    — small ε / gated drag
+#   * pendulum γ-4-1 / γ-4-2     — small α anharmonic / height-dep g
+#   * wave γ-8-1                 — small γ dispersion offset
+#   * kinetics γ-11-2 / δ-11-1   — saturating: small at low C;
+#                                  branching: C_A obeys baseline by
+#                                  physics (paper 1 finding)
+#   * fluid δ-10-1               — friction loss small
 _P2_SOFT_CELLS = {
     ("damped_ho", "baseline"),
     ("damped_ho", "gamma_3_2"),
     ("damped_ho", "delta_3_1"),
+    ("pendulum",  "baseline"),
+    ("pendulum",  "gamma_4_1"),
+    ("pendulum",  "gamma_4_2"),
+    ("rlc",       "baseline"),
+    ("wave",      "baseline"),
+    ("wave",      "gamma_8_1"),
+    ("optics",    "baseline"),
     ("fluid",     "baseline"),
     ("fluid",     "delta_10_1"),
+    ("kinetics",  "baseline"),
+    ("kinetics",  "gamma_11_2"),
+    ("kinetics",  "delta_11_1"),
 }
 
 

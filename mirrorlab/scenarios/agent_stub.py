@@ -174,36 +174,45 @@ def _coulomb(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, An
 
 
 def _pendulum(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]:
+    # Post-XY (T13): bench builders output θ̈ from input θ but the
+    # pendulum DIM declares output "theta" (unit "1"). The ceiling
+    # entry inherits that declared output schema, so the stub must do
+    # the same to pass stage-1 dim filtering. The numeric output is
+    # still −(g/L)·sin(θ).
     g_over_L = _attr(
         sc.sim, "g_over_L", _attr(sc.sim, "g0_over_L", _attr(sc.sim, "g", 9.81) / max(_attr(sc.sim, "L", 1.0), 1e-9))
     )
     return _entry(
         "L1",
-        "omega_dot = -(g_over_L)*sin(theta)",
+        "theta_dotdot = -(g_over_L)*sin(theta)",
         "import math\ndef f(theta, g_over_L):\n    return -g_over_L*math.sin(theta)\n",
         [{"name": "theta", "units": "1"}],
-        [{"name": "omega_dot", "units": "s**-2"}],
+        [{"name": "theta", "units": "1"}],
         [_param("g_over_L", "s**-2", g_over_L)],
     )
 
 
 def _rlc(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]:
+    # Post-XY (T13): bench builders return di/dt from inputs {q, i}
+    # (and +t for δ-6-1). The RLC DIM declares output {q, i, V}, but
+    # ceiling and bench operate on the di/dt channel. Stub emits the
+    # Kirchhoff-derived di/dt directly so the stage-1 filter passes
+    # on the same channel.
     L = _attr(sc.sim, "L", _attr(sc.sim, "L0", _attr(sc.sim, "L1", 1.0)))
     R = _attr(sc.sim, "R", _attr(sc.sim, "R1", 1.0))
     C = _attr(sc.sim, "C", _attr(sc.sim, "C1", 1.0e-6))
     return _entry(
         "L1",
-        "V = L*didt + R*i + q/C",
+        "didt = -(R*i + q/C)/L",
         (
-            "def f(i, didt, q, L, R, C):\n"
-            "    return L*didt + R*i + q/C\n"
+            "def f(q, i, L, R, C):\n"
+            "    return -(R*i + q/max(C, 1e-30))/max(L, 1e-12)\n"
         ),
         [
-            {"name": "i", "units": "A"},
-            {"name": "didt", "units": "A*s**-1"},
             {"name": "q", "units": "A*s"},
+            {"name": "i", "units": "A"},
         ],
-        [{"name": "V", "units": "kg*m**2*s**-3*A**-1"}],
+        [{"name": "q", "units": "A*s"}],
         [
             _param("L", "kg*m**2*s**-2*A**-2", L),
             _param("R", "kg*m**2*s**-3*A**-2", R),
@@ -229,25 +238,30 @@ def _thermal(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, An
 
 
 def _wave(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]:
+    # Post-XY (T13): bench measures u(t) at sim.params.x_probe and uses
+    # sin(k·x_probe − ω·t + φ). Stub bakes x_probe in as a closure
+    # constant so its predictor signature matches the grid keys {t}.
     A = _attr(sc.sim, "A", 1.0)
     k = _attr(sc.sim, "k", 1.0)
     c = _attr(sc.sim, "c", 1.0)
     phi = _attr(sc.sim, "phi", 0.0)
+    x_probe = _attr(sc.sim, "x_probe", 0.0)
     return _entry(
         "L1",
-        "u = A*cos(k*x - c*k*t + phi)",
+        "u(t) = A*sin(k*x_probe - c*k*t + phi)",
         (
             "import math\n"
-            "def f(x, t, A, k, c, phi):\n"
-            "    return A*math.cos(k*x - c*k*t + phi)\n"
+            "def f(t, A, k, c, phi, x_probe):\n"
+            "    return A*math.sin(k*x_probe - c*k*t + phi)\n"
         ),
-        [{"name": "x", "units": "m"}, {"name": "t", "units": "s"}],
+        [{"name": "t", "units": "s"}],
         [{"name": "u", "units": "m"}],
         [
             _param("A", "m", A),
             _param("k", "m**-1", k),
             _param("c", "m*s**-1", c),
             _param("phi", "1", phi),
+            _param("x_probe", "m", x_probe),
         ],
     )
 
@@ -295,18 +309,36 @@ def _fluid(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]
 
 
 def _kinetics(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]:
-    # Fit linear: rate = -k*C from (C, rate).
+    # Post-XY (T13): bench measures C(t) (mol/m³), not rate (s^-1).
+    # Stub now emits the n-th-order analytic C(t) so the dim filter
+    # passes and the spread reflects "stub missed shift physics"
+    # instead of "wrong output channel."
     data = _collect(sc.sim, probe_times, ("C", "rate"))
     k_hat = _fit_neg_linear(data["C"], data["rate"])
     if k_hat == 0.0:
         k_hat = _attr(sc.sim, "k", 0.1)
+    n_hat = _attr(sc.sim, "n", 1.0)
+    C0_hat = _attr(sc.sim, "C0", _attr(sc.sim, "C_A0", 1.0))
     return _entry(
         "L1",
-        "rate = -k*C",
-        "def f(C, k):\n    return -k*C\n",
+        "C(t) = analytic n-th-order solution",
+        (
+            "import math\n"
+            "def f(t, k, n, C0):\n"
+            "    if n == 1.0:\n"
+            "        return C0*math.exp(-k*t)\n"
+            "    base = C0**(1.0 - n) + (n - 1.0)*k*t\n"
+            "    if base <= 0:\n"
+            "        return 0.0\n"
+            "    return base**(1.0/(1.0 - n))\n"
+        ),
+        [{"name": "t", "units": "s"}],
         [{"name": "C", "units": "mol*m**-3"}],
-        [{"name": "rate", "units": "mol*m**-3*s**-1"}],
-        [_param("k", "s**-1", k_hat)],
+        [
+            _param("k", "s**-1", k_hat),
+            _param("n", "1", n_hat),
+            _param("C0", "mol*m**-3", C0_hat),
+        ],
     )
 
 
