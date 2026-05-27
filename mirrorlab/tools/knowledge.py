@@ -76,19 +76,21 @@ _UNIT_TO_SI: Dict[str, float] = {
 }
 
 
-_OBSERVABLES_BY_DOMAIN: Dict[str, List[str]] = {
-    "hooke":    ["x (m)", "v (m/s)", "F (N)", "E (J)"],
-    "gravity":  ["r (m)", "v (m/s)", "F (N)", "E (J)"],
-    "damped":   ["x (m)", "v (m/s)", "E (J)"],
-    "pendulum": ["theta (rad)", "omega (rad/s)", "E (J)"],
-    "coulomb":  ["r (m)", "F (N)", "U (J)"],
-    "rlc":      ["q (C)", "i (A)", "V (V)"],
-    "thermal":  ["T (K)", "q (W/m**2)"],
-    "wave":     ["u (m)", "u_t (m/s)"],
-    "optics":   ["theta1 (rad)", "theta2 (rad)", "n1", "n2"],
-    "fluid":    ["p (Pa)", "v (m/s)", "h (m)"],
-    "kinetics": ["C (mol/m**3)", "t (s)"],
-    "decay":    ["N", "t (s)"],
+# Maps the knowledge-tool domain label to the scenario-registry domain_id.
+# Only "damped" diverges (scenarios use "damped_ho"); the rest are identity.
+_DOMAIN_TO_SCENARIO_ID: Dict[str, str] = {
+    "hooke":    "hooke",
+    "gravity":  "gravity",
+    "damped":   "damped_ho",
+    "pendulum": "pendulum",
+    "coulomb":  "coulomb",
+    "rlc":      "rlc",
+    "thermal":  "thermal",
+    "wave":     "wave",
+    "optics":   "optics",
+    "fluid":    "fluid",
+    "kinetics": "kinetics",
+    "decay":    "decay",
 }
 
 
@@ -184,9 +186,18 @@ def unit_convert(*, value: float, from_: str = None, to: str = None,
 
 
 def list_observables(*, domain: str) -> Dict[str, Any]:
-    if domain not in _OBSERVABLES_BY_DOMAIN:
+    """Return the actual observables exposed by ``domain``'s baseline step().
+
+    Reflected live from `scenarios.registry.make(domain, "baseline")` so it
+    cannot drift from real step() output after shift-leak audits. See
+    `tests/tools/test_knowledge_observable_sync.py`.
+    """
+    if domain not in _DOMAIN_TO_SCENARIO_ID:
         raise KeyError(f"unknown domain {domain!r}")
-    return {"domain": domain, "observables": list(_OBSERVABLES_BY_DOMAIN[domain])}
+    from mirrorlab.scenarios.registry import make  # lazy: avoid import cycle
+    sim = make(_DOMAIN_TO_SCENARIO_ID[domain], "baseline", seed=0)
+    keys = list(sim.step(0.0).keys())
+    return {"domain": domain, "observables": keys}
 
 
 def suggest_probe(*, domain: str) -> Dict[str, str]:
