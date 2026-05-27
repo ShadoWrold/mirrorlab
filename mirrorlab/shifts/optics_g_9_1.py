@@ -54,7 +54,7 @@ class OpticsGamma91Instance:
         ne = n_eff(p)
         s2 = p.n1 / ne * sin(p.theta1)
         theta2 = asin(s2) if -1.0 <= s2 <= 1.0 else nan
-        return {"t": float(t), "theta1": float(p.theta1), "theta2": float(theta2), "n_eff": float(ne)}
+        return {"t": float(t), "theta1": float(p.theta1), "theta2": float(theta2)}
 
 
 def sampler(seed: int) -> OpticsGamma91Params:

@@ -74,7 +74,7 @@ class ThermalDelta71Instance:
             self._integrate(max(t * 2.0, 1.0))
         y = self._sol.sol(t)
         Ta, Tb = float(y[0]), float(y[1])
-        return {"t": float(t), "T_a": Ta, "T_b": Tb, "T_mean": 0.5 * (Ta + Tb)}
+        return {"t": float(t), "T_a": Ta, "T_b": Tb}
 
 
 def sampler(seed: int) -> ThermalDelta71Params:

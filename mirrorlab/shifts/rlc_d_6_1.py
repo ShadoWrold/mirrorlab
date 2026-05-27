@@ -131,8 +131,7 @@ class _Sim:
             self._integrate(max(t * 2.0, 1.0))
         y = self._sol.sol(t)
         q, i = float(y[0]), float(y[1])
-        return {"t": float(t), "q": q, "i": i,
-                "L_eff": float(_L_of_t(t, self._p))}
+        return {"t": float(t), "q": q, "i": i}
 
 
 def build(*, params: RLCDelta61Params | None = None, seed: int = 0) -> _Sim:

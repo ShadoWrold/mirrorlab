@@ -76,6 +76,9 @@ def sampler(seed: int) -> GravityGamma21Params:
     nx, ny, nz = s * math.cos(phi), s * math.sin(phi), u
     r0 = 1.0e7
     # Choose circular-ish IC in xy plane
+    # G_DEFAULT used intentionally — actual G0 = G_DEFAULT * loguniform(0.5, 2.0),
+    # so this IC produces a near-circular but slightly elliptical orbit, which
+    # aids agent observation of γ-2-1's ROT-break precession signature.
     v_circ = math.sqrt(G_DEFAULT * M / r0)
     return GravityGamma21Params(
         G0=G0, M=M, m=1.0, xi=xi, nx=nx, ny=ny, nz=nz,
@@ -134,9 +137,8 @@ class _Sim:
             self._integrate(max(t * 2.0, 1.0))
         y = self._sol.sol(t)
         x, yc, z, vx, vy, vz = (float(v) for v in y)
-        Lz = self._p.m * (x * vy - yc * vx)
         return {"t": float(t), "x": x, "y": yc, "z": z,
-                "vx": vx, "vy": vy, "vz": vz, "Lz": float(Lz)}
+                "vx": vx, "vy": vy, "vz": vz}
 
 
 def build(*, params: GravityGamma21Params | None = None, seed: int = 0) -> _Sim:

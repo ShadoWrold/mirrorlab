@@ -90,6 +90,10 @@ def validator(p) -> bool:
     # require asymmetry: δM ≠ 0
     if abs(p.dM) < 1e-12:
         return False
+    if p.M0 > 0:
+        ratio = abs(p.dM) / p.M0
+        if not (0.05 <= ratio <= 0.4):
+            return False
     return True
 
 

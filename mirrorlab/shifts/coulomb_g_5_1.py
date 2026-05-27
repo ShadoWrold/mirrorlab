@@ -134,9 +134,8 @@ class _Sim:
             self._integrate(max(t * 2.0, 1.0))
         y = self._sol.sol(t)
         x, yc, z, vx, vy, vz = (float(v) for v in y)
-        Lz = self._p.m * (x * vy - yc * vx)
         return {"t": float(t), "x": x, "y": yc, "z": z,
-                "vx": vx, "vy": vy, "vz": vz, "Lz": float(Lz)}
+                "vx": vx, "vy": vy, "vz": vz}
 
 
 def build(*, params: CoulombGamma51Params | None = None, seed: int = 0) -> _Sim:

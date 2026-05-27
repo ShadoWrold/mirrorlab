@@ -23,8 +23,13 @@ def test_validator_passes_1000_samples():
 def test_energy_decays():
     p = HookeDelta11Params(k=20.0, c=0.5, L=1.0, m=1.0, x0=0.5, v0=0.0)
     inst = make("hooke", "delta_1_1", params=p)
-    e0 = inst.step(0.0)["E"]
-    e_late = inst.step(5.0)["E"]
+
+    def energy(t: float) -> float:
+        s = inst.step(t)
+        return 0.5 * p.m * s["v"] ** 2 + 0.5 * p.k * s["x"] ** 2
+
+    e0 = energy(0.0)
+    e_late = energy(5.0)
     assert e_late < e0 - 1e-6, f"E did not decay: E0={e0}, E_late={e_late}"
 
 

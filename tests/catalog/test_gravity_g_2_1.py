@@ -24,8 +24,13 @@ def test_validator_passes_1000_samples():
 def test_rot_broken_lz_drifts():
     p = sampler(42)
     inst = make("gravity", "gamma_2_1", params=p)
-    Lz0 = inst.step(0.0)["Lz"]
-    Lzs = [inst.step(float(t))["Lz"] for t in np.linspace(10.0, 200.0, 20)]
+
+    def lz(t: float) -> float:
+        s = inst.step(t)
+        return p.m * (s["x"] * s["vy"] - s["y"] * s["vx"])
+
+    Lz0 = lz(0.0)
+    Lzs = [lz(float(t)) for t in np.linspace(10.0, 200.0, 20)]
     drift = max(abs(L - Lz0) for L in Lzs)
     assert drift / max(abs(Lz0), 1e-30) > 1e-6, f"L_z conserved; ROT not broken"
 

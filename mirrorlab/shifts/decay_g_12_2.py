@@ -52,8 +52,7 @@ class DecayGamma122Instance:
             raise ValueError("t must be non-negative")
         p = self._params
         N = p.N_init * math.exp(-_integrated_rate(t, p))
-        lam_t = p.lam0 * (1.0 + p.eps * math.cos(p.omega * t))
-        return {"t": float(t), "N": float(N), "lam_t": float(lam_t)}
+        return {"t": float(t), "N": float(N)}
 
 
 def sampler(seed: int) -> DecayGamma122Params:

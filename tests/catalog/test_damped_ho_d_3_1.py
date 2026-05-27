@@ -24,8 +24,13 @@ def test_anti_damping_inside_core():
     p = DampedHODelta31Params(omega0=2.0, gamma=0.1, L=1.0, m=1.0,
                               x0=0.01, v0=0.0)
     inst = make("damped_ho", "delta_3_1", params=p)
-    e0 = inst.step(0.0)["E"]
-    e_late = inst.step(10.0)["E"]
+
+    def energy(t: float) -> float:
+        s = inst.step(t)
+        return 0.5 * p.m * s["v"] ** 2 + 0.5 * p.m * p.omega0 ** 2 * s["x"] ** 2
+
+    e0 = energy(0.0)
+    e_late = energy(10.0)
     assert e_late > e0, f"core anti-damping not observed: E0={e0}, E_late={e_late}"
 
 

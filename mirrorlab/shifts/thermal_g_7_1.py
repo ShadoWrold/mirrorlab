@@ -61,9 +61,6 @@ class ThermalGamma71Instance:
         return {
             "t": float(t),
             "q_norm": float(np.linalg.norm(q)),
-            "q_x": float(q[0]),
-            "q_y": float(q[1]),
-            "q_z": float(q[2]),
         }
 
 

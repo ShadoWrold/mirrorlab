@@ -48,13 +48,10 @@ class OpticsDelta91Instance:
         p = self._params
         s2 = p.n1 / p.n2 * sin(p.theta_i)
         theta_t = asin(s2) if -1.0 <= s2 <= 1.0 else nan
-        leak = p.xi * abs(sin(p.theta_i)) ** p.p
-        budget = 1.0 - leak  # = R + T
         return {
             "t": float(t),
             "theta_i": float(p.theta_i),
             "theta_t": float(theta_t),
-            "R_plus_T": float(budget),
         }
 
 
@@ -89,7 +86,7 @@ shift = ShiftImpl(law=lambda t, p: 0.0, sampler=sampler, validator=validator)
 
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"theta_i": "1"},
-    "outputs": {"theta_t": "1", "R_plus_T": "1"},
+    "outputs": {"theta_t": "1"},
     "params": {"n1": "1", "n2": "1", "xi": "1", "p": "1"},
 }
 

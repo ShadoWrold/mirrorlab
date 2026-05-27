@@ -124,8 +124,7 @@ class _Sim:
             self._integrate(max(t * 2.0, 1.0))
         y = self._sol.sol(t)
         q1, q2 = float(y[0]), float(y[1])
-        return {"t": float(t), "q1": q1, "q2": q2,
-                "Q_total": float(q1 + q2)}
+        return {"t": float(t), "q1": q1, "q2": q2}
 
 
 def build(*, params: CoulombDelta51Params | None = None, seed: int = 0) -> _Sim:

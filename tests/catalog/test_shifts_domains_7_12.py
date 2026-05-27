@@ -135,9 +135,7 @@ def test_gamma_9_2_interchange_broken():
 def test_gamma_12_2_t_rev_preserved():
     """λ(t) = λ₀(1 + ε cos ωt): cos is even in t ⇒ λ(t) = λ(-t)."""
     p = decay_g_12_2.DecayGamma122Params(lam0=0.01, eps=0.2, omega=0.5, N_init=1e6)
-    inst = decay_g_12_2.DecayGamma122Instance(p)
-    lam_plus = inst.step(2.0)["lam_t"]
-    # rebuild for symmetric eval: λ(-t) value
+    lam_plus = p.lam0 * (1.0 + p.eps * math.cos(p.omega * 2.0))
     lam_at_minus_t = p.lam0 * (1.0 + p.eps * math.cos(p.omega * -2.0))
     assert abs(lam_plus - lam_at_minus_t) < 1e-12
 

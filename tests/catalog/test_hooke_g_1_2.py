@@ -29,8 +29,13 @@ def test_rot_broken_lz_drifts():
     p = HookeGamma12Params(k0=10.0, xi=0.5, phi=0.3, m=1.0,
                            x0=0.2, y0=0.1, vx0=0.0, vy0=0.5)
     inst = make("hooke", "gamma_1_2", params=p)
-    Lz0 = inst.step(0.0)["Lz"]
-    Lzs = [inst.step(float(t))["Lz"] for t in np.linspace(0.1, 5.0, 25)]
+
+    def lz(t: float) -> float:
+        s = inst.step(t)
+        return p.m * (s["x"] * s["vy"] - s["y"] * s["vx"])
+
+    Lz0 = lz(0.0)
+    Lzs = [lz(float(t)) for t in np.linspace(0.1, 5.0, 25)]
     drift = max(abs(L - Lz0) for L in Lzs)
     assert drift > 1e-3, f"L_z conserved (drift={drift:.2e}); ROT not broken"
 

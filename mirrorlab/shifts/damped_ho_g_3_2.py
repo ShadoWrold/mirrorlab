@@ -39,14 +39,16 @@ def shifted_law(x: float, v: float, t: float, p: DampedHOGamma32Params) -> float
 def sampler(seed: int) -> DampedHOGamma32Params:
     rng = np.random.default_rng(seed)
     omega0 = loguniform(rng, OMEGA_MIN, OMEGA_MAX)
-    gamma = omega0 * loguniform(rng, 0.01, 0.3)
     # ε must satisfy ε < 4γ/ω₀ (sub-threshold) AND ε ∈ [EPS_MIN, EPS_MAX].
+    # Rejection-sample γ to preserve the loguniform distribution rather than
+    # silently mutating it when the upper bound collapses below EPS_MIN.
+    for _ in range(100):
+        gamma = omega0 * loguniform(rng, 0.01, 0.3)
+        if 0.95 * 4.0 * gamma / omega0 > EPS_MIN:
+            break
+    else:
+        raise RuntimeError("γ-3-2 sampler: 100 rejection attempts failed")
     eps_hi = min(EPS_MAX, 0.95 * 4.0 * gamma / omega0)
-    if eps_hi <= EPS_MIN:
-        eps = EPS_MIN  # may fail validator if gamma is too small; bias toward valid
-        # Boost gamma so that 4γ/ω₀ > EPS_MIN comfortably.
-        gamma = omega0 * (EPS_MIN / 4.0 + 0.01)
-        eps_hi = min(EPS_MAX, 0.95 * 4.0 * gamma / omega0)
     eps = float(rng.uniform(EPS_MIN, eps_hi))
     Omega_p = omega0 * float(rng.uniform(0.3, 1.7))
     return DampedHOGamma32Params(omega0=omega0, gamma=gamma, eps=eps,

@@ -22,7 +22,6 @@ def test_validator_passes_1000_samples():
 def test_q_decays():
     p = sampler(0)
     inst = make("coulomb", "delta_5_1", params=p)
-    Q0 = inst.step(0.0)["Q_total"]
     q1_late = inst.step(p.T_sim * 0.9)["q1"]
     assert abs(q1_late) < abs(p.q1_0), "q1 did not decay under field-coupled leakage"
 

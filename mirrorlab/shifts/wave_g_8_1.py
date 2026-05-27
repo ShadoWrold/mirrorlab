@@ -56,7 +56,7 @@ class WaveGamma81Instance:
         arg = p.k * p.x_probe - omega * t
         u = p.A * math.sin(arg)
         du_dt = -p.A * omega * math.cos(arg)
-        return {"t": float(t), "u": float(u), "du_dt": float(du_dt), "omega": float(omega)}
+        return {"t": float(t), "u": float(u), "du_dt": float(du_dt)}
 
 
 def sampler(seed: int) -> WaveGamma81Params:

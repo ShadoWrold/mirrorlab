@@ -113,6 +113,13 @@ def validator(p) -> bool:
         return False
     if p.m <= 0 or p.k_e <= 0 or p.phi0 <= 0:
         return False
+    L_typ = max(abs(p.src1_x - p.src2_x), 0.1)
+    eps = 0.1 * L_typ
+    for sx, sy, sz in [(p.src1_x, p.src1_y, p.src1_z),
+                       (p.src2_x, p.src2_y, p.src2_z)]:
+        d = math.sqrt((p.x0 - sx) ** 2 + (p.y0 - sy) ** 2 + (p.z0 - sz) ** 2)
+        if d < eps:
+            return False
     return True
 
 

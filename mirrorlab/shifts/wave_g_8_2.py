@@ -65,7 +65,7 @@ class WaveGamma82Instance:
         omega = math.sqrt(max(shifted_omega_squared(p), 0.0))
         arg = p.k * p.x_probe - omega * t
         u = p.A * math.sin(arg)
-        return {"t": float(t), "u": float(u), "omega": float(omega)}
+        return {"t": float(t), "u": float(u)}
 
 
 def sampler(seed: int) -> WaveGamma82Params:

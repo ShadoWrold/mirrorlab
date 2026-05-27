@@ -102,10 +102,8 @@ class _Sim:
             self._integrate(max(t * 2.0, 1.0))
         y = self._sol.sol(t)
         r, v = float(y[0]), float(y[1])
-        E = 0.5 * self._p.m * v * v - G_of_t(t, self._p) * self._p.M * self._p.m / r
         return {"t": float(t), "r": r, "v": v,
-                "F": float(shifted_force(r, t, self._p)),
-                "E": float(E), "G_eff": float(G_of_t(t, self._p))}
+                "F": float(shifted_force(r, t, self._p))}
 
 
 def build(*, params: GravityDelta21Params | None = None, seed: int = 0) -> _Sim:

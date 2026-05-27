@@ -92,9 +92,8 @@ class _Sim:
             self._integrate(max(t * 2.0, 1.0))
         y = self._sol.sol(t)
         x, v = float(y[0]), float(y[1])
-        E = 0.5 * self._p.m * v * v + 0.5 * self._p.k * x * x
         return {"t": float(t), "x": x, "v": v,
-                "F": float(shifted_force(x, v, self._p)), "E": float(E)}
+                "F": float(shifted_force(x, v, self._p))}
 
 
 def build(*, params: HookeDelta11Params | None = None, seed: int = 0) -> _Sim:

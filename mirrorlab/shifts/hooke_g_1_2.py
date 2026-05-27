@@ -120,9 +120,8 @@ class _Sim:
         y = self._sol.sol(t)
         x, yc, vx, vy = (float(v) for v in y)
         Fx, Fy = shifted_force((x, yc), self._p)
-        Lz = self._p.m * (x * vy - yc * vx)
         return {"t": float(t), "x": x, "y": yc, "vx": vx, "vy": vy,
-                "Fx": float(Fx), "Fy": float(Fy), "Lz": float(Lz)}
+                "Fx": float(Fx), "Fy": float(Fy)}
 
 
 def build(*, params: HookeGamma12Params | None = None, seed: int = 0) -> _Sim:
