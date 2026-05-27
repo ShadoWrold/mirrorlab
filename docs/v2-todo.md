@@ -119,4 +119,35 @@ leak 严重度不取决于 "agent 自己会不会想到测这个量"，而取决
 
 ---
 
+### TODO-6 (2026-05-27, γ-3-2 触发；distribution distortion)
+
+**问题**：γ-3-2 的 sampler 在某些情况下**静默改写参数**，扭曲文档分布。
+
+```python
+gamma = omega0 * loguniform(rng, 0.01, 0.3)
+eps_hi = min(EPS_MAX, 0.95 * 4.0 * gamma / omega0)
+if eps_hi <= EPS_MIN:
+    # Boost gamma so that 4γ/ω₀ > EPS_MIN comfortably.
+    gamma = omega0 * (EPS_MIN / 4.0 + 0.01)
+    eps_hi = min(EPS_MAX, 0.95 * 4.0 * gamma / omega0)
+```
+
+当采样的 γ/ω₀ ∈ [0.01, 0.0132] 时（最低约 10% 的 γ 分布），代码**直接覆盖** γ 到 0.0225·ω₀，**没有重采样**。
+
+**后果**：γ 的有效分布不再是 LogUniform(0.01, 0.3)，而是带一个点状峰在 0.0225·ω₀。document 与 actual distribution 不一致。
+
+**v2 修法**：用 rejection sampling — 抽到不满足条件就重新抽，而不是覆盖。
+
+```python
+for _ in range(100):
+    gamma_candidate = omega0 * loguniform(rng, 0.01, 0.3)
+    if 0.95 * 4.0 * gamma_candidate / omega0 > EPS_MIN:
+        gamma = gamma_candidate
+        break
+```
+
+**适用范围**：γ-3-2 已知；检查其它 shift 是否有类似 silent mutation 模式。
+
+---
+
 (后续待补录)

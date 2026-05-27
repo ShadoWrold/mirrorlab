@@ -3,6 +3,7 @@
 > 域 3 / Damped harmonic oscillator / δ-tier / shift_id = `delta_3_1`
 > 代码：[`mirrorlab/shifts/damped_ho_d_3_1.py`](../../mirrorlab/shifts/damped_ho_d_3_1.py)
 > Catalog Round-2 状态：APPROVED
+> **人工二审 errata (2026-05-27)**：🔴 `step()` 输出 `E` 是 ground-truth leak（同 δ-1-1 模式，按 [v2-todo TODO-2](../v2-todo.md) 升级到 🔴）。E pumping/dissipation 切换是本 shift 的核心 narrative，直接给 E(t) 让 agent 一眼看到漂移。
 
 ---
 

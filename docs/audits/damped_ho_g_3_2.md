@@ -3,6 +3,7 @@
 > 域 3 / Damped harmonic oscillator / γ-tier / shift_id = `gamma_3_2`
 > 代码：[`mirrorlab/shifts/damped_ho_g_3_2.py`](../../mirrorlab/shifts/damped_ho_g_3_2.py)
 > Catalog Round-2 状态：APPROVED
+> **人工二审 errata (2026-05-27)**：🟡 sampler silent mutation —— γ 在某些采样下被覆盖到 0.0225·ω₀，扭曲了文档的 LogUniform 分布（详见 [v2-todo TODO-6](../v2-todo.md)）。step() 输出干净。
 
 ---
 
