@@ -311,17 +311,25 @@ def _kinetics(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, A
 
 
 def _decay(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]:
+    # Post-T10 bench measures N(t) (dimensionless) as the truth channel,
+    # not dN/dt. Fit λ from observed (N, rate) when both are exposed and
+    # emit a closed-form N₀·exp(−λ·t) predictor so the stage-1 dim
+    # filter passes and the baseline cell shows ~0 spread.
     data = _collect(sc.sim, probe_times, ("N", "rate"))
     lam_hat = _fit_neg_linear(data["N"], data["rate"])
     if lam_hat == 0.0:
         lam_hat = _attr(sc.sim, "lam", _attr(sc.sim, "lam0", 0.1))
+    N0_hat = _attr(sc.sim, "N0", _attr(sc.sim, "N_init", 1.0e6))
     return _entry(
         "L1",
-        "rate = -lam*N",
-        "def f(N, lam):\n    return -lam*N\n",
+        "N(t) = N0*exp(-lam*t)",
+        "import math\ndef f(t, lam, N0):\n    return N0*math.exp(-lam*t)\n",
+        [{"name": "t", "units": "s"}],
         [{"name": "N", "units": "1"}],
-        [{"name": "rate", "units": "s**-1"}],
-        [_param("lam", "s**-1", lam_hat)],
+        [
+            _param("lam", "s**-1", lam_hat),
+            _param("N0", "1", N0_hat),
+        ],
     )
 
 

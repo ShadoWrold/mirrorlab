@@ -1,15 +1,22 @@
 """T10 (P1, decay): truth-form builders end-to-end smoke.
 
 All 4 decay cells use step()-based truth (blueprint §3.2.1) with the
-observable ``N`` (population), not ``rate`` (dN/dt). The existing
-agent_stub still emits ``rate = -lam·N`` and declares output units
-``s**-1``, so the stage-1 dim filter (target_dim = "1" for N)
-rejects every stub submission → stub scores 0 by construction.
+observable ``N`` (population). T12-mini patched agent_stub._decay to
+emit N(t) = N₀·exp(−λ·t) (units "1") so the stage-1 dim filter passes
+and baseline / δ-12-1 show ~0 spread (their truth is also exponential
+on the observed N_A channel; only the unobserved N_B differs).
 
-This is the desired X.B exposure for decay: the canonical-baseline
-agent has its observable / output channel pinned to ``rate``, while
-the truth-form bench measures ``N(t)``. The post-T13 stub rewrite
-will harmonize them; until then the cliff is large.
+Cell-by-cell expectations:
+- baseline:  ceiling ≈ stub (both N₀·exp(−λt))
+- γ-12-1:    density-coupled rate → stub misses α·N^p correction,
+             spread ~0.1-0.9 (sampler-dependent)
+- γ-12-2:    parametric modulation → stub misses ε·cos(ωt), spread
+             0 to 0.1 (ε is small; sometimes the timing of the
+             integral aligns to 0)
+- δ-12-1:    branching loss only affects N_B; observed channel N_A
+             obeys the SAME exponential as baseline → stub matches
+             truth by physics, not by mistake. paper 1: "single-channel
+             observation cannot detect particle-loss to dark channel."
 """
 
 from __future__ import annotations
@@ -35,14 +42,11 @@ def test_decay_ceiling_high(shift, seed):
 
 @pytest.mark.parametrize("shift", ["baseline", "gamma_12_1", "gamma_12_2", "delta_12_1"])
 @pytest.mark.parametrize("seed", [0, 1, 2])
-def test_decay_stub_below_ceiling(shift, seed):
-    """Stub output is ``rate`` (s**-1) but truth GT is ``N`` (dimensionless);
-    stub is filtered at stage-1 → 0 score. The cliff is uniform across
-    all 4 decay cells."""
+def test_decay_truth_not_worse_than_stub(shift, seed):
+    """Direction check: truth ≥ stub on every cell (within float noise)."""
     sc = load("decay", shift, seed=seed)
     s_c = score_against_scenario(sc, ceiling_submission(sc))
     s_s = score_against_scenario(sc, [stub_submission(sc)])
-    assert s_c - s_s >= 0.50, (
-        f"seed={seed}: decay/{shift} spread {s_c - s_s:+.4f} < 0.50 "
-        f"(ceiling {s_c:.4f}, stub {s_s:.4f})"
+    assert s_c >= s_s - 1e-3, (
+        f"seed={seed}: decay/{shift} truth {s_c:.4f} < stub {s_s:.4f}"
     )
