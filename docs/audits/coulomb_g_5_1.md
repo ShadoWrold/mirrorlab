@@ -3,6 +3,7 @@
 > 域 5 / Coulomb electrostatics / γ-tier / shift_id = `gamma_5_1`
 > 代码：[`mirrorlab/shifts/coulomb_g_5_1.py`](../../mirrorlab/shifts/coulomb_g_5_1.py)
 > Catalog Round-2 状态：APPROVED（R1-fix：pair-potential form, conservative）
+> **人工二审 errata (2026-05-27)**：🔴 `step()` 输出 `L_z`（同 γ-2-1 / γ-1-2 leak 模式，[v2-todo TODO-2](../v2-todo.md)）。
 
 ---
 

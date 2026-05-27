@@ -3,6 +3,7 @@
 > 域 5 / Coulomb / δ-tier / shift_id = `delta_5_1`
 > 代码：[`mirrorlab/shifts/coulomb_d_5_1.py`](../../mirrorlab/shifts/coulomb_d_5_1.py)
 > Catalog Round-2 状态：APPROVED（T-rev bundled）
+> **人工二审 errata (2026-05-27)**：🔴 `step()` 输出 `Q_total = q1 + q2` —— **Q-break shift 的 Noether 荷被直接给出**，等同于 δ-2-1 G_eff / γ-1-2 L_z leak 模式（[v2-todo TODO-2](../v2-todo.md)）。
 
 ---
 

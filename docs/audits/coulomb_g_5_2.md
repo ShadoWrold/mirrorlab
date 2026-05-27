@@ -3,6 +3,7 @@
 > 域 5 / Coulomb / γ-tier / shift_id = `gamma_5_2`
 > 代码：[`mirrorlab/shifts/coulomb_g_5_2.py`](../../mirrorlab/shifts/coulomb_g_5_2.py)
 > Catalog Round-2 状态：APPROVED（R1-fix：nonlinearity 搬到 scalar potential）
+> **人工二审 errata (2026-05-27)**：🟡 多源场景 validator 不检查 test charge 与 source 的最小距离 → 1/r 数值边界风险（[v2-todo TODO-7](../v2-todo.md)）。step() 输出干净。
 
 ---
 

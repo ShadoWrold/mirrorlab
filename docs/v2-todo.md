@@ -40,6 +40,8 @@ Sprint 1-4 通过审查暴露的、暂时不修但日后必须处理的设计问
 | γ-8-2 (wave) | `omega` | 振幅依赖波速下的频率 | 🔴 |
 | γ-1-2 (hooke) | `L_z` | 破缺对称性 ROT 的 Noether 荷 | 🔴 |
 | **γ-2-1 (gravity)** | **`L_z`** | **3D 重力下的角动量 z 分量（人工二审 2026-05-27）** | **🔴** |
+| **γ-5-1 (coulomb)** | **`L_z`** | **3D Coulomb 下的角动量 z 分量（人工二审 2026-05-27）** | **🔴** |
+| **δ-5-1 (coulomb)** | **`Q_total`** | **总电荷直接输出 —— Q-break shift 的 Noether 荷（人工二审 2026-05-27）** | **🔴** |
 | **δ-1-1 (hooke)** | **`E`** | **E-break shift 的能量被直接读出（人工二审 2026-05-27 升 🟡→🔴）** | **🔴** |
 | **δ-3-1 (damped_ho)** | **`E`** | **同上** | **🔴** |
 
@@ -147,6 +149,23 @@ for _ in range(100):
 ```
 
 **适用范围**：γ-3-2 已知；检查其它 shift 是否有类似 silent mutation 模式。
+
+---
+
+### TODO-7 (2026-05-27, γ-5-2 触发；多体 Coulomb 数值边界)
+
+**问题**：γ-5-2 是多源 Coulomb 场景（2 个 fixed sources + 1 mobile test charge）。validator **不检查** test charge 与 source 的最小距离。物理上 test charge 可能被加速到 source 附近 → 1/r 发散 → 数值崩溃。
+
+```python
+# coulomb_g_5_2.py 中 validator 只检查 χ、k_e、m，不检查源距离
+```
+
+**v2 修法**：
+1. validator 加 minimum-distance check：`for src: |x0 - x_src| ≥ ε·L_typ`
+2. 或 sampler 在 source 附近加 ε offset
+3. 或 force law 加 cutoff（在 r < r_cut 时返回 r=r_cut 的力）
+
+**适用范围**：所有 N-body Coulomb / gravity shift（γ-2-1、γ-5-1、γ-5-2、δ-5-1 等）—— 凡有 1/r 或 1/r² 都需检查。
 
 ---
 
