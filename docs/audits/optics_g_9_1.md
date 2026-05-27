@@ -3,6 +3,7 @@
 > 域 9 / Geometric optics / γ-tier / shift_id = `gamma_9_1`
 > 代码：[`mirrorlab/shifts/optics_g_9_1.py`](../../mirrorlab/shifts/optics_g_9_1.py)
 > Catalog Round-2 状态：APPROVED
+> **人工二审 errata (2026-05-27)**：🔴 `step()` 输出 `n_eff` —— 修改后的等效折射率被直接给出，等同 δ-2-1 G_eff 模式（[v2-todo TODO-2](../v2-todo.md)）。
 
 ---
 

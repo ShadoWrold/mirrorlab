@@ -3,6 +3,7 @@
 > 域 9 / Geometric optics / δ-tier / shift_id = `delta_9_1`
 > 代码：[`mirrorlab/shifts/optics_d_9_1.py`](../../mirrorlab/shifts/optics_d_9_1.py)
 > Catalog Round-2 状态：APPROVED
+> **人工二审 errata (2026-05-27)**：🔴 `step()` 输出 `R_plus_T` —— 能量预算 = 1 − leak，直接显示 E-break。同 δ-1-1 / δ-7-1 模式（[v2-todo TODO-2](../v2-todo.md)）。
 
 ---
 
