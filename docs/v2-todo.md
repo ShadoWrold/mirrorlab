@@ -38,9 +38,18 @@ Sprint 1-4 通过审查暴露的、暂时不修但日后必须处理的设计问
 | δ-6-1 (rlc) | `L_eff(t)` | 时变电感的瞬时值 | 🔴 |
 | γ-8-1 (wave) | `omega` | 各向异性色散下的频率 | 🔴 |
 | γ-8-2 (wave) | `omega` | 振幅依赖波速下的频率 | 🔴 |
-| **γ-1-2 (hooke)** | `L_z` | 破缺对称性 ROT 的 Noether 荷 | 🔴 |
-| δ-1-1 (hooke) | `E` | E-break shift 的能量直接读出 | 🟡 |
-| δ-3-1 (damped_ho) | `E` | 同上 | 🟡 |
+| γ-1-2 (hooke) | `L_z` | 破缺对称性 ROT 的 Noether 荷 | 🔴 |
+| **δ-1-1 (hooke)** | **`E`** | **E-break shift 的能量被直接读出（人工二审 2026-05-27 升 🟡→🔴）** | **🔴** |
+| **δ-3-1 (damped_ho)** | **`E`** | **同上** | **🔴** |
+
+**🔴 vs 🟡 判定准则**（人工二审 2026-05-27 修订）：
+
+leak 严重度不取决于 "agent 自己会不会想到测这个量"，而取决于 **暴露了什么 shift signature**：
+- shift 修改的参数本身（G_eff、L_eff、ω 等）→ 🔴
+- shift 破缺对称性的 Noether 荷（L_z、E 等）→ 🔴
+- **反向检查**：和 baseline 该域的 step() 输出对比，**只在 shift 版本出现的 derived quantity** 都属 🔴 leak，因为存在本身就是"这个 scenario 不同"的明示
+
+按此准则，δ-1-1 / δ-3-1 输出 E 而 baseline Hooke (1D) 不输出 E → 升 🔴。
 
 **为什么是问题**：
 - 🔴 类：直接漏了"shift 修改的参数本身"或"shift 破缺的 Noether 荷"，agent 不用思考就能锁定 shift 类型

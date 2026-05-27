@@ -3,6 +3,7 @@
 > 域 1 / Hooke spring / δ-tier / shift_id = `delta_1_1`
 > 代码：[`mirrorlab/shifts/hooke_d_1_1.py`](../../mirrorlab/shifts/hooke_d_1_1.py)
 > Catalog Round-2 状态：APPROVED（T-rev bundled w/ E per dissipative convention）
+> **人工二审 errata (2026-05-27)**：🔴 `step()` 输出 `E` 是 ground-truth leak —— E-break shift 的能量直接喂给 agent，baseline Hooke (1D) 不输出 E，差异本身就是 shift 明示。原 audit 标 🟡，**重判 🔴**。v2 修复，详见 [`docs/v2-todo.md`](../v2-todo.md) TODO-2。
 
 ---
 
