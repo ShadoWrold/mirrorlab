@@ -34,6 +34,7 @@ from mirrorlab.domains.rlc import DIM_SIGNATURE as RLC_DIM
 from mirrorlab.domains.thermal import DIM_SIGNATURE as THERMAL_DIM
 from mirrorlab.domains.wave import DIM_SIGNATURE as WAVE_DIM
 from mirrorlab.scenarios import prompts
+from mirrorlab.scenarios import loader_shifts as _shifts
 from mirrorlab.scenarios.counterfactual import DEFAULT_MAGNITUDE, perturb_params
 from mirrorlab.scenarios.registry import make as _make_sim
 
@@ -545,12 +546,17 @@ def load(
     prompt = _DOMAIN_PROMPT_BUILDERS[domain_id]()
     observables = tuple(_DOMAIN_OBSERVABLES[domain_id])
     dim_signature = _DOMAIN_DIM[domain_id]
+    # Hooke keeps its Sprint-1 numpy-array (a)/(b)/(c) path for both the
+    # baseline demo and all γ/δ shifts. Every other (domain, shift) key
+    # goes through the loader_shifts dispatch table; per-shift truth-form
+    # builders (T3+) replace individual entries via
+    # ``loader_shifts.register(domain_id, shift_id, builder)`` at import.
     if domain_id == "hooke":
         test_grids, cf_params = _hooke_test_grids(
             sim, seed, counterfactual_magnitude
         )
-    elif domain_id in _NON_HOOKE_GRID_BUILDERS:
-        test_grids, cf_params = _NON_HOOKE_GRID_BUILDERS[domain_id](
+    elif (domain_id, shift_id) in _shifts._GRID_BUILDERS:
+        test_grids, cf_params = _shifts.get(domain_id, shift_id)(
             sim, seed, counterfactual_magnitude
         )
     else:
@@ -570,3 +576,11 @@ def load(
 
 
 __all__ = ["ScenarioInstance", "load"]
+
+
+# Populate the per-(domain, shift) dispatch table with the legacy per-
+# domain builders. Per-shift truth-form modules (T3+) call
+# ``_shifts.register(...)`` from their import and override individual
+# entries. This call must happen after ``_NON_HOOKE_GRID_BUILDERS`` is
+# defined above so it can be read.
+_shifts.register_legacy_dispatch()
