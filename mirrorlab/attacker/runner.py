@@ -89,6 +89,11 @@ def _pack_grids(scenario: ScenarioInstance) -> Dict[str, list]:
         return {}
     packed: Dict[str, list] = {}
     for key, arr in grids.items():
+        # Post-T7: loader_shifts/hooke.py emits tuple lists like every
+        # other domain. Pre-T7: ndarrays of floats. Detect and route.
+        if isinstance(arr, list) and arr and isinstance(arr[0], tuple):
+            packed[key] = list(arr)
+            continue
         try:
             packed[key] = [
                 ({"x": float(x)}, float(force(float(x), params)))

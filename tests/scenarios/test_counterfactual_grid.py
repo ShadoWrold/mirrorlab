@@ -90,7 +90,7 @@ def test_loader_emits_counterfactual_params_aligned_with_c_grid(shift_id):
     sc = load("hooke", shift_id, seed=0)
     grid_c = sc.test_grids["c"]
     cf = sc.counterfactual_params
-    assert len(cf) == grid_c.size
+    assert len(cf) == len(grid_c)
     assert sc.counterfactual_magnitude == pytest.approx(DEFAULT_MAGNITUDE)
 
 
@@ -120,12 +120,17 @@ def test_loader_c_params_perturbation_in_30pct_band_per_field():
 def test_loader_a_and_b_unchanged_from_perturbation():
     """(a) and (b) are NOT counterfactual: they share the baseline sim's law."""
     sc = load("hooke", "gamma_1_1", seed=0)
-    # The loader's (a)(b) are pure x-arrays; (c) is too, but (c) carries
-    # extra params metadata while (a)(b) don't.
+    # Post-T7: hooke flows through loader_shifts → (a)/(b)/(c) are all
+    # tuple lists. (a)/(b) are 2-tuples; (c) is a 3-tuple per blueprint
+    # §2.3 so it carries the per-point cf_params.
     for key in ("a", "b"):
-        assert isinstance(sc.test_grids[key], np.ndarray)
-    # And the metadata-bearing structure is reserved for (c).
-    assert sc.counterfactual_params  # non-empty
+        grid = sc.test_grids[key]
+        assert isinstance(grid, list)
+        assert all(isinstance(pt, tuple) and len(pt) == 2 for pt in grid)
+    grid_c = sc.test_grids["c"]
+    assert all(isinstance(pt, tuple) and len(pt) == 3 for pt in grid_c)
+    # And cf_params is still attached for downstream consumers.
+    assert sc.counterfactual_params
 
 
 # --------------------------- per-point GT semantics ---------------------------

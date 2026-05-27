@@ -89,3 +89,4 @@ __all__ = [
 # registrations are preserved.
 # Keep alphabetical so the dispatch table is built deterministically.
 from mirrorlab.scenarios.loader_shifts import gravity as _gravity  # noqa: E402,F401
+from mirrorlab.scenarios.loader_shifts import hooke as _hooke  # noqa: E402,F401

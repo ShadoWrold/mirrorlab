@@ -49,11 +49,18 @@ def test_load_returns_scenario_instance(shift_id: str) -> None:
     # observables + dim sig are present
     assert "x" in sc.observables and "F" in sc.observables
     assert sc.dim_signature["outputs"]["F"] == "kg*m*s**-2"
-    # test grids: a / b / c populated
+    # test grids: a / b / c populated. Post-T7 (blueprint §3.2), hooke
+    # is migrated off the Sprint-1 ndarray path and now emits tuple
+    # lists like every other domain.
     for key in ("a", "b", "c"):
         assert key in sc.test_grids
-        assert isinstance(sc.test_grids[key], np.ndarray)
-        assert sc.test_grids[key].size > 0
+        grid = sc.test_grids[key]
+        assert isinstance(grid, list)
+        assert len(grid) > 0
+        first = grid[0]
+        assert isinstance(first, tuple)
+        # (a)/(b) are 2-tuples, (c) is a 3-tuple per blueprint §2.3.
+        assert len(first) in (2, 3)
 
 
 @pytest.mark.parametrize("shift_id", ["baseline", "gamma_1_1"])

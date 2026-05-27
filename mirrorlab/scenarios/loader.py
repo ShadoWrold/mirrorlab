@@ -546,17 +546,19 @@ def load(
     prompt = _DOMAIN_PROMPT_BUILDERS[domain_id]()
     observables = tuple(_DOMAIN_OBSERVABLES[domain_id])
     dim_signature = _DOMAIN_DIM[domain_id]
-    # Hooke keeps its Sprint-1 numpy-array (a)/(b)/(c) path for both the
-    # baseline demo and all γ/δ shifts. Every other (domain, shift) key
-    # goes through the loader_shifts dispatch table; per-shift truth-form
-    # builders (T3+) replace individual entries via
-    # ``loader_shifts.register(domain_id, shift_id, builder)`` at import.
-    if domain_id == "hooke":
-        test_grids, cf_params = _hooke_test_grids(
+    # Post-T7 (blueprint §3.2): every (domain, shift) flows through the
+    # loader_shifts dispatch table. The Sprint-1 hooke ndarray path
+    # (``_hooke_test_grids``) is retained only as a no-op fallback when
+    # no dispatch entry exists (e.g. an unregistered shift).
+    if (domain_id, shift_id) in _shifts._GRID_BUILDERS:
+        test_grids, cf_params = _shifts.get(domain_id, shift_id)(
             sim, seed, counterfactual_magnitude
         )
-    elif (domain_id, shift_id) in _shifts._GRID_BUILDERS:
-        test_grids, cf_params = _shifts.get(domain_id, shift_id)(
+    elif domain_id == "hooke":
+        # Legacy ndarray path — preserved for any hooke shift not yet
+        # registered in loader_shifts. Should be unreachable after T7
+        # since all 4 hooke shifts are registered.
+        test_grids, cf_params = _hooke_test_grids(
             sim, seed, counterfactual_magnitude
         )
     else:

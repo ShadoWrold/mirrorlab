@@ -98,45 +98,68 @@ def _dim_units(scenario: ScenarioInstance) -> tuple[list[dict], list[dict]]:
 # only the grid's input variables (no params kwarg).
 
 def _hooke_pred(scenario: ScenarioInstance) -> PredictorFn:
+    """Hooke ceiling predictors.
+
+    T7 (blueprint §3.5): baseline + γ-1-1 + γ-1-2 + δ-1-1 read law
+    coefficients via ``**kw`` with defaults bound to the sim's params,
+    so the predictor is callable in legacy contexts AND every per-call
+    kwarg overrides the default (Y plumbing on sub-grid (c)).
+    """
     sim = scenario.sim
     p = sim.params
     shift_id = scenario.shift_id
 
     if shift_id == "delta_1_1":
-        def pred(**kw):
-            x = float(kw.get("x", 0.0))
-            v = float(kw.get("v", 0.0))
-            try:
-                return float(hooke_d_1_1.shifted_force(x, v, p))
-            except Exception:
-                return -_attr(p, ("k",), 1.0) * x
+        _k0 = float(_attr(p, ("k",), 1.0))
+        _c0 = float(_attr(p, ("c",), 0.0))
+        _L0 = float(_attr(p, ("L",), 1.0))
+
+        def pred(*, x, v, k=_k0, c=_c0, L=_L0, **_):
+            return -k * x - c * (x * x / (L * L)) * v
         return pred
 
     if shift_id == "gamma_1_1":
-        def pred(**kw):
-            x = float(kw.get("x", 0.0))
-            try:
-                return float(hooke_g_1_1.shifted_force(x, p))
-            except Exception:
-                return -_attr(p, ("k",), 1.0) * x
+        _k0 = float(_attr(p, ("k",), 1.0))
+        _eta0 = float(_attr(p, ("eta",), 0.0))
+        _xs0 = float(_attr(p, ("x_scale",), 1.0)) or 1.0
+
+        def pred(*, x, k=_k0, eta=_eta0, x_scale=_xs0, **_):
+            return -k * x * (1.0 + eta * math.tanh(x / x_scale))
         return pred
 
     if shift_id == "gamma_1_2":
-        # 2-D shift; grid only exposes scalar x. Project onto the (x,0)
-        # axis: shifted_force((x,0), p)[0] is the x-component.
-        def pred(**kw):
-            x = float(kw.get("x", 0.0))
-            try:
-                fx, _ = hooke_g_1_2.shifted_force((x, 0.0), p)
-                return float(fx)
-            except Exception:
-                return -_attr(p, ("k",), 1.0) * x
+        # 2-D ROT-anisotropic stiffness. Read x, y from the grid and
+        # return the radial-projected signed magnitude of F per blueprint
+        # §2.5 (same convention as gravity γ-2-1).
+        _k0 = float(_attr(p, ("k0", "k"), 1.0))
+        _xi0 = float(_attr(p, ("xi",), 0.0))
+        _phi0 = float(_attr(p, ("phi",), 0.0))
+
+        def pred(*, x, y, k0=_k0, xi=_xi0, phi=_phi0, **_):
+            r2 = x * x + y * y
+            r = math.sqrt(r2)
+            if r == 0.0:
+                return 0.0
+            theta = math.atan2(y, x)
+            K_theta = k0 * (1.0 + xi * math.cos(2.0 * (theta - phi)))
+            F_r = -K_theta * r
+            F_theta = k0 * xi * r * math.sin(2.0 * (theta - phi))
+            # Convert (F_r, F_θ) → (Fx, Fy) so we can apply the standard
+            # signed-|F|·r̂ projection used in loader_shifts/hooke.py.
+            rhat_x, rhat_y = x / r, y / r
+            that_x, that_y = -rhat_y, rhat_x
+            Fx = F_r * rhat_x + F_theta * that_x
+            Fy = F_r * rhat_y + F_theta * that_y
+            dot = Fx * rhat_x + Fy * rhat_y
+            mag = math.sqrt(Fx * Fx + Fy * Fy)
+            return math.copysign(mag, dot) if dot != 0.0 else mag
         return pred
 
     # Baseline: F = -k x.
-    def pred(**kw):
-        x = float(kw.get("x", 0.0))
-        return -_attr(p, ("k",), 1.0) * x
+    _k0 = float(_attr(p, ("k",), 1.0))
+
+    def pred(*, x, k=_k0, **_):
+        return -k * x
     return pred
 
 
@@ -441,8 +464,44 @@ def _gravity_gamma_2_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]
     ]
 
 
+def _hooke_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [{"name": "k", "value": float(getattr(p, "k"))}]
+
+
+def _hooke_gamma_1_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "eta", "value": float(getattr(p, "eta"))},
+        {"name": "x_scale", "value": float(getattr(p, "x_scale"))},
+    ]
+
+
+def _hooke_gamma_1_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k0", "value": float(getattr(p, "k0"))},
+        {"name": "xi", "value": float(getattr(p, "xi"))},
+        {"name": "phi", "value": float(getattr(p, "phi"))},
+    ]
+
+
+def _hooke_delta_1_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "c", "value": float(getattr(p, "c"))},
+        {"name": "L", "value": float(getattr(p, "L"))},
+    ]
+
+
 _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[str, Any]]]] = {
     ("gravity", "gamma_2_1"): _gravity_gamma_2_1_params,
+    ("hooke", "baseline"): _hooke_baseline_params,
+    ("hooke", "gamma_1_1"): _hooke_gamma_1_1_params,
+    ("hooke", "gamma_1_2"): _hooke_gamma_1_2_params,
+    ("hooke", "delta_1_1"): _hooke_delta_1_1_params,
 }
 
 

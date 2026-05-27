@@ -71,6 +71,18 @@ def _grids_with_ground_truth(scenario: ScenarioInstance) -> Dict[str, list]:
     force = sim._force  # noqa: SLF001 — matches existing test pattern
     params = sim.params
 
+    def _as_floats(grid) -> np.ndarray:
+        """Coerce a sub-grid to a 1-D float ndarray of x values.
+
+        Pre-T7 hooke grids were ndarrays of floats; post-T7 the loader
+        emits tuple lists like every other domain. Accept both shapes so
+        the Sprint-1 demo path keeps working.
+        """
+        if isinstance(grid, np.ndarray):
+            return grid
+        # Assume tuple list: (inputs_dict, gt[, cf_params]).
+        return np.array([float(entry[0]["x"]) for entry in grid])
+
     def pack(xs: np.ndarray) -> list:
         return [({"x": float(x)}, float(force(float(x), params))) for x in xs]
 
@@ -90,7 +102,8 @@ def _grids_with_ground_truth(scenario: ScenarioInstance) -> Dict[str, list]:
     if x_scale is None or not np.isfinite(x_scale) or x_scale <= 0:
         out: Dict[str, list] = {}
         for key, grid in scenario.test_grids.items():
-            out[key] = pack_counterfactual(grid) if key == "c" else pack(grid)
+            xs = _as_floats(grid)
+            out[key] = pack_counterfactual(xs) if key == "c" else pack(xs)
         return out
 
     # γ-1-1 path: rebuild (a)(b) referenced to ``x_scale`` so the OOD sub-grid

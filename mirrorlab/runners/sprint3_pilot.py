@@ -134,7 +134,19 @@ def pack_grids(scenario: ScenarioInstance) -> Dict[str, List[Tuple[Dict[str, flo
     if not grids:
         return {}
     consts = _scenario_constants(scenario)
-    if scenario.domain_id == "hooke":
+    # Sprint-1 ndarray path was hooke-only and assumed grid points are
+    # bare floats. Post-T7 hooke loads through loader_shifts and emits
+    # tuple-list grids like every other domain, so the ndarray branch
+    # only triggers for unregistered (domain, shift) keys that fall
+    # back to the legacy ``_hooke_test_grids``.
+    grid_a_sample = grids.get("a")
+    is_legacy_ndarray = (
+        scenario.domain_id == "hooke"
+        and grid_a_sample is not None
+        and len(grid_a_sample) > 0
+        and not isinstance(grid_a_sample[0], tuple)
+    )
+    if is_legacy_ndarray:
         sim = scenario.sim
         force = _hooke_force_fn(scenario)
         params = getattr(sim, "params", None)
@@ -150,7 +162,8 @@ def pack_grids(scenario: ScenarioInstance) -> Dict[str, List[Tuple[Dict[str, flo
             except Exception:  # noqa: BLE001
                 out[key] = []
         return out
-    # Other domains: loader already returns packed list[(inputs, gt)].
+    # Other domains (and post-T7 hooke): loader already returns packed
+    # list[(inputs, gt)].
     out_other: Dict[str, List[Tuple[Dict[str, float], float]]] = {}
     for key, val in grids.items():
         try:
