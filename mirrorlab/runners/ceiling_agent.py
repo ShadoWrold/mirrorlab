@@ -10,19 +10,21 @@ knowledge of the law and parameters, what S_scen could it reach?" — which
 tells us whether sub-baseline scores from real LLMs are LLM-limited or
 bench-limited.
 
-For shifts whose true law signature requires inputs the test grid does
-not expose (e.g. 3-D anisotropic shifts, time-dependent shifts that pass
-no ``t`` input through the grid), the predictor falls back to the
-baseline-form law evaluated with the shift's params — i.e. the strongest
-predictor expressible in the grid's input vocabulary. This is honest:
-those gaps are real bench-design limitations and should surface as low
-ceiling scores in the report.
+Post-XY status (T4, blueprint §3.5): per-shift truth-form predictors are
+migrated incrementally. γ-2-1 (gravity) now ships the real anisotropic
+``shifted_force`` projection with full param exposure so Y plumbing on
+sub-grid (c) can override declared values with per-point ``cf_params``.
+The other 30 ceiling branches still close over ``scenario.sim.params``
+and will be migrated in T12 (P1 batch). Where a branch falls back to
+baseline-form because the truth law requires inputs the legacy grid
+does not expose, that fallback is silent today and will be replaced by
+an explicit ``warn + CLAMP`` per blueprint §2.6 in T12.
 """
 
 from __future__ import annotations
 
 import math
-from typing import Any, Callable, Dict, List, Mapping, Optional
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple
 
 from mirrorlab.scenarios.loader import ScenarioInstance
 from mirrorlab.shifts import (
@@ -181,6 +183,43 @@ def _gravity_pred(scenario: ScenarioInstance) -> PredictorFn:
     p = scenario.sim.params
     shift_id = scenario.shift_id
 
+    if shift_id == "gamma_2_1":
+        # T4 (P0, blueprint §3.5): real 3-D anisotropic projection.
+        # G/M/xi/nx/ny/nz default to the sim's params so the predictor is
+        # callable in legacy contexts that invoke it with only the grid's
+        # input variables. When the evaluator runs through the Y-plumbing
+        # path on sub-grid (c), per-point ``cf_params`` flow in via
+        # ``**kw`` and override these defaults — the per-call kwargs win
+        # over defaults at the Python-binding level, exactly the override
+        # semantics blueprint §2.3 demands.
+        _G0 = float(_attr(p, ("G0", "G"), 6.6743e-11))
+        _M0 = float(_attr(p, ("M",), 1.0))
+        _m0 = float(_attr(p, ("m",), 1.0))
+        _xi0 = float(_attr(p, ("xi",), 0.0))
+        _nx0 = float(_attr(p, ("nx",), 0.0))
+        _ny0 = float(_attr(p, ("ny",), 0.0))
+        _nz0 = float(_attr(p, ("nz",), 1.0))
+
+        def pred(*, x, y, z,
+                 G=_G0, M=_M0, m=_m0, xi=_xi0,
+                 nx=_nx0, ny=_ny0, nz=_nz0, **_):
+            r2 = x * x + y * y + z * z
+            r = math.sqrt(r2)
+            if r == 0.0:
+                return 0.0
+            rhat_x, rhat_y, rhat_z = x / r, y / r, z / r
+            mu = rhat_x * nx + rhat_y * ny + rhat_z * nz
+            Amp = G * M * m
+            rad_coef = -Amp * (1.0 + xi * (mu * mu - 1.0 / 3.0)) / r2
+            perp_coef = 2.0 * Amp * xi * mu / r2
+            Fx = rad_coef * rhat_x + perp_coef * (nx - mu * rhat_x)
+            Fy = rad_coef * rhat_y + perp_coef * (ny - mu * rhat_y)
+            Fz = rad_coef * rhat_z + perp_coef * (nz - mu * rhat_z)
+            dot = Fx * rhat_x + Fy * rhat_y + Fz * rhat_z
+            mag = math.sqrt(Fx * Fx + Fy * Fy + Fz * Fz)
+            return math.copysign(mag, dot) if dot != 0.0 else mag
+        return pred
+
     if shift_id == "gamma_2_2":
         def pred(**kw):
             r = float(kw.get("r", 1.0))
@@ -205,7 +244,7 @@ def _gravity_pred(scenario: ScenarioInstance) -> PredictorFn:
                 return -G * M * m / (r * r)
         return pred
 
-    # baseline + γ-2-1 (3-D anisotropic → use scalar baseline form).
+    # baseline (γ-2-1 handled above with full truth-form projection).
     def pred(**kw):
         r = float(kw.get("r", 1.0))
         G = _attr(p, ("G", "G0"), 6.6743e-11)
@@ -383,6 +422,30 @@ _DISPATCH: Dict[str, Callable[[ScenarioInstance], PredictorFn]] = {
 }
 
 
+# Per-(domain, shift) declared-param builders for the truth-form ceilings
+# that read their coefficients via **kw rather than closing over
+# scenario.sim.params. The build_submission entry's ``params`` list is
+# populated from here so Y plumbing on sub-grid (c) has names to
+# override with per-point cf_params. Entries not listed get an empty
+# params list (legacy closure-based predictors).
+def _gravity_gamma_2_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "G", "value": float(getattr(p, "G0"))},
+        {"name": "M", "value": float(getattr(p, "M"))},
+        {"name": "m", "value": float(getattr(p, "m"))},
+        {"name": "xi", "value": float(getattr(p, "xi"))},
+        {"name": "nx", "value": float(getattr(p, "nx"))},
+        {"name": "ny", "value": float(getattr(p, "ny"))},
+        {"name": "nz", "value": float(getattr(p, "nz"))},
+    ]
+
+
+_DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[str, Any]]]] = {
+    ("gravity", "gamma_2_1"): _gravity_gamma_2_1_params,
+}
+
+
 _BROKEN_SYMMETRY: Dict[tuple[str, str], str] = {
     # Catalog R2-final labels. None means no labeled break (baseline).
     ("hooke", "gamma_1_1"): "PAR",
@@ -448,6 +511,8 @@ def build_submission(scenario: ScenarioInstance) -> Submission:
     predictor = builder(scenario)
     inputs, outputs = _dim_units(scenario)
     sym = broken_symmetry_for(scenario.domain_id, scenario.shift_id)
+    declared = _DECLARED_PARAMS.get((scenario.domain_id, scenario.shift_id))
+    params = declared(scenario) if declared is not None else []
     entry: Dict[str, Any] = {
         "law_id": "L1",
         "formula": "oracle: catalog law wrapped via closure",
@@ -458,7 +523,7 @@ def build_submission(scenario: ScenarioInstance) -> Submission:
         "_predictor": predictor,
         "inputs": inputs,
         "outputs": outputs,
-        "params": [],
+        "params": params,
         "claim_broken_symmetry": sym,
     }
     return [entry]
