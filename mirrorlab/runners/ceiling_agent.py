@@ -597,12 +597,82 @@ def _kinetics_pred(scenario: ScenarioInstance) -> PredictorFn:
 
 
 def _decay_pred(scenario: ScenarioInstance) -> PredictorFn:
-    p = scenario.sim.params
+    """Decay ceiling predictors.
 
-    def pred(**kw):
-        N = float(kw.get("N", 0.0))
-        lam = _attr(p, ("lam", "lam0"), 0.1)
-        return -lam * N
+    T10 (blueprint §3.5, §3.2.1 step()-only). All 4 cells return N(t),
+    not dN/dt. baseline uses closed-form; the 3 shifts integrate their
+    actual rhs per call (bypassing the catalog validator so cf-perturbed
+    coefficients still score).
+    """
+    from scipy.integrate import solve_ivp as _solve_ivp
+
+    p = scenario.sim.params
+    shift_id = scenario.shift_id
+
+    def _integrate(rhs, y0, t):
+        t = max(float(t), 0.0)
+        if t == 0.0:
+            return list(y0)
+        sol = _solve_ivp(
+            rhs, (0.0, t), list(y0),
+            method="DOP853", rtol=1e-9, atol=1e-12,
+        )
+        if not sol.success:
+            return list(y0)
+        return [float(v) for v in sol.y[:, -1]]
+
+    if shift_id == "gamma_12_1":
+        _lam0 = float(_attr(p, ("lam",), 0.1))
+        _alpha0 = float(_attr(p, ("alpha",), 0.0))
+        _p0 = float(_attr(p, ("p",), 1.0))
+        _Ns0 = float(_attr(p, ("N_scale",), 1.0)) or 1.0
+        _Ni0 = float(_attr(p, ("N_init",), 1.0e6))
+
+        def pred(*, t,
+                 lam=_lam0, alpha=_alpha0, p_exp=_p0,
+                 N_scale=_Ns0, N_init=_Ni0, **_):
+            def rhs(_t, y):
+                (N,) = y
+                Ns = max(N, 0.0)
+                return (-lam * Ns * (1.0 + alpha * (Ns / N_scale) ** p_exp),)
+            return _integrate(rhs, [N_init], t)[0]
+        return pred
+
+    if shift_id == "gamma_12_2":
+        _lam0 = float(_attr(p, ("lam0", "lam"), 0.1))
+        _eps0 = float(_attr(p, ("eps",), 0.0))
+        _omg0 = float(_attr(p, ("omega",), 0.0))
+        _Ni0 = float(_attr(p, ("N_init",), 1.0e6))
+
+        def pred(*, t,
+                 lam=_lam0, eps=_eps0, omega=_omg0, N_init=_Ni0, **_):
+            def rhs(_t, y):
+                (N,) = y
+                lam_t = lam * (1.0 + eps * math.cos(omega * _t))
+                return (-lam_t * N,)
+            return _integrate(rhs, [N_init], t)[0]
+        return pred
+
+    if shift_id == "delta_12_1":
+        _lam0 = float(_attr(p, ("lam",), 0.1))
+        _xi0 = float(_attr(p, ("xi",), 0.0))
+        _NA0 = float(_attr(p, ("N_A0",), 1.0e6))
+        _NB0 = float(_attr(p, ("N_B0",), 0.0))
+
+        def pred(*, t, lam=_lam0, xi=_xi0,
+                 N_A0=_NA0, N_B0=_NB0, **_):
+            def rhs(_t, y):
+                NA, _NB = y
+                return (-lam * NA, (1.0 - xi) * lam * NA)
+            return _integrate(rhs, [N_A0, N_B0], t)[0]
+        return pred
+
+    # Baseline: closed-form N(t) = N₀·exp(−λ t).
+    _lam0 = float(_attr(p, ("lam",), 0.1))
+    _N00 = float(_attr(p, ("N0",), 1.0e6))
+
+    def pred(*, t, lam=_lam0, N0=_N00, **_):
+        return N0 * math.exp(-lam * t)
     return pred
 
 
@@ -748,6 +818,41 @@ def _thermal_delta_7_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]
     ]
 
 
+def _decay_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "lam", "value": float(getattr(p, "lam"))},
+        {"name": "N0", "value": float(getattr(p, "N0"))},
+    ]
+
+
+def _decay_gamma_12_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "lam", "value": float(getattr(p, "lam"))},
+        {"name": "alpha", "value": float(getattr(p, "alpha"))},
+        {"name": "p_exp", "value": float(getattr(p, "p"))},
+        {"name": "N_scale", "value": float(getattr(p, "N_scale"))},
+    ]
+
+
+def _decay_gamma_12_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "lam", "value": float(getattr(p, "lam0"))},
+        {"name": "eps", "value": float(getattr(p, "eps"))},
+        {"name": "omega", "value": float(getattr(p, "omega"))},
+    ]
+
+
+def _decay_delta_12_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "lam", "value": float(getattr(p, "lam"))},
+        {"name": "xi", "value": float(getattr(p, "xi"))},
+    ]
+
+
 _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[str, Any]]]] = {
     ("gravity", "gamma_2_1"): _gravity_gamma_2_1_params,
     ("hooke", "baseline"): _hooke_baseline_params,
@@ -762,6 +867,10 @@ _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[s
     ("thermal", "gamma_7_1"): _thermal_gamma_7_1_params,
     ("thermal", "gamma_7_2"): _thermal_gamma_7_2_params,
     ("thermal", "delta_7_1"): _thermal_delta_7_1_params,
+    ("decay", "baseline"): _decay_baseline_params,
+    ("decay", "gamma_12_1"): _decay_gamma_12_1_params,
+    ("decay", "gamma_12_2"): _decay_gamma_12_2_params,
+    ("decay", "delta_12_1"): _decay_delta_12_1_params,
 }
 
 
