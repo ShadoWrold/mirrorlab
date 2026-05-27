@@ -3,6 +3,7 @@
 > 域 7 / Thermal conduction / γ-tier / shift_id = `gamma_7_1`
 > 代码：[`mirrorlab/shifts/thermal_g_7_1.py`](../../mirrorlab/shifts/thermal_g_7_1.py)
 > Catalog Round-2 状态：APPROVED（R1-fix：constant β + field-independent K）
+> **人工二审 errata (2026-05-27)**：🔴 `step()` 输出 `q_x, q_y, q_z` 三分量，但 baseline thermal 只输出标量 `q`。off-axis 分量 (q_y, q_z ≠ 0 当 n̂ 不沿 ∇T) 的存在本身揭示 ROT break。v2 修：只输出标量 `q_norm` 或 `q_along_grad`，让 agent 通过 manipulate `grad_dir` 方向自己发现各向异性（[v2-todo TODO-2](../v2-todo.md)）。
 
 ---
 

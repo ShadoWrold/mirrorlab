@@ -3,6 +3,7 @@
 > 域 7 / Thermal / δ-tier / shift_id = `delta_7_1`
 > 代码：[`mirrorlab/shifts/thermal_d_7_1.py`](../../mirrorlab/shifts/thermal_d_7_1.py)
 > Catalog Round-2 状态：APPROVED（R1-fix：comoving ⟨T⟩ 参考保 T→T+c）
+> **人工二审 errata (2026-05-27)**：🔴 `step()` 输出 `T_mean = (T_a + T_b)/2` —— 总热量 proxy，对 E-break shift 的耗散直接可见（同 δ-1-1 E 漏模式）。v2 移除（[v2-todo TODO-2](../v2-todo.md)）。
 
 ---
 
