@@ -3,6 +3,7 @@
 > 域 2 / Newtonian gravity / δ-tier / shift_id = `delta_2_1`
 > 代码：[`mirrorlab/shifts/gravity_d_2_1.py`](../../mirrorlab/shifts/gravity_d_2_1.py)
 > Catalog Round-2 状态：APPROVED（R1-fix: φ 锁 0，T-rev 保留）
+> **人工二审 errata (2026-05-27)**：原 audit 已正确标 🔴 `G_eff` leak。补充：`step()` **同时**输出 `E(t)`，E 是用 G_eff 算的，**修 v2 时两个都要移除**。否则只去 G_eff，agent 仍能从 E drift 推断破缺。详见 [v2-todo TODO-2](../v2-todo.md)。
 
 ---
 
