@@ -80,3 +80,12 @@ __all__ = [
     "register_legacy_dispatch",
     "_GRID_BUILDERS",
 ]
+
+
+# Import per-shift truth-form builder modules so their import-time
+# ``register(...)`` calls run before ``load()`` is invoked. Each module
+# binds its own (domain, shift) entries; ``register_legacy_dispatch`` is
+# then called by ``loader.py`` and uses ``setdefault`` so these
+# registrations are preserved.
+# Keep alphabetical so the dispatch table is built deterministically.
+from mirrorlab.scenarios.loader_shifts import gravity as _gravity  # noqa: E402,F401

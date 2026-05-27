@@ -60,6 +60,12 @@ def test_inputs_match_observables(domain_id: str, shift_id: str) -> None:
 
     Output channel names (``F``, ``q``, ``rate`` …) are excluded because GT is
     the output, not an input.
+
+    Post-XY exception: ROT shifts expand the grid input vocabulary to
+    3-D ``{x, y, z}`` so the anisotropic correction is observable
+    (blueprint §3.2 / §4). Prompts.py listing of observables is updated
+    in a later task (T13); until then, accept ``x, y, z`` as allowed
+    extras on shifts that have a truth-form builder registered.
     """
     sc = load(domain_id, shift_id, seed=0)
     obs = set(sc.observables) | set(sc.dim_signature.get("inputs", {}).keys())
@@ -67,7 +73,11 @@ def test_inputs_match_observables(domain_id: str, shift_id: str) -> None:
         sample_keys = set(grid[0][0].keys())
         # Agent-stub predictors also declare derived inputs not in OBSERVABLES
         # (e.g. ``didt`` for RLC; ``p1``/``h1``/``h2``/``v1``/``v2`` for fluid).
-        allowed_extras = {"didt", "p1", "h1", "h2", "v1", "v2", "L", "T_hot", "T_cold"}
+        # Post-XY: ROT shifts add 3-D position keys; T_TRANS shifts add ``t``.
+        allowed_extras = {
+            "didt", "p1", "h1", "h2", "v1", "v2", "L", "T_hot", "T_cold",
+            "x", "y", "z", "t",
+        }
         leaked = sample_keys - obs - allowed_extras
         assert not leaked, (
             f"{(domain_id, shift_id)}/{key}: inputs {sorted(leaked)} not in "
