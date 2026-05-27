@@ -4,7 +4,7 @@
 >
 > **Reading order**: §1 → §2 → §3 → §4 → §5 → §6 → skim others.
 >
-> **Last update**: 2026-05-27 by Claude Opus 4.7
+> **Last update**: 2026-05-27 (post-T23) by Claude Opus 4.7
 
 ---
 
@@ -21,7 +21,7 @@ A research program with **3 planned papers**, organized under GitHub org [ShadoW
 **Paper 2** — Counterfactual diversity hypothesis (train physical world models on MirrorLab).
 **Paper 3** — Symmetry recovery via physics-inductive world models.
 
-**Sprint 4 result (preliminary, single-seed, 4 representative domains)**: 4/5 frontier LLMs cliff-drop on γ-tier; only GPT-5.4 holds (0.698 vs 1.10 ceiling). cliff plot in [`figures/fig1_cliff.png`](../figures/fig1_cliff.png).
+**Bench status (2026-05-27, post-X+Y rebuild)**: the original Sprint-4 "TRUE PASS" was found to be a *plumbing pass*, not a *physics pass* — `loader.py` scored agent predictors against the **baseline-form law** (not the shifted law) for all 36 shifts, so a 1-D Newtonian closure could score 0.95+ on a 3-D anisotropic γ shift. The blocker is documented in `docs/blocker-{consensus,trace,physics,fix-options}.md`; the full rewrite plan lives in `docs/blueprint-xy.md` v2. The X+Y rebuild has **shipped through T23**: all 48 (domain, shift) cells × 3 seeds now score against truth-form GT with cf_params reaching the predictor on sub-grid (c). Headline numbers: ceiling overall median **0.992**, stub mean **0.617**, spread mean **+0.357**, **0 cells** below 0.70 floor.
 
 ---
 
@@ -29,52 +29,73 @@ A research program with **3 planned papers**, organized under GitHub org [ShadoW
 
 ```
 mirrorlab/                            # ROOT
-├── README.md                         # public-facing repo description
-├── paper1/                           # Paper 1 LaTeX manuscript (9-page draft)
+├── README.md                         # public-facing repo description (Sprint-4-era language)
+├── paper1/                           # Paper 1 LaTeX manuscript (9-page draft, PRE-X+Y data)
 │   ├── main.tex, appendix.tex, refs.bib, Makefile
-│   └── main.pdf                      # builds clean
+│   └── main.pdf                      # builds clean but numbers are stale; T26 will regen
 ├── mirrorlab/                        # PYTHON PACKAGE
 │   ├── domains/                      # 12 baseline physics simulators
 │   ├── shifts/                       # 36 γ/δ shift implementations (= 12 × 3)
 │   ├── scenarios/
-│   │   ├── loader.py                 # scenario builder w/ test grids
-│   │   ├── prompts.py                # 12 domain prompt templates
-│   │   ├── agent_stub.py             # rule-based baseline agent
+│   │   ├── loader.py                 # entry point (now dispatches to loader_shifts/)
+│   │   ├── loader_shifts/            # ★ X+Y per-(domain,shift) builders, 12 files
+│   │   │   ├── _common.py            # _pack (3-tuple grid_c), _linspace_signed, ...
+│   │   │   ├── {gravity,hooke,coulomb,thermal,decay}.py        # P1 domains
+│   │   │   ├── {damped_ho,pendulum,rlc,wave,optics,fluid,kinetics}.py   # P2 domains
+│   │   │   └── __init__.py           # 48-entry _GRID_BUILDERS dispatch table
+│   │   ├── prompts.py                # 12 domain prompt templates (updated for new vocab)
+│   │   ├── agent_stub.py             # rule-based baseline agent (T13 channel-harmonized)
 │   │   ├── counterfactual.py         # ±30% latent-param perturbation
-│   │   └── registry.py               # (domain, shift) → SimInstance
+│   │   │                             # + _LAW_PARAM_FIELDS, _PREDICTOR_NAME_MAP,
+│   │   │                             #   params_to_predictor_kwargs (X+Y additions)
+│   │   └── registry.py               # (domain, shift) → SimInstance factory
 │   ├── tools/                        # 32-tool MVS (measure/manipulate/analyze/knowledge)
 │   │   ├── measure.py, manipulate.py, analyze.py, knowledge.py
-│   │   ├── registry.py, sandbox.py
+│   │   ├── registry.py, sandbox.py   # multi-D bugs fixed in Sprint 4.5
 │   ├── eval/                         # 2-stage evaluator (dim + numeric)
-│   │   ├── dimensional.py, numeric.py, scoring.py
+│   │   ├── dimensional.py
+│   │   ├── numeric.py                # ★ subgrid-c branch: _eval_subgrid_c overrides
+│   │   │                             #   declared params with per-point cf_params kwargs
+│   │   └── scoring.py
 │   ├── runners/
 │   │   ├── openai_client.py          # OpenAI-format proxy (gpt-*) @ 127.0.0.1:4142
 │   │   ├── anthropic_client.py       # Anthropic-format proxy (claude/gemini) @ 127.0.0.1:4141
 │   │   ├── provider.py               # auto-dispatch by model name prefix
 │   │   ├── llm_agent.py              # tool-calling loop w/ budgets
-│   │   ├── ceiling_agent.py          # oracle ceiling experiment
-│   │   ├── sprint{1,2,3,3_5,4}_*.py  # sprint demo / pilot runners
-│   │   ├── rescore.py                # re-score saved sweep data
-│   ├── attacker/                     # lookup-attacker (spec §8)
+│   │   ├── ceiling_agent.py          # oracle ceiling — 12 _<domain>_pred dispatchers
+│   │   │                             #   rewritten for X+Y (T4, T12, T16-T22)
+│   │   ├── t23_ceiling_sweep.py      # ★ NEW: 48 cells × 3 seeds, writes docs/ceiling-data.json
+│   │   ├── sprint{1,2,3,3_5,4}_*.py  # legacy sprint runners (sprint4_sweep still used for T25)
+│   │   ├── rescore.py                # version-guards on "xy_version: 1"
+│   ├── attacker/                     # lookup-attacker (spec §8) — locked prompt v1.1
 │   │   ├── lookup.py, runner.py, cli.py
 │   ├── calibration/sweep.py          # CAL-N knob sweeps
-│   └── reports/figures.py            # paper figures generator
+│   └── reports/figures.py            # paper figures generator (will be re-run at T26)
 ├── vendor/newtonbench/               # git submodule (HKUST-KnowComp/NewtonBench)
-├── tests/                            # pytest suite (~850 tests)
+├── tests/                            # pytest suite (~853 tests pre-X+Y; ~+8 P1/P2 gates)
 │   ├── catalog/                      # 36 per-shift tests
 │   ├── scenarios/, tools/, eval/, attacker/, calibration/
-│   ├── runners/, reports/, integration/
-├── figures/                          # paper-grade PDFs + PNGs (300 dpi)
+│   ├── runners/
+│   │   ├── test_p0_gravity_g_2_1_smoke.py        # X+Y T5/T6 P0 gate
+│   │   ├── test_p1_{coulomb,decay,gravity_rest,hooke,thermal}_smoke.py
+│   │   ├── test_p1_sweep_acceptance.py            # 20 cells × 3 seeds = 60 (P1 §8.2 gate)
+│   │   └── test_p2_sweep_acceptance.py            # 28 cells × 3 seeds = 84 (P2 §8.3 gate)
+│   ├── reports/, integration/
+├── figures/                          # paper-grade PDFs + PNGs (pre-X+Y data; T26 regen pending)
 ├── docs/
+│   ├── HANDOVER.md                   # ← this file
+│   ├── blueprint-xy.md               # ★ X+Y master plan v2 (SHIP-approved); SOURCE OF TRUTH
+│   ├── blueprint-xy-review-round{1,2}.md   # audit trail
+│   ├── blocker-{consensus,trace,physics,fix-options}.md  # why X+Y exists
+│   ├── ceiling-data.json             # ★ T23 output (xy_version: 1, 144 rows / 48 cells)
+│   ├── archive/pre-xy/               # all pre-X+Y JSONs (sprint3/3.5/4 + old ceiling)
 │   ├── program-overview.md           # 3-paper program (PI / collaborator view)
 │   ├── story.md                      # plain-English 500-word story
 │   ├── paper1-spec.md                # Paper 1 implementation spec
 │   ├── d6-shift-catalog.md           # 36 shifts, post-audit Round-2 final
 │   ├── audits/                       # 36 per-shift human-review markdowns
-│   ├── sprint{1,2,3,3_5,4}-report.md # per-sprint verdicts
-│   ├── sprint4-{sweep-data,ceiling-data,...}.json   # raw experimental data
-│   ├── v2-todo.md                    # carry-over fixes deferred to v2
-│   └── HANDOVER.md                   # ← this file
+│   ├── sprint{1,2,3,3_5,4}-report.md # per-sprint verdicts (Sprint-4 superseded by X+Y)
+│   └── v2-todo.md                    # carry-over fixes deferred to v2
 └── pyproject.toml
 ```
 
@@ -84,53 +105,124 @@ mirrorlab/                            # ROOT
 
 | Sprint | Goal | Outcome |
 |---|---|---|
-| **1** | sim + agent loop + scoring (Hooke + γ-1-1 only) | PASS, end-to-end demo green |
-| **2** | All 12 domains + 36 shifts + 32 tools + true counterfactual sub-grid | PASS, 331/331 tests; multi-seed mean discrimination Δ jumped 0.22 → 0.40 |
-| **3** | LLM runner + lookup-attacker + first pilot | CONDITIONAL PASS — pipeline worked but 0/5 honest cells submitted due to **budget-prompt mismatch** (prompt advertised CAL-7=30 calls but runner clamped to 20; model paced wrong) |
-| **3.5** | Fix budget contract + retry pilot | TRUE PASS — 4/5 honest cells submitted, attacker `S_bench^lookup = 0.0` (non-vacuous) |
-| **4** | 5-model × 4-domain × 3-tier sweep + ceiling + figures + paper draft | TRUE PASS — cliff plot reproduces; ceiling median 1.08 (bench fair); 9-page paper PDF builds clean |
-| **4.5** (in progress at handover) | Fix audit findings: step() leaks + sampler/validator hardening | Done at handover write-time — 853/854 tests, see commit `34ea738` |
+| **1** | sim + agent loop + scoring (Hooke + γ-1-1 only) | PASS |
+| **2** | 12 domains + 36 shifts + 32 tools | PASS, 331/331 tests |
+| **3** | LLM runner + lookup-attacker + first pilot | CONDITIONAL PASS — pipeline OK, 0/5 honest cells submitted (budget-prompt mismatch) |
+| **3.5** | Fix budget contract + retry pilot | TRUE PASS — 4/5 honest cells submit, attacker `S_bench^lookup = 0.0` non-vacuous |
+| **4** | 5-model × 4-domain × 3-tier sweep + ceiling + figures + paper draft | TRUE PASS (later **invalidated** — see X+Y blocker) |
+| **4.5** | Audit findings: step() leaks, sampler/validator hardening, multi-D tool bugs | DONE in commit `675e7b7`, `34ea738` |
+| **X+Y** | Full bench rebuild after blocker (`loader.py` scored against baseline-form GT) | **In progress, T0 → T23 shipped**; T24 / T25 / T26 pending |
+
+### X+Y task-by-task (commits)
+
+| Task | Commit | What |
+|---|---|---|
+| BLOCKER consensus + blueprint v2 | `04fe986` | Spec frozen |
+| T0  | `fbcdab7` | Archived 7 pre-XY JSONs to `docs/archive/pre-xy/` |
+| T1  | `b41e0a0` | Y plumbing — `numeric._eval_subgrid_c` overrides declared params with cf_params |
+| T2  | `36ac395` | `loader_shifts/` scaffold + 48-entry dispatch |
+| T3  | `c79d94c` | gravity γ-2-1 truth-form builder (P0) |
+| T4  | `9785721` | ceiling γ-2-1 truth predictor |
+| T5/T6 | `35b2645` | End-to-end ceiling > baseline-stub smoke (P0 gate) |
+| T7  | `79c6d14` | hooke loader_shifts (4 cells) |
+| T8  | `b43214e` | coulomb loader_shifts (4 cells) |
+| T9  | `821ea4d` | thermal loader_shifts (4 cells) |
+| T10 | `8a8734a` | decay loader_shifts (4 cells) |
+| T11 | `01abb34` | gravity rest (baseline + γ-2-2 + δ-2-1) |
+| T12-mini + T15 | `193bf76` | decay stub fix + P1 sweep acceptance gate |
+| T16-T18 (P2 A) | `7a64fb6` | damped_ho + pendulum + optics truth-form |
+| T19-T22 (P2 B) | `3cb0449` | fluid + rlc + wave + kinetics truth-form + P2 sweep gate |
+| T13 | `35d5924` | Stub channel harmonization (pendulum/rlc/wave/kinetics) |
+| **T23** | **`c3ebbb9`** | **Full 48-cell × 3-seed ceiling + stub sweep → new `docs/ceiling-data.json`** |
 
 ---
 
-## 4. Conventions & Codified Rules
+## 4. T23 Result Summary (2026-05-27)
 
-These rules emerged from human review and override any earlier informal conventions.
+**Runner**: `python3 -m mirrorlab.runners.t23_ceiling_sweep --out docs/ceiling-data.json --quiet`
+**Wall-clock**: 165.5 s, zero LLM calls.
 
-### 4.1 step() leak severity rule (codified 2026-05-27 during δ-1-1 audit)
+| Metric | Value | Gate (§8.2 / §8.3) |
+|---|---|---|
+| Rows / cells / seeds | 144 / 48 / 3 | — |
+| Errors | **0** | — |
+| Ceiling overall median | **0.992** | ≥ 0.90 ✓ |
+| Ceiling mean | 0.974 | — |
+| Stub mean | 0.617 | — |
+| Spread mean | **+0.357** | — |
+| Spread median | +0.116 | — |
+| Cells with min ceiling < 0.70 | **0** | ≥ 0.70 ✓ |
+| Truth ≥ baseline on every (cell,seed) | True | ✓ |
+
+**Top spread cliffs (X+Y working as intended)**:
+- `optics/δ-9-1`, `coulomb/δ-5-1`, `optics/γ-9-2`, `coulomb/γ-5-2` → all ≈ **+1.00**
+- `gravity/γ-2-1` +0.9998, `rlc/γ-6-2` +0.9998, `thermal/δ-7-1` +0.9985
+- `pendulum/δ-4-1` +0.9907, `fluid/γ-10-1` +0.9788
+
+The cliff cells confirm X.B input-vocabulary expansion (3-D coords for ROT, `t` for T_TRANS) is now exposing what stub canonical-law fits cannot.
+
+**Soft cells (small spread by physics, not by bug)**: enumerated in `tests/runners/test_p{1,2}_sweep_acceptance.py::_P{1,2}_SOFT_CELLS`. Baselines all 0 by construction (stub IS the canonical law).
+
+---
+
+## 5. Conventions & Codified Rules
+
+### 5.1 step() leak severity rule (codified 2026-05-27 during δ-1-1 audit)
 
 > A `step()` output key is a 🔴 leak iff: **(a) the key is a derived quantity that the shift's broken-symmetry directly manifests in, AND (b) the baseline domain's `step()` does not include that key**.
 
-Examples:
-- γ-1-2 outputting `Lz` → 🔴 (ROT-break Noether charge; baseline Hooke is 1D, no Lz)
-- δ-1-1 outputting `E` → 🔴 (E-break charge; baseline doesn't output E)
-- δ-2-1 outputting `G_eff` → 🔴 (modified parameter directly)
+Fixed in Sprint 4.5 (commit `34ea738`); cross-checked again during X+Y per-cell builder authoring.
 
-This was applied during the 36-shift human audit; 14 shifts had 🔴 leaks (now removed in Sprint 4.5).
+### 5.2 X+Y data-format contract
 
-### 4.2 D6 design rules (shift construction)
+All post-X+Y sweep JSONs MUST have top-level key `"xy_version": 1`. `mirrorlab/runners/rescore.py` refuses files lacking it. Pre-XY JSONs are quarantined under `docs/archive/pre-xy/`.
 
-When designing or modifying shifts:
-1. **Borrow but don't copy**: take ideas from named physics effects (MOND / Cattaneo-Vernotte / SME / Stokes drag / ...) but write a novel functional form. Avoid lookup-attacker recognition.
-2. **Cross-domain re-skin preferred**: transplanting a math structure from domain A to domain B is the strongest defense.
-3. **One symmetry break per shift**: γ-X-Y breaks exactly one γ-type symmetry; δ-X-Y breaks exactly one conservation law. Dissipative bundle convention: T-rev loss is bundled with E-break, counted as single shift.
-4. **Wide parameter randomization**: every free parameter from a LogUniform or Uniform distribution covering ≥1 decade or ≥0.5 range.
-5. **Numerical safety**: validator must enforce parameter regions where sim is stable.
+`docs/ceiling-data.json` schema (T23 output):
+```
+{
+  "xy_version": 1,
+  "schema": "ceiling+stub per (domain,shift,seed)",
+  "elapsed_s": <float>,
+  "summary": { n_rows, n_errors, n_cells,
+               ceiling_overall_median, ceiling_mean,
+               stub_mean, spread_mean, spread_median,
+               worst_cells_below_0_7 },
+  "rows": [ { domain_id, shift_id, seed,
+              s_scen_ceiling, s_scen_stub, spread, error }, ... ]
+}
+```
 
-### 4.3 [CAL] placeholder convention
+`mirrorlab/reports/figures.py` consumes the **legacy `rows[i].s_scen`** shape (pre-X+Y `docs/ceiling-data.json`). For T26 it needs a tiny adapter: read `s_scen_ceiling` instead. Either patch figures.py or write `s_scen` as an alias in T23 output — defer to T26 implementer.
 
-[CAL]-tagged values in spec are deliberately un-fixed placeholders. They are tuned in Sprint 3 calibration. Status at handover:
-- **Locked**: CAL-4 τ=0.35, CAL-7=30 (honest budget), CAL-8 K=20 (attacker), CAL-9 < 0.50 (attacker threshold)
+### 5.3 Disjointness invariant (blueprint §2.4)
+
+For every shift Params dataclass:
+- **Law-coefficient fields**: exactly `counterfactual._LAW_PARAM_FIELDS[type(params)]`. Mutated ONLY by `cf_params` on sub-grid (c). Forbidden for builders to mutate per grid point.
+- **Input-encoding fields**: complement. Mutated freely by builders per grid point. Forbidden for `cf_params` to touch.
+
+Enforced by `tests/scenarios/test_param_field_disjointness.py` (parametrized over all 36 shifts).
+
+### 5.4 Predictor name-map (blueprint §2.5)
+
+Shift-internal Params field names → predictor-facing kwarg names via `counterfactual._PREDICTOR_NAME_MAP`. Rules: lowercase + strip trailing `0` only for canonical singletons (`G0→G`, `lam0→lam`) + preserve numeric pairs (`L1→L_1`, `M01→M_01`) + sequential numeric for role modifiers (`q_src/q_test→q_1/q_2`).
+
+Round-trip bijection enforced per type.
+
+### 5.5 [CAL] placeholder convention
+
+[CAL]-tagged values in spec are deliberately un-fixed placeholders.
+- **Locked** (pre-X+Y): CAL-4 τ=0.35, CAL-7=30 (honest budget), CAL-8 K=20 (attacker), CAL-9 < 0.50 (attacker threshold)
+- **CAL-5 (bonus)**: blueprint Q1 author-pick reduces to 0.05 post-X+Y; deferred until T25 numbers land
 - **Deferred to camera-ready**: CAL-1 (sub-grid shares), CAL-3 (±30% counterfactual), CAL-10 (seeds per cell)
 
-### 4.4 Provider routing
+### 5.6 Provider routing
 
 - `gpt-*`, `o3*`, `o4*` → OpenAI-format proxy at `127.0.0.1:4142/v1`, env `MIRRORLAB_LLM_API_KEY` (sk-cloudgpt-...)
 - `claude-*`, `gemini-*` → Anthropic-format proxy at `127.0.0.1:4141`, key literal `"dummy"`
 - Default model: `gpt-5.4-20260305` (bare `gpt-5.4` not on proxy)
 - Known quirks: gpt-5.x rejects `tool_choice` + `max_tokens` (shim in `openai_client.OpenAIClient.chat` drops them only for gpt-5*); gpt-5.4 is 3× slower than gpt-4.1
 
-### 4.5 Memory references
+### 5.7 Memory references
 
 - `~/.claude/projects/-Data-tanh-phyLLM/memory/llm_api_endpoint.md` — proxy keys + model defaults
 - `~/.claude/projects/-Data-tanh-phyLLM/memory/MEMORY.md` — index
@@ -139,82 +231,96 @@ These survive across Claude sessions. New AI may not have access — check the G
 
 ---
 
-## 5. Open Decisions Awaiting User Input
+## 6. Active Work Queue (Next Steps)
 
-### 5.1 Tool pool multi-D bug (just discovered, blocks reliable Sprint 4 reinterpretation)
+In strict execution order. The next stop is **T24**.
 
-Audit found: `measure.position / velocity / energy / trajectory / spectrum` and `manipulate.set_initial / apply_impulse / set_parameter / time_reverse_probe` assume **1-D Hooke**. They KeyError or stub-fail on 11/12 multi-D domains.
+### 6.1 T24 — lookup-attacker sweep (next up, requires LLM key)
 
-**Effective tools per scenario**:
-- 1D scenarios (hooke baseline, hooke γ-1-1, hooke δ-1-1, decay, kinetics, fluid): **~30 / 32 work**
-- Multi-D scenarios (gravity, coulomb, hooke γ-1-2, rlc, thermal, wave, optics, pendulum): **~18 / 32 work**
+**Goal**: regenerate `S_bench^lookup` on the γ∪δ slice under X+Y bench. Verify §8.4 gate `< 0.50`.
 
-This means Sprint 4 sweep results conflate "LLM weakness" with "tool unavailability".
+**Plan**:
+- Cells: 24 (γ + δ across 12 domains, excluding baselines)
+- Seeds: 3
+- Turn cap: ~20 per run (locked-prompt attacker is one-shot in practice)
+- Budget: ~72 runs × ~20 calls ≈ 1.5 k LLM calls, ~1.5 h wall-clock (blueprint §7.1 R2 estimate)
+- **Model choice (user-approved 2026-05-27)**: `gpt-4.1` — attacker prompt is locked to "submit the textbook canonical law", so model strength is irrelevant; cheap model preserves budget.
+- Runner: `mirrorlab/attacker/runner.py` exists; needs verification it writes `"xy_version": 1` header. If not, add adapter or new wrapper `t24_attacker_sweep.py` analogous to `t23_ceiling_sweep.py`.
 
-**Decision pending**: spawn agent team to fix (next planned action) vs. document as known limitation.
+**Gate predictions (blueprint §6.3)**:
+- A: attacker score on baselines stays high (~0.95+) — gate excludes baselines, attacker passes anyway
+- B: attacker score on γ/δ slice drops sharply (≤ 0.1) → §8.4 PASS
+- C: if any γ/δ slice ≥ 0.50 → catalog Round-3 escalation, do NOT proceed to T25
 
-### 5.2 v2-todo backlog (7 items deferred to camera-ready)
+**Output**: new `docs/sprint35-attacker-data.json` (or rename to `attacker-xy-data.json`) with `xy_version: 1`. Archive any old in-place file first via `git mv`.
 
-See [`docs/v2-todo.md`](v2-todo.md). Summary:
-- **TODO-1**: IC randomization (36-shift refactor; sampler currently hardcodes initial conditions)
-- **TODO-2**: ~~step() leak removal (DONE in Sprint 4.5)~~
-- **TODO-3**: gravity γ-2-1 v_circ uses G_DEFAULT (intentional but undocumented — now commented)
-- **TODO-4**: timescale normalization (gravity M spans 4 orders → orbital period not visible to agent)
-- **TODO-5**: γ-2-2 is 1D radial sim, can't show Bertrand precession (claim-vs-impl mismatch)
-- **TODO-6**: ~~γ-3-2 sampler silent γ-mutation (FIXED via rejection sampling)~~
-- **TODO-7**: ~~Coulomb min-distance check (FIXED)~~
+### 6.2 T25 — Sprint-4 model sweep rerun (after T24, big LLM bill)
 
-### 5.3 v1 paper data caveat (must footnote)
+**Goal**: rebuild the cliff plot under X+Y bench so paper §6 numbers reflect truth-form scoring.
 
-Sprint 4 sweep (60 cells × 5 models = 300 LLM calls) was run with:
-- (a) step() leaks present for 5 of the 12 swept cells (Hooke δ-1-1, Coulomb γ-5-1, Coulomb δ-5-1, Thermal γ-7-1, Thermal δ-7-1) — now removed in Sprint 4.5
-- (b) multi-D tool bugs (just discovered, not yet fixed)
+**Plan (user-approved 2026-05-27)**:
+- **Cells: 12** (Sprint-4 subset for direct comparability with old `figures/fig1_cliff.png`)
+- Domains: hooke / coulomb / thermal / decay (same 4 as Sprint-4)
+- Models: 5 frontier (gpt-4.1, gpt-5.4, claude-*, gemini-*, plus one o-series — confirm with user before launching)
+- Budget: 5 models × ~36 runs × ~30 turn ≈ tens-of-thousands of calls, 4-6 h wall-clock
+- Runner: `mirrorlab/runners/sprint4_sweep.py` exists; `--out` default now writes to `docs/sprint4-sweep-data.json`. Verify it writes `"xy_version": 1`; if not, patch or wrap.
 
-The cliff finding **still holds qualitatively** (Claude got 0 on γ even with leaks; bench-fairness ceiling experiment is unaffected). But the paper §8 Limitations should:
-1. Footnote the step() leak issue
-2. Footnote the tool availability issue
-3. Promise camera-ready re-run after fixes
+**Decision points to flag before launch**:
+- Confirm 12-cell subset (vs full 48-cell R5)
+- Confirm 5-model list (gpt-5.4 is 3× slower; sequence runs cheap→expensive so cliff signal lands early)
+- Confirm CAL-5 bonus value (0.05 per blueprint Q1, or hold 0.10 until ablation)
 
----
+### 6.3 T26 — Figures + paper data refresh (after T25, zero LLM)
 
-## 6. Active Work Queue (Recommended Next Steps)
+**Goal**: regenerate `figures/fig1_cliff.png` + tables; update Paper 1 LaTeX.
 
-In order of priority:
+**Plan**:
+- Adapt `mirrorlab/reports/figures.py` to new T23 schema (`s_scen_ceiling` vs old `s_scen`)
+- Regenerate all 6 paper figures
+- Update `docs/sprint4-figure-captions.md` — remove "convention recognition" hedge, replace with X+Y framing
+- Update Paper 1 §6 numbers from new sweep
+- Update `docs/sprint4-report.md` → write `docs/x_y-sweep-report.md` superseder
+- Footnote in paper §8 Limitations: T0-archived original sweep, X+Y rebuild summarized in HANDOVER §3-4
 
-1. **🔴 Tool pool multi-D fix** (Sprint 4.5 continuation, ~1-2 hours)
-   - measure.position/velocity etc. → reflect-from-step()
-   - manipulate.set_parameter → use sim.params dataclass fields automatically
-   - knowledge.list_observables → align with step() reality
+### 6.4 v2 backlog (camera-ready, weeks of work, none block T24-T26)
 
-2. **🟡 Re-run Sprint 4 sweep with fixed tools** (~1-2 hours LLM time)
-   - 60 cells × 5 models with new tools; compare to pre-fix data
-   - If cliff still visible, paper claims solidify
-   - Update figures, regenerate `paper1/main.pdf`
+See [`docs/v2-todo.md`](v2-todo.md). Key items:
+- **TODO-1**: IC randomization across 36 shifts
+- **TODO-4**: timescale normalization (gravity M spans 4 orders → orbital period not visible)
+- **TODO-5**: γ-2-2 1D→2D promotion to expose Bertrand precession
+- Full 48-cell × 3-seed sweep (R5; T25 is 12-cell only)
+- Multi-seed honest data for CAL-4 τ direction-lock confirmation
 
-3. **🟡 Audit remaining components** (Hour each, deferable)
-   - `scenarios/loader.py` (test grid generation per domain)
-   - `eval/dimensional.py` + `eval/numeric.py` (post-Sprint-4 binding fixes)
-   - `attacker/lookup.py` (locked prompt v1.1)
-   - `calibration/sweep.py` (knob sweep math)
-   - `paper1/main.tex` (manuscript polish)
+### 6.5 Paper 2 program (deferred)
 
-4. **v2 backlog** (camera-ready, weeks of work)
-   - TODO-1 IC randomization
-   - TODO-4 timescale normalization
-   - TODO-5 γ-2-2 2D upgrade
-   - Multi-seed sweep (current is single-seed)
-   - Full 48-pair sweep (current is 12-pair subset)
-
-5. **Paper 2 program** (deferred until Paper 1 ships)
-   - Counterfactual diversity hypothesis
-   - Train physical world models on MirrorLab trajectories
-   - Auto-mode procedural data generator (already designed in `domains/*` with feature flag, not wired)
+Counterfactual diversity hypothesis. Train physical world models on MirrorLab. Auto-mode generator scaffolded but not wired.
 
 ---
 
-## 7. Team / Agent Conventions
+## 7. Quick Verification Checklist (run before doing anything)
 
-This project has used heavy delegation to agent teams. Each Sprint had a team of 4-8 named agents (`physicist-A`, `sim-engineer`, `figure-maker`, etc.) coordinated via:
+```bash
+cd /Data/tanh/phyLLM
+git log --oneline -10
+# Should see c3ebbb9 (T23) at top.
+
+git status                                        # should be clean
+pytest -q tests/runners/test_p1_sweep_acceptance.py tests/runners/test_p2_sweep_acceptance.py
+# 8 passed in ~155s. If any fail, the X+Y bench has regressed since T23.
+
+python3 -c "import json; d=json.load(open('docs/ceiling-data.json')); \
+            print('xy_version=', d.get('xy_version'), 'n_rows=', d['summary']['n_rows'], \
+                  'median=', round(d['summary']['ceiling_overall_median'], 4))"
+# Expect: xy_version=1 n_rows=144 median=0.9917
+```
+
+Sanity: if `docs/ceiling-data.json` has shape `{"summary": {...legacy...}, "rows": [{"s_scen": ...}]}` without `xy_version`, someone clobbered T23 — `git checkout c3ebbb9 -- docs/ceiling-data.json` to restore.
+
+---
+
+## 8. Team / Agent Conventions
+
+This project uses delegation to agent teams when work is parallel. Each sprint had a team of 4-8 named agents (`physicist-A`, `sim-engineer`, `figure-maker`, etc.) coordinated via:
 
 - `TeamCreate` / `TeamDelete` — one team per sprint
 - `TaskCreate` / `TaskUpdate` — task list with `blockedBy` dependencies
@@ -223,11 +329,13 @@ This project has used heavy delegation to agent teams. Each Sprint had a team of
 
 When teams finish, **always shut down all teammates and `TeamDelete`** before starting a new sprint team. Lead can only manage one team at a time.
 
-For non-sprint work (single-shot audits / fixes), `Agent(run_in_background=true)` is fine without a formal team.
+For non-sprint work (single-shot audits / fixes / linear sweeps like T23), `Agent(run_in_background=true)` or direct execution from the main session is fine without a formal team. T23 was done in main session because builders were already validated by P1/P2 acceptance tests.
+
+T24 / T25 will run for hours under LLM load — use `Bash(run_in_background=true)` and check back, or set a `CronCreate` poll.
 
 ---
 
-## 8. Conversational Style
+## 9. Conversational Style
 
 User prefers:
 - **Terse, declarative responses** in Chinese (with English technical terms inline)
@@ -239,35 +347,19 @@ User prefers:
 
 User is technically sophisticated — physics + ML background. Don't over-explain basics. Do explain non-obvious reasoning chains.
 
-When code/spec violations are found, **upgrade severity by codified rule, not by gut feeling** — see §4.1 for example precedent.
+When code/spec violations are found, **upgrade severity by codified rule, not by gut feeling**.
 
 ---
 
-## 9. Git / GitHub Discipline
+## 10. Git / GitHub Discipline
 
 - Remote: `origin → https://github.com/ShadoWrold/mirrorlab` (current org)
 - Also: `personal → https://github.com/Tanhhhhtjy/phyLLM` (archived backup)
 - Main branch: `main`
-- Co-author tag on AI-generated commits: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
+- Co-author tag on AI-generated commits: `Co-Authored-By: Claude Opus 4 (1M context) <noreply@anthropic.com>`
 - **Never** commit secrets (API keys live only in env vars / memory files)
-- Every sprint commits to `main` directly (no PR workflow)
-- Commit messages include: what changed + why + test count diff
-
----
-
-## 10. Quick Verification Checklist (New AI runs this first)
-
-```bash
-cd /Data/tanh/phyLLM
-git log --oneline -10              # see recent commits
-pytest -q                           # should report 853/853 (or close)
-ls docs/audits/ | wc -l             # should be ≥37 (36 + README)
-cat docs/v2-todo.md                 # see open backlog
-ls vendor/newtonbench/              # submodule should be populated
-cat paper1/main.pdf | head -c 4     # should start with %PDF
-```
-
-If any of these fail, surface to user immediately rather than guessing.
+- Every X+Y task commits to `main` directly (no PR workflow)
+- Commit message format: `Tn (tier): one-line subject` + body with what / why / test or data delta
 
 ---
 
@@ -294,5 +386,19 @@ If any of these fail, surface to user immediately rather than guessing.
 | counterfactual | test point with shift's free parameters perturbed ±30% |
 | CAL-N | [CAL]-tagged placeholder in spec §10, tuned during Sprint 3 |
 | step() leak | derived quantity in `_Sim.step()` output that reveals the broken symmetry (forbidden post-Sprint 4.5) |
+| X+Y | the full bench rebuild documented in `docs/blueprint-xy.md`: X.A = truth-form GT, X.B = expanded input vocab, Y = cf_params reach predictor on sub-grid (c) |
+| P0 / P1 / P2 | X+Y rollout tiers: P0 = gravity γ-2-1 only; P1 = 5 domains (gravity/hooke/coulomb/thermal/decay); P2 = remaining 7 domains |
+| Tn | X+Y task number from blueprint §5 DAG (T0 archive → T26 figures) |
+
+---
+
+## Appendix B: Pre-X+Y context (for archaeology)
+
+The original Sprint-4 report and figures are intact for forensic comparison:
+- `docs/sprint4-report.md` — TRUE PASS verdict on pre-X+Y bench (now superseded)
+- `figures/fig1_cliff.png` — pre-X+Y cliff plot; T26 will overwrite with X+Y rebuild
+- `docs/archive/pre-xy/*.json` — 7 invalidated sweep JSONs + 1 invalidated ceiling JSON
+
+Do NOT trust pre-X+Y numbers in the README or paper draft until T26 lands. The README/paper still describe Sprint-4 results as headline; this is a known stale-language hazard.
 
 — end of handover —
