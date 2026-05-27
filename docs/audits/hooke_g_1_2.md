@@ -3,6 +3,7 @@
 > 域 1 / Hooke spring 2D / γ-tier / shift_id = `gamma_1_2`
 > 代码：[`mirrorlab/shifts/hooke_g_1_2.py`](../../mirrorlab/shifts/hooke_g_1_2.py)
 > Catalog Round-2 状态：APPROVED（R1-fix: 完整 `F = −∇V`，含切向分量）
+> **人工二审 errata (2026-05-27)**：🔴 `step()` 输出 `L_z` 是 ground-truth leak —— ROT 破缺的 Noether 荷被直接喂给 agent，等同 δ-2-1 的 G_eff 漏。v2 修复，详见 [`docs/v2-todo.md`](../v2-todo.md) TODO-2。
 
 ---
 
