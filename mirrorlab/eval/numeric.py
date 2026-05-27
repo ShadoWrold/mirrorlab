@@ -25,8 +25,9 @@ TAU_DEFAULT = 0.5       # CAL-4
 SUBGRID_WEIGHTS = {"a": 0.40, "b": 0.40, "c": 0.20}   # CAL-1
 
 TestPoint = tuple[Mapping[str, float], float]
+TestPointC = tuple[Mapping[str, float], float, Any]  # blueprint-xy §2.3
 SubGrid = Sequence[TestPoint]
-TestGrids = Mapping[str, SubGrid]
+TestGrids = Mapping[str, Sequence]   # heterogeneous: (a)/(b) are 2-tuples, (c) is 3-tuples
 
 
 def _slog(x: np.ndarray) -> np.ndarray:
@@ -89,6 +90,21 @@ def _predictor_signature(f: Callable[..., float]) -> tuple[Optional[set[str]], b
     return allowed, has_var_kw
 
 
+def _materialize_predictor(entry: Mapping[str, Any]) -> Callable[..., float]:
+    """Extract the raw predictor callable from an entry (no closure)."""
+    if callable(entry.get("_predictor")):
+        return entry["_predictor"]
+    pred = entry.get("predictor") or {}
+    if pred.get("lang") != "python" or "code" not in pred:
+        raise ValueError("entry has no usable predictor")
+    ns: dict[str, Any] = {}
+    exec(pred["code"], ns)  # noqa: S102 — trusted within sandbox
+    funcs = [v for k, v in ns.items() if callable(v) and not k.startswith("_")]
+    if not funcs:
+        raise ValueError("predictor code defined no callable")
+    return funcs[0]
+
+
 def _entry_predictor(entry: Mapping[str, Any]) -> Callable[..., float]:
     """Materialize the entry's predictor callable bound with its declared params.
 
@@ -100,19 +116,12 @@ def _entry_predictor(entry: Mapping[str, Any]) -> Callable[..., float]:
     (e.g. scenario constants the grid packer enriched in but the predictor
     does not consume) are silently filtered against the predictor signature
     so a strict positional-or-keyword signature is not poisoned by them.
+
+    Used for sub-grids (a) and (b). Sub-grid (c) takes the raw predictor via
+    ``_entry_predictor_raw`` so per-point ``cf_params`` overrides can win
+    over the declared values (blueprint-xy §2.3 Y-plumbing).
     """
-    if callable(entry.get("_predictor")):
-        f = entry["_predictor"]
-    else:
-        pred = entry.get("predictor") or {}
-        if pred.get("lang") != "python" or "code" not in pred:
-            raise ValueError("entry has no usable predictor")
-        ns: dict[str, Any] = {}
-        exec(pred["code"], ns)  # noqa: S102 — trusted within sandbox
-        funcs = [v for k, v in ns.items() if callable(v) and not k.startswith("_")]
-        if not funcs:
-            raise ValueError("predictor code defined no callable")
-        f = funcs[0]
+    f = _materialize_predictor(entry)
     param_values = {p["name"]: p["value"] for p in entry.get("params", [])}
     allowed, has_var_kw = _predictor_signature(f)
 
@@ -123,6 +132,26 @@ def _entry_predictor(entry: Mapping[str, Any]) -> Callable[..., float]:
         return f(**merged)
 
     return bound
+
+
+def _entry_predictor_raw(entry: Mapping[str, Any]) -> Callable[..., float]:
+    """Materialize the entry's predictor with signature filtering but **no** param closure.
+
+    Used on sub-grid (c) so the caller can merge per-point ``cf_params`` over
+    declared params before invoking. Signature filtering is preserved
+    (blueprint-xy §2.3 requirement A): predictors with strict positional-or-
+    keyword signatures still must not see unexpected kwargs from
+    scenario-enriched inputs.
+    """
+    f = _materialize_predictor(entry)
+    allowed, has_var_kw = _predictor_signature(f)
+
+    def raw(**kwargs):
+        if allowed is not None and not has_var_kw:
+            kwargs = {k: v for k, v in kwargs.items() if k in allowed}
+        return f(**kwargs)
+
+    return raw
 
 
 def _alias_inputs(
@@ -161,6 +190,17 @@ def _alias_inputs(
     return out
 
 
+def _params_to_predictor_kwargs(cf_params: Any) -> dict[str, float]:
+    """Delegate to counterfactual.params_to_predictor_kwargs.
+
+    Kept as a private alias so callers in this module do not pull in the
+    counterfactual import at the top of the file (avoids a circular import
+    risk if counterfactual ever needs anything from eval).
+    """
+    from mirrorlab.scenarios.counterfactual import params_to_predictor_kwargs
+    return params_to_predictor_kwargs(cf_params)
+
+
 def evaluate_entry(
     entry: Mapping[str, Any],
     test_grids: TestGrids,
@@ -171,9 +211,20 @@ def evaluate_entry(
 ) -> float:
     """Per-entry score ``s_entry = exp(-R_bar / τ)`` per spec §6.2.
 
-    ``test_grids`` maps sub-grid key ``"a"|"b"|"c"`` to a sequence of
-    ``(inputs_dict, ground_truth_scalar)`` tuples. Missing sub-grids drop out
-    of the weighted mean and the remaining weights are renormalized.
+    ``test_grids`` maps sub-grid key ``"a"|"b"|"c"`` to a sequence of test
+    points. Sub-grids (a) and (b) emit 2-tuples ``(inputs_dict, gt)``;
+    sub-grid (c) emits 3-tuples ``(inputs_dict, gt, cf_params_obj)`` per
+    blueprint-xy §2.3 (Y plumbing). Missing sub-grids drop out of the
+    weighted mean and the remaining weights are renormalized.
+
+    On (a)/(b) the predictor is bound with the entry's declared params
+    (legacy behavior). On (c) the bare callable is invoked per point with
+    declared params overlaid by the per-point ``cf_params`` so a frozen-
+    coefficient submission cannot pass by ignoring the perturbation.
+
+    Legacy compatibility: a 2-tuple in (c) is still accepted (treated as
+    if ``cf_params_obj`` were ``None``, so declared params win). This keeps
+    the Sprint-1 ``_hooke_test_grids`` path working without rewriting it.
 
     When ``canonical_inputs`` (the scenario's declared input-name order) is
     provided and the entry declares an ``inputs`` list with names that
@@ -181,7 +232,9 @@ def evaluate_entry(
     alias — letting an LLM that calls the spring coordinate ``q`` instead of
     ``x`` still receive the grid's ``x`` values bound to ``q``.
     """
-    predictor = _entry_predictor(entry)
+    bound = _entry_predictor(entry)
+    raw: Optional[Callable[..., float]] = None
+    declared_params = {p["name"]: p["value"] for p in entry.get("params", [])}
     entry_inputs = entry.get("inputs")
     rbars: list[tuple[float, float]] = []
     for key, grid in test_grids.items():
@@ -190,18 +243,59 @@ def evaluate_entry(
         w = weights.get(key, 0.0)
         if w <= 0:
             continue
-        preds = [
-            _safe_call(
-                predictor,
-                _alias_inputs(
+        if key == "c":
+            if raw is None:
+                raw = _entry_predictor_raw(entry)
+            preds: list[float] = []
+            truths: list[float] = []
+            for point in grid:
+                # Accept three shapes:
+                #   (ins, gt, cf_params_obj)  — XY-fix 3-tuple (default)
+                #   (ins, gt)                 — legacy 2-tuple from pre-XY
+                #                               builders still in tree
+                # A bare scalar (the Sprint-1 hooke numpy-array path) is
+                # rejected here just as it would be on (a)/(b); callers
+                # that emit numpy arrays do not flow through this path.
+                if isinstance(point, tuple) and len(point) == 3:
+                    ins, gt, cf_params_obj = point
+                elif isinstance(point, tuple) and len(point) == 2:
+                    ins, gt = point
+                    cf_params_obj = None
+                else:
+                    raise TypeError(
+                        f"sub-grid (c) point must be a 2- or 3-tuple, got {type(point).__name__}"
+                    )
+                aliased = _alias_inputs(
                     ins,
                     entry_inputs=entry_inputs,
                     canonical_order=canonical_inputs,
-                ),
-            )
-            for ins, _ in grid
-        ]
-        truths = [gt for _, gt in grid]
+                )
+                cf_overrides = (
+                    _params_to_predictor_kwargs(cf_params_obj)
+                    if cf_params_obj is not None
+                    else {}
+                )
+                # Merge order: declared < cf_overrides < inputs.
+                # cf_overrides win over declared params (Y plumbing), and
+                # input values win over coefficient values (a malformed
+                # submission whose input name collides with a coefficient
+                # name will score badly on that point — see §2.3 last note).
+                kwargs = {**declared_params, **cf_overrides, **aliased}
+                preds.append(_safe_call(raw, kwargs))
+                truths.append(float(gt))
+        else:
+            preds = [
+                _safe_call(
+                    bound,
+                    _alias_inputs(
+                        ins,
+                        entry_inputs=entry_inputs,
+                        canonical_order=canonical_inputs,
+                    ),
+                )
+                for ins, _ in grid
+            ]
+            truths = [float(gt) for _, gt in grid]
         rbars.append((w, rmsle(preds, truths)))
     if not rbars:
         return 0.0

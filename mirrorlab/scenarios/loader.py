@@ -177,13 +177,20 @@ def _attr(p: Any, names: Sequence[str], default: float) -> float:
 
 
 def _pack(rng_seed: int, magnitude: float, sim: Any, build: Any) -> tuple[
-    Dict[str, List[Tuple[Dict[str, float], float]]], Tuple[Any, ...]
+    Dict[str, List[Any]], Tuple[Any, ...]
 ]:
     """Shared scaffold: build (a,b,c) sub-grids via the domain-supplied ``build``.
 
     ``build(rng, mode)`` returns a list of ``(inputs_dict, gt_fn)`` pairs where
     ``gt_fn`` accepts the params object and returns a scalar GT. Modes are
     ``"a"`` (in-domain), ``"b"`` (OOD), ``"c"`` (same inputs as a).
+
+    Per blueprint-xy §2.3: grid_c is a list of 3-tuples
+    ``(inputs_dict, gt_scalar, cf_params_obj)``. (a)/(b) remain 2-tuples —
+    they have no per-point param perturbation. The ``cf_params_obj`` is the
+    same instance used to compute the GT, so downstream consumers in
+    ``eval/numeric.py`` can override declared predictor params with the
+    matching perturbation on a per-point basis.
     """
     rng_a = np.random.default_rng(rng_seed + 1)
     rng_b = np.random.default_rng(rng_seed + 3)
@@ -198,7 +205,7 @@ def _pack(rng_seed: int, magnitude: float, sim: Any, build: Any) -> tuple[
     grid_a = [(ins, float(gt_fn(sim.params))) for ins, gt_fn in pts_a]
     grid_b = [(ins, float(gt_fn(sim.params))) for ins, gt_fn in pts_b]
     grid_c = [
-        (ins, float(gt_fn(cf_params[i])))
+        (ins, float(gt_fn(cf_params[i])), cf_params[i])
         for i, (ins, gt_fn) in enumerate(zip(pts_c_inputs, [g for _, g in pts_a]))
     ]
     return {"a": grid_a, "b": grid_b, "c": grid_c}, cf_params

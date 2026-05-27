@@ -151,7 +151,15 @@ def test_pack_grids_produces_packable_tuples(domain, shift):
     assert grids, f"{domain}/{shift}: no grids packed"
     for key, pts in grids.items():
         assert pts, f"{domain}/{shift} sub-grid {key}: empty"
-        ins, gt = pts[0]
+        # Sub-grid (c) emits 3-tuples (ins, gt, cf_params_obj) per
+        # blueprint-xy §2.3; (a)/(b) remain 2-tuples.
+        first = pts[0]
+        assert isinstance(first, tuple)
+        if key == "c":
+            assert len(first) in (2, 3)
+        else:
+            assert len(first) == 2
+        ins, gt = first[0], first[1]
         assert isinstance(ins, dict)
         assert isinstance(gt, float)
 

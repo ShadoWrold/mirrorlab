@@ -23,13 +23,19 @@ _NON_HOOKE_PAIRS = sorted(
 )
 
 
-def _is_packed_grid(grid) -> bool:
+def _is_packed_grid(grid, *, allow_cf: bool = False) -> bool:
     if not isinstance(grid, list) or not grid:
         return False
     for entry in grid:
-        if not (isinstance(entry, tuple) and len(entry) == 2):
+        if not isinstance(entry, tuple):
             return False
-        ins, gt = entry
+        if allow_cf:
+            if len(entry) not in (2, 3):
+                return False
+        else:
+            if len(entry) != 2:
+                return False
+        ins, gt = entry[0], entry[1]
         if not isinstance(ins, dict):
             return False
         if not math.isfinite(float(gt)):
@@ -43,7 +49,7 @@ def test_test_grids_packed_and_non_empty(domain_id: str, shift_id: str) -> None:
     grids = sc.test_grids
     for key in ("a", "b", "c"):
         assert key in grids, f"{(domain_id, shift_id)} missing sub-grid {key!r}"
-        assert _is_packed_grid(grids[key]), (
+        assert _is_packed_grid(grids[key], allow_cf=(key == "c")), (
             f"{(domain_id, shift_id)} sub-grid {key!r} not packed correctly"
         )
 
@@ -85,13 +91,15 @@ def test_counterfactual_differs_from_in_domain(domain_id: str, shift_id: str) ->
         f"{(domain_id, shift_id)}: (a) len {len(grid_a)} != (c) len {len(grid_c)}"
     )
     # Inputs at index i must match between (a) and (c).
-    for i, ((ins_a, _), (ins_c, _)) in enumerate(zip(grid_a, grid_c)):
+    for i, (entry_a, entry_c) in enumerate(zip(grid_a, grid_c)):
+        ins_a, _ = entry_a[0], entry_a[1]
+        ins_c, _ = entry_c[0], entry_c[1]
         assert ins_a == ins_c, (
             f"{(domain_id, shift_id)}: (c) input[{i}] differs from (a): "
             f"{ins_a} vs {ins_c}"
         )
-    diff = sum(abs(gt_a - gt_c) for (_, gt_a), (_, gt_c) in zip(grid_a, grid_c))
-    a_scale = sum(abs(gt_a) for _, gt_a in grid_a) or 1.0
+    diff = sum(abs(a[1] - c[1]) for a, c in zip(grid_a, grid_c))
+    a_scale = sum(abs(a[1]) for a in grid_a) or 1.0
     assert diff / a_scale > 1e-6, (
         f"{(domain_id, shift_id)}: (c) GT is identical to (a) (diff={diff!r}); "
         f"perturb_params did not move any field the GT formula depends on"

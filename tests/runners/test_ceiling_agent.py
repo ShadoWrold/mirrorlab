@@ -60,7 +60,8 @@ def test_all_pairs_produce_valid_submission():
         for grid in scenario.test_grids.values():
             for point in grid:
                 if isinstance(point, tuple):
-                    inputs, _ = point
+                    # Sub-grid (c) is a 3-tuple; (a)/(b) are 2-tuples.
+                    inputs = point[0]
                 else:
                     # Hooke ndarray case: predictor takes x.
                     inputs = {"x": float(point)}

@@ -158,7 +158,19 @@ def pack_grids(scenario: ScenarioInstance) -> Dict[str, List[Tuple[Dict[str, flo
         except TypeError:
             packed = []
         if packed and isinstance(packed[0], tuple):
-            out_other[key] = [({**consts, **dict(ins)}, float(gt)) for ins, gt in packed]
+            # Sub-grid (c) carries a third element (cf_params_obj) per
+            # blueprint-xy §2.3; (a)/(b) are 2-tuples. Preserve the cf
+            # payload so downstream evaluation can still override
+            # declared predictor params on (c).
+            enriched: list = []
+            for entry in packed:
+                ins, gt = entry[0], entry[1]
+                merged_ins = {**consts, **dict(ins)}
+                if len(entry) == 3:
+                    enriched.append((merged_ins, float(gt), entry[2]))
+                else:
+                    enriched.append((merged_ins, float(gt)))
+            out_other[key] = enriched
         else:
             out_other[key] = []
     return out_other

@@ -22,6 +22,7 @@ explicit here.
 
 from __future__ import annotations
 
+import math
 from dataclasses import replace
 from typing import Any
 
@@ -84,6 +85,14 @@ DEFAULT_MAGNITUDE = 0.30  # CAL-3
 # direction unit vectors (n / nx/ny/nz / grad_dir / theta_pol / theta_k /
 # theta0 axis / theta1 / theta_i query angles), and numerical sentinels
 # (T_sim, dt, tau_min). Each entry is the explicit law-vs-BC verdict.
+#
+# Values are tuples of internal field-name strings. The predictor-facing
+# canonical names used on (c) are tracked separately in
+# ``_PREDICTOR_NAME_MAP`` below (per blueprint-xy §2.5 canonicalization
+# rule). Keeping the two side-by-side makes ``perturb_params`` continue to
+# use the internal Params field names (which is what ``replace(...)`` needs)
+# while the (c) override path in ``eval/numeric.py`` reads the canonical
+# names that LLM-emitted predictors expect.
 _LAW_PARAM_FIELDS: dict[type, tuple[str, ...]] = {
     # --- 12 baselines ---------------------------------------------------
     HookeParams: ("k",),
@@ -154,6 +163,158 @@ def _factor(rng: np.random.Generator, magnitude: float) -> float:
     return 1.0 + float(rng.uniform(-magnitude, magnitude))
 
 
+# Predictor-facing canonical kwarg name per (Params type, internal field
+# name). See blueprint-xy.md §2.5 (Q10 resolution) for the canonicalization
+# rule:
+#   (1) lowercase the internal name
+#   (2) strip a trailing ``0`` ONLY if the bare form is the canonical
+#       physics symbol AND no other field on the same type collides
+#       (e.g. ``G0 -> G``, ``lam0 -> lam``); otherwise keep numeric suffix
+#       (e.g. RLC ``L0/L1/L2 -> L_0/L_1/L_2``)
+#   (3) multi-coupling indices preserved as numeric pair (``M01 -> M_01``)
+#   (4) role-modifier suffixes (``_src``, ``_test``, ``src1_``) collapse
+#       to a sequential numeric suffix in declaration order
+#       (``q_src, q_test -> q_1, q_2``; ``src1_q, src2_q, test_q -> q_1,
+#       q_2, q_3``)
+# The map is hand-built, NOT derived, so unambiguous resolutions on
+# multi-coupling shifts are explicit and reviewable. Round-trip bijection
+# is asserted by tests/eval/test_predictor_name_map_bijection.py.
+_PREDICTOR_NAME_MAP: dict[type, dict[str, str]] = {
+    # --- 12 baselines ---------------------------------------------------
+    HookeParams: {"k": "k"},
+    DampedHOParams: {"k": "k", "c": "c"},
+    GravityParams: {"G": "G", "M": "M"},
+    CoulombParams: {"k_e": "k_e", "q1": "q_1", "q2": "q_2"},
+    PendulumParams: {"L": "L", "g": "g"},
+    RLCParams: {"L": "L", "R": "R", "C": "C"},
+    ThermalParams: {"k": "k"},
+    WaveParams: {"A": "A", "k": "k", "c": "c", "phi": "phi"},
+    OpticsParams: {"n1": "n_1", "n2": "n_2"},
+    FluidParams: {"rho": "rho", "g": "g"},
+    KineticsParams: {"k": "k", "n": "n"},
+    DecayParams: {"lam": "lam"},
+    # --- 36 shifts ------------------------------------------------------
+    # Domain 1 — Hooke
+    HookeGamma11Params: {"k": "k", "eta": "eta", "x_scale": "x_scale"},
+    HookeGamma12Params: {"k0": "k", "xi": "xi", "phi": "phi"},
+    HookeDelta11Params: {"k": "k", "c": "c", "L": "L"},
+    # Domain 2 — Gravity
+    GravityGamma21Params: {"G0": "G", "M": "M", "xi": "xi"},
+    GravityGamma22Params: {"G": "G", "M": "M", "alpha": "alpha", "r_scale": "r_scale"},
+    GravityDelta21Params: {"G0": "G", "M": "M", "beta": "beta", "omega_G": "omega_G"},
+    # Domain 3 — Damped HO
+    DampedHOGamma31Params: {
+        "omega0": "omega_0", "gamma": "gamma", "kappa": "kappa",
+        "tau": "tau", "x_ref": "x_ref",
+    },
+    DampedHOGamma32Params: {
+        "omega0": "omega_0", "gamma": "gamma", "eps": "eps", "Omega_p": "Omega_p",
+    },
+    DampedHODelta31Params: {"omega0": "omega_0", "gamma": "gamma", "L": "L"},
+    # Domain 4 — Pendulum
+    PendulumGamma41Params: {"g_over_L": "g_over_L", "alpha": "alpha"},
+    PendulumGamma42Params: {
+        "g0_over_L": "g_over_L", "alpha": "alpha", "L": "L", "H": "H",
+    },
+    PendulumDelta41Params: {
+        "g0_over_L": "g_over_L", "eps": "eps", "Omega": "Omega",
+    },
+    # Domain 5 — Coulomb
+    # γ-5-1 uses _src/_test role suffixes → collapse to q_1/q_2.
+    CoulombGamma51Params: {
+        "k_e": "k_e", "q_src": "q_1", "q_test": "q_2", "chi": "chi",
+    },
+    # γ-5-2 has src1_q, src2_q, test_q AND xi/phi0; sources first, test last.
+    CoulombGamma52Params: {
+        "k_e": "k_e", "xi": "xi", "phi0": "phi_0",
+        "src1_q": "q_1", "src2_q": "q_2", "q_test": "q_3",
+    },
+    CoulombDelta51Params: {
+        "k_e": "k_e", "alpha": "alpha", "n_exp": "n_exp", "E_ref": "E_ref",
+    },
+    # Domain 6 — RLC (L1/L2 stay distinct; M0/dM are coupling coefficients)
+    RLCGamma61Params: {"L0": "L", "R": "R", "C": "C", "I_sat": "I_sat"},
+    RLCGamma62Params: {
+        "L1": "L_1", "L2": "L_2", "R1": "R_1", "R2": "R_2",
+        "C1": "C_1", "C2": "C_2", "M0": "M_0", "dM": "dM",
+    },
+    RLCDelta61Params: {
+        "L0": "L", "R": "R", "C": "C", "eps": "eps", "Omega_p": "Omega_p",
+    },
+    # Domain 7 — Thermal
+    ThermalGamma71Params: {"k0": "k", "beta": "beta"},
+    ThermalGamma72Params: {"k0": "k", "p": "p"},
+    ThermalDelta71Params: {"alpha": "alpha", "lam": "lam"},
+    # Domain 8 — Wave
+    WaveGamma81Params: {"A": "A", "k": "k", "c": "c", "gamma": "gamma"},
+    WaveGamma82Params: {"A": "A", "k": "k", "c": "c", "beta": "beta"},
+    WaveDelta81Params: {
+        "A": "A", "k": "k", "c": "c", "alpha0": "alpha", "u_ref": "u_ref",
+    },
+    # Domain 9 — Optics
+    OpticsGamma91Params: {
+        "n1": "n_1", "n0": "n_0", "dn": "dn", "phi": "phi",
+    },
+    OpticsGamma92Params: {"n1": "n_1", "n2": "n_2", "kappa": "kappa"},
+    OpticsDelta91Params: {"n1": "n_1", "n2": "n_2", "xi": "xi", "p": "p"},
+    # Domain 10 — Fluid
+    FluidGamma101Params: {"rho": "rho", "alpha": "alpha", "g": "g"},
+    FluidGamma102Params: {
+        "rho": "rho", "g": "g", "h0": "h_0", "lam": "lam", "q": "q",
+    },
+    FluidDelta101Params: {"rho": "rho", "g": "g", "zeta": "zeta"},
+    # Domain 11 — Kinetics
+    KineticsGamma111Params: {"k": "k", "n": "n", "beta": "beta"},
+    KineticsGamma112Params: {
+        "k": "k", "n": "n", "m": "m_exp", "C_sat": "C_sat",
+    },
+    KineticsDelta111Params: {"k": "k", "n": "n", "eta": "eta"},
+    # Domain 12 — Decay
+    DecayGamma121Params: {
+        "lam": "lam", "alpha": "alpha", "p": "p", "N_scale": "N_scale",
+    },
+    DecayGamma122Params: {"lam0": "lam", "eps": "eps", "omega": "omega"},
+    DecayDelta121Params: {"lam": "lam", "xi": "xi"},
+}
+
+
+def params_to_predictor_kwargs(params: Any) -> dict[str, float]:
+    """Flatten a registered Params dataclass to predictor-facing kwargs.
+
+    Used on counterfactual sub-grid (c) by ``eval/numeric.py`` to override
+    declared predictor params with the per-point perturbed values. Pass-
+    through behavior for non-registered types and dict-like inputs so
+    callers do not need a special case.
+
+    The output dict is keyed on the predictor-facing canonical names from
+    ``_PREDICTOR_NAME_MAP`` (see blueprint-xy §2.5), NOT the internal
+    Params field names. Field values are coerced to ``float``; only finite
+    values are emitted (NaN/inf are dropped so a degenerate perturbation
+    does not poison the merge).
+
+    Idempotency: ``params_to_predictor_kwargs(d)`` returns ``dict(d)`` when
+    ``d`` is already a Mapping.
+    """
+    if isinstance(params, dict):
+        return {str(k): float(v) for k, v in params.items()
+                if isinstance(v, (int, float)) and math.isfinite(v)}
+    name_map = _PREDICTOR_NAME_MAP.get(type(params))
+    if name_map is None:
+        return {}
+    out: dict[str, float] = {}
+    for internal, canonical in name_map.items():
+        if not hasattr(params, internal):
+            continue
+        try:
+            v = float(getattr(params, internal))
+        except (TypeError, ValueError):
+            continue
+        if not math.isfinite(v):
+            continue
+        out[canonical] = v
+    return out
+
+
 def perturb_params(
     params: Any,
     *,
@@ -183,4 +344,10 @@ def perturb_params(
     return replace(params, **updates)
 
 
-__all__ = ["DEFAULT_MAGNITUDE", "perturb_params"]
+__all__ = [
+    "DEFAULT_MAGNITUDE",
+    "perturb_params",
+    "params_to_predictor_kwargs",
+    "_LAW_PARAM_FIELDS",
+    "_PREDICTOR_NAME_MAP",
+]
