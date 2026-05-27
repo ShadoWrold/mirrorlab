@@ -3,6 +3,10 @@
 > 域 2 / Newtonian gravity / γ-tier / shift_id = `gamma_2_1`
 > 代码：[`mirrorlab/shifts/gravity_g_2_1.py`](../../mirrorlab/shifts/gravity_g_2_1.py)
 > Catalog Round-2 状态：APPROVED（R1-fix + R2A.1 符号修正）
+> **人工二审 errata (2026-05-27)**：
+> - 🔴 `step()` 输出 `L_z` 是 ground-truth leak —— ROT-break shift 的 Noether 荷 z 分量被直接喂给 agent。原 audit 标 🟡，**重判 🔴**。v2 修复（[v2-todo TODO-2](../v2-todo.md)）。
+> - 🟡 sampler 中 `v_circ = √(G_DEFAULT · M / r0)` 但实际 `G_0 ≠ G_DEFAULT` → IC 不是真正圆轨道（[v2-todo TODO-3](../v2-todo.md)）。
+> - 🟡 `M ∈ [1e20, 1e24]` 时间尺度跨 4 数量级，agent 时间窗口可能错失轨道进动（[v2-todo TODO-4](../v2-todo.md)）。
 
 ---
 
