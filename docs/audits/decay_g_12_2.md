@@ -3,6 +3,7 @@
 > 域 12 / Radioactive decay / γ-tier / shift_id = `gamma_12_2`
 > 代码：[`mirrorlab/shifts/decay_g_12_2.py`](../../mirrorlab/shifts/decay_g_12_2.py)
 > Catalog Round-2 状态：APPROVED（R1-fix：`φ ≡ 0` 锁定保 T-rev）
+> **人工二审 errata (2026-05-27)**：🔴 `step()` 输出 `lam_t = λ₀·(1 + ε·cos(ωt))` —— 时变衰变率直接给 agent，等同 δ-2-1 G_eff、δ-6-1 L_eff 模式（[v2-todo TODO-2](../v2-todo.md)）。
 
 ---
 
