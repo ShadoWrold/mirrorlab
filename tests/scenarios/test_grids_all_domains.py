@@ -78,6 +78,7 @@ def test_inputs_match_observables(domain_id: str, shift_id: str) -> None:
         allowed_extras = {
             "didt", "p1", "h1", "h2", "v1", "v2", "L", "T_hot", "T_cold",
             "x", "y", "z", "t", "q1", "q2", "dx", "dy", "dz",
+            "theta_i", "theta_pol",
         }
         leaked = sample_keys - obs - allowed_extras
         assert not leaked, (

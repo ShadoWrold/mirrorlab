@@ -164,41 +164,54 @@ def _hooke_pred(scenario: ScenarioInstance) -> PredictorFn:
 
 
 def _damped_ho_pred(scenario: ScenarioInstance) -> PredictorFn:
+    """damped_ho ceiling predictors. T16 truth-form for all 4 cells."""
     p = scenario.sim.params
     shift_id = scenario.shift_id
 
-    if shift_id == "gamma_3_2":
-        # F(x, v, t): grid does not pass t → use t=0 snapshot.
-        def pred(**kw):
-            x = float(kw.get("x", 0.0))
-            v = float(kw.get("v", 0.0))
-            try:
-                return float(damped_ho_g_3_2.shifted_law(x, v, 0.0, p))
-            except Exception:
-                k = _attr(p, ("k",), 1.0)
-                c = _attr(p, ("c",), 0.0)
-                return -k * x - c * v
+    if shift_id == "gamma_3_1":
+        # Use single-point ⟨x²⟩ ≈ x² proxy (same as builder).
+        _w0 = float(_attr(p, ("omega0",), 1.0))
+        _g0 = float(_attr(p, ("gamma",), 0.0))
+        _ka0 = float(_attr(p, ("kappa",), 0.0))
+        _xr0 = float(_attr(p, ("x_ref",), 1.0)) or 1.0
+
+        def pred(*, x, v,
+                 omega_0=_w0, gamma=_g0, kappa=_ka0, x_ref=_xr0, **_):
+            x2_mean = x * x
+            omega2 = omega_0 * omega_0 * (1.0 + kappa * x2_mean / (x_ref * x_ref))
+            return -2.0 * gamma * v - omega2 * x
         return pred
 
-    # baseline, γ-3-1 (uses x2_mean: pass 0 as best static proxy), δ-3-1.
-    def pred(**kw):
-        x = float(kw.get("x", 0.0))
-        v = float(kw.get("v", 0.0))
-        if shift_id == "gamma_3_1":
-            try:
-                return float(damped_ho_g_3_1.shifted_law(x, v, 0.0, p))
-            except Exception:
-                pass
-        if shift_id == "delta_3_1":
-            try:
-                return float(damped_ho_d_3_1.shifted_law(x, v, p))
-            except Exception:
-                pass
-        # Baseline / fallback.
-        k = _attr(p, ("k",), 1.0)
-        c = _attr(p, ("c",), 0.0)
-        return -k * x - c * v
+    if shift_id == "gamma_3_2":
+        _w0 = float(_attr(p, ("omega0",), 1.0))
+        _g0 = float(_attr(p, ("gamma",), 0.0))
+        _e0 = float(_attr(p, ("eps",), 0.0))
+        _Op = float(_attr(p, ("Omega_p",), 0.0))
 
+        def pred(*, x, v, t,
+                 omega_0=_w0, gamma=_g0, eps=_e0, Omega_p=_Op, **_):
+            omega2 = omega_0 * omega_0 * (1.0 + eps * math.cos(Omega_p * t))
+            return -2.0 * gamma * v - omega2 * x
+        return pred
+
+    if shift_id == "delta_3_1":
+        _w0 = float(_attr(p, ("omega0",), 1.0))
+        _g0 = float(_attr(p, ("gamma",), 0.0))
+        _L0 = float(_attr(p, ("L",), 1.0)) or 1.0
+
+        def pred(*, x, v,
+                 omega_0=_w0, gamma=_g0, L=_L0, **_):
+            gate = abs(x) / L - 1.0
+            return -2.0 * gamma * gate * v - omega_0 * omega_0 * x
+        return pred
+
+    # Baseline: F/m = −(k/m)x − (c/m)v; predictor returns ẍ.
+    _k0 = float(_attr(p, ("k",), 1.0))
+    _c0 = float(_attr(p, ("c",), 0.0))
+    _m0 = float(_attr(p, ("m",), 1.0)) or 1.0
+
+    def pred(*, x, v, k=_k0, c=_c0, m=_m0, **_):
+        return -(k / m) * x - (c / m) * v
     return pred
 
 
@@ -410,46 +423,46 @@ def _coulomb_pred(scenario: ScenarioInstance) -> PredictorFn:
 
 
 def _pendulum_pred(scenario: ScenarioInstance) -> PredictorFn:
+    """pendulum ceiling predictors. T17 truth-form for all 4 cells."""
     p = scenario.sim.params
     shift_id = scenario.shift_id
 
     if shift_id == "gamma_4_1":
-        def pred(**kw):
-            th = float(kw.get("theta", 0.0))
-            try:
-                return float(pendulum_g_4_1.shifted_law(th, p))
-            except Exception:
-                gol = _attr(p, ("g_over_L", "g0_over_L"),
-                            _attr(p, ("g",), 9.81) / max(_attr(p, ("L",), 1.0), 1e-9))
-                return -gol * math.sin(th)
+        _gol = float(_attr(p, ("g_over_L",), 9.81))
+        _a0 = float(_attr(p, ("alpha",), 0.0))
+
+        def pred(*, theta, g_over_L=_gol, alpha=_a0, **_):
+            return -g_over_L * math.sin(theta) - g_over_L * alpha * (1.0 - math.cos(theta))
         return pred
 
     if shift_id == "gamma_4_2":
-        def pred(**kw):
-            th = float(kw.get("theta", 0.0))
-            try:
-                return float(pendulum_g_4_2.shifted_law(th, p))
-            except Exception:
-                gol = _attr(p, ("g_over_L",), 9.81)
-                return -gol * math.sin(th)
+        _gol = float(_attr(p, ("g0_over_L", "g_over_L"), 9.81))
+        _a0 = float(_attr(p, ("alpha",), 0.0))
+        _L0 = float(_attr(p, ("L",), 1.0)) or 1.0
+        _H0 = float(_attr(p, ("H",), 1.0)) or 1.0
+
+        def pred(*, theta, g_over_L=_gol, alpha=_a0, L=_L0, H=_H0, **_):
+            height = L * (1.0 - math.cos(theta))
+            g_eff = g_over_L * (1.0 - alpha * height / H)
+            return -g_eff * math.sin(theta)
         return pred
 
     if shift_id == "delta_4_1":
-        def pred(**kw):
-            th = float(kw.get("theta", 0.0))
-            try:
-                return float(pendulum_d_4_1.shifted_law(th, 0.0, p))
-            except Exception:
-                gol = _attr(p, ("g_over_L",), 9.81)
-                return -gol * math.sin(th)
+        _gol = float(_attr(p, ("g0_over_L", "g_over_L"), 9.81))
+        _e0 = float(_attr(p, ("eps",), 0.0))
+        _Om = float(_attr(p, ("Omega",), 0.0))
+
+        def pred(*, theta, t, g_over_L=_gol, eps=_e0, Omega=_Om, **_):
+            factor = 1.0 + eps * math.cos(Omega * t)
+            return -g_over_L * factor * math.sin(theta)
         return pred
 
     # baseline
-    def pred(**kw):
-        th = float(kw.get("theta", 0.0))
-        gol = _attr(p, ("g_over_L", "g0_over_L"),
-                    _attr(p, ("g",), 9.81) / max(_attr(p, ("L",), 1.0), 1e-9))
-        return -gol * math.sin(th)
+    _gol = float(_attr(p, ("g_over_L", "g0_over_L"),
+                       _attr(p, ("g",), 9.81) / max(_attr(p, ("L",), 1.0), 1e-9)))
+
+    def pred(*, theta, g_over_L=_gol, **_):
+        return -g_over_L * math.sin(theta)
     return pred
 
 
@@ -563,15 +576,50 @@ def _wave_pred(scenario: ScenarioInstance) -> PredictorFn:
 
 
 def _optics_pred(scenario: ScenarioInstance) -> PredictorFn:
+    """optics ceiling predictors. T18 truth-form returns sin(θ_t)."""
     p = scenario.sim.params
+    shift_id = scenario.shift_id
 
-    def pred(**kw):
-        th1 = float(kw.get("theta1", 0.0))
-        n1 = _attr(p, ("n1",), 1.0)
-        n2 = _attr(p, ("n2", "n0"), 1.0)
-        s = (n1 / max(n2, 1e-12)) * math.sin(th1)
-        s = max(-1.0, min(1.0, s))
-        return math.asin(s)
+    if shift_id == "gamma_9_1":
+        _n10 = float(_attr(p, ("n1",), 1.0))
+        _n00 = float(_attr(p, ("n0",), 1.5))
+        _dn0 = float(_attr(p, ("dn",), 0.0))
+        _ph0 = float(_attr(p, ("phi",), 0.0))
+
+        def pred(*, theta_i, theta_pol,
+                 n_1=_n10, n_0=_n00, dn=_dn0, phi=_ph0, **_):
+            n_eff = n_0 + dn * math.sin(2.0 * theta_pol - phi) ** 2
+            if n_eff == 0.0:
+                return 0.0
+            return (n_1 / n_eff) * math.sin(theta_i)
+        return pred
+
+    if shift_id == "gamma_9_2":
+        _n10 = float(_attr(p, ("n1",), 1.0))
+        _n20 = float(_attr(p, ("n2",), 1.5))
+        _ka0 = float(_attr(p, ("kappa",), 0.0))
+
+        def pred(*, theta_i, n_1=_n10, n_2=_n20, kappa=_ka0, **_):
+            s = math.sin(theta_i)
+            anti = (n_1 - n_2) / (n_1 + n_2) if (n_1 + n_2) != 0 else 0.0
+            return (n_1 / n_2) * s + kappa * anti * s ** 3
+        return pred
+
+    if shift_id == "delta_9_1":
+        # Current catalog step() is baseline Snell.
+        _n10 = float(_attr(p, ("n1",), 1.0))
+        _n20 = float(_attr(p, ("n2",), 1.5))
+
+        def pred(*, theta_i, t=0.0, n_1=_n10, n_2=_n20, **_):
+            return (n_1 / n_2) * math.sin(theta_i)
+        return pred
+
+    # baseline Snell.
+    _n10 = float(_attr(p, ("n1",), 1.0))
+    _n20 = float(_attr(p, ("n2",), 1.5))
+
+    def pred(*, theta_i, n_1=_n10, n_2=_n20, **_):
+        return (n_1 / n_2) * math.sin(theta_i)
     return pred
 
 
@@ -889,6 +937,114 @@ def _decay_delta_12_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]
     ]
 
 
+def _damped_ho_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k", "value": float(getattr(p, "k"))},
+        {"name": "c", "value": float(getattr(p, "c"))},
+        {"name": "m", "value": float(getattr(p, "m"))},
+    ]
+
+
+def _damped_ho_gamma_3_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "omega_0", "value": float(getattr(p, "omega0"))},
+        {"name": "gamma", "value": float(getattr(p, "gamma"))},
+        {"name": "kappa", "value": float(getattr(p, "kappa"))},
+        {"name": "x_ref", "value": float(getattr(p, "x_ref"))},
+    ]
+
+
+def _damped_ho_gamma_3_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "omega_0", "value": float(getattr(p, "omega0"))},
+        {"name": "gamma", "value": float(getattr(p, "gamma"))},
+        {"name": "eps", "value": float(getattr(p, "eps"))},
+        {"name": "Omega_p", "value": float(getattr(p, "Omega_p"))},
+    ]
+
+
+def _damped_ho_delta_3_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "omega_0", "value": float(getattr(p, "omega0"))},
+        {"name": "gamma", "value": float(getattr(p, "gamma"))},
+        {"name": "L", "value": float(getattr(p, "L"))},
+    ]
+
+
+def _pendulum_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "g", "value": float(getattr(p, "g"))},
+        {"name": "L", "value": float(getattr(p, "L"))},
+    ]
+
+
+def _pendulum_gamma_4_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "g_over_L", "value": float(getattr(p, "g_over_L"))},
+        {"name": "alpha", "value": float(getattr(p, "alpha"))},
+    ]
+
+
+def _pendulum_gamma_4_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "g_over_L", "value": float(getattr(p, "g0_over_L"))},
+        {"name": "alpha", "value": float(getattr(p, "alpha"))},
+        {"name": "L", "value": float(getattr(p, "L"))},
+        {"name": "H", "value": float(getattr(p, "H"))},
+    ]
+
+
+def _pendulum_delta_4_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "g_over_L", "value": float(getattr(p, "g0_over_L"))},
+        {"name": "eps", "value": float(getattr(p, "eps"))},
+        {"name": "Omega", "value": float(getattr(p, "Omega"))},
+    ]
+
+
+def _optics_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "n_1", "value": float(getattr(p, "n1"))},
+        {"name": "n_2", "value": float(getattr(p, "n2"))},
+    ]
+
+
+def _optics_gamma_9_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "n_1", "value": float(getattr(p, "n1"))},
+        {"name": "n_0", "value": float(getattr(p, "n0"))},
+        {"name": "dn", "value": float(getattr(p, "dn"))},
+        {"name": "phi", "value": float(getattr(p, "phi"))},
+    ]
+
+
+def _optics_gamma_9_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "n_1", "value": float(getattr(p, "n1"))},
+        {"name": "n_2", "value": float(getattr(p, "n2"))},
+        {"name": "kappa", "value": float(getattr(p, "kappa"))},
+    ]
+
+
+def _optics_delta_9_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "n_1", "value": float(getattr(p, "n1"))},
+        {"name": "n_2", "value": float(getattr(p, "n2"))},
+    ]
+
+
 _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[str, Any]]]] = {
     ("gravity", "baseline"): _gravity_baseline_params,
     ("gravity", "gamma_2_1"): _gravity_gamma_2_1_params,
@@ -910,6 +1066,18 @@ _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[s
     ("decay", "gamma_12_1"): _decay_gamma_12_1_params,
     ("decay", "gamma_12_2"): _decay_gamma_12_2_params,
     ("decay", "delta_12_1"): _decay_delta_12_1_params,
+    ("damped_ho", "baseline"): _damped_ho_baseline_params,
+    ("damped_ho", "gamma_3_1"): _damped_ho_gamma_3_1_params,
+    ("damped_ho", "gamma_3_2"): _damped_ho_gamma_3_2_params,
+    ("damped_ho", "delta_3_1"): _damped_ho_delta_3_1_params,
+    ("pendulum", "baseline"): _pendulum_baseline_params,
+    ("pendulum", "gamma_4_1"): _pendulum_gamma_4_1_params,
+    ("pendulum", "gamma_4_2"): _pendulum_gamma_4_2_params,
+    ("pendulum", "delta_4_1"): _pendulum_delta_4_1_params,
+    ("optics", "baseline"): _optics_baseline_params,
+    ("optics", "gamma_9_1"): _optics_gamma_9_1_params,
+    ("optics", "gamma_9_2"): _optics_gamma_9_2_params,
+    ("optics", "delta_9_1"): _optics_delta_9_1_params,
 }
 
 

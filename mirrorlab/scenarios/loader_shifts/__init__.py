@@ -89,7 +89,10 @@ __all__ = [
 # registrations are preserved.
 # Keep alphabetical so the dispatch table is built deterministically.
 from mirrorlab.scenarios.loader_shifts import coulomb as _coulomb  # noqa: E402,F401
+from mirrorlab.scenarios.loader_shifts import damped_ho as _damped_ho  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import decay as _decay  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import gravity as _gravity  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import hooke as _hooke  # noqa: E402,F401
+from mirrorlab.scenarios.loader_shifts import optics as _optics  # noqa: E402,F401
+from mirrorlab.scenarios.loader_shifts import pendulum as _pendulum  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import thermal as _thermal  # noqa: E402,F401
