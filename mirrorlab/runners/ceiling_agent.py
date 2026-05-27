@@ -470,14 +470,76 @@ def _rlc_pred(scenario: ScenarioInstance) -> PredictorFn:
 
 
 def _thermal_pred(scenario: ScenarioInstance) -> PredictorFn:
-    p = scenario.sim.params
+    """Thermal ceiling predictors.
 
-    def pred(**kw):
-        Th = float(kw.get("T_hot", 0.0))
-        Tc = float(kw.get("T_cold", 0.0))
-        L = float(kw.get("L", 1.0))
-        k = _attr(p, ("k", "k0", "alpha"), 1.0)
-        return k * (Th - Tc) / max(L, 1e-12)
+    T9 (blueprint §3.5). Truth-form for baseline + γ-7-1 + γ-7-2 + δ-7-1.
+    Coefficients read via **kw with defaults from sim params.
+    """
+    p = scenario.sim.params
+    shift_id = scenario.shift_id
+
+    if shift_id == "gamma_7_1":
+        # ROT anisotropic conductivity. K = k₀(I + β·n̂n̂ᵀ); GT = |K·∇T|
+        # where ∇T = (T_cold − T_hot)/L · d̂.
+        from mirrorlab.shifts import thermal_g_7_1 as _g71_mod
+
+        _k0d = float(_attr(p, ("k0",), 1.0))
+        _beta0 = float(_attr(p, ("beta",), 0.0))
+        _n_vec = tuple(float(x) for x in getattr(p, "n", (0.0, 0.0, 1.0)))
+
+        def pred(*, T_hot, T_cold, L, dx, dy, dz,
+                 k=_k0d, beta=_beta0, **_):
+            p_eff = _g71_mod.ThermalGamma71Params(
+                k0=k, beta=beta, n=_n_vec,
+                L=L, T_hot=T_hot, T_cold=T_cold, grad_dir=(dx, dy, dz),
+            )
+            return _g71_mod.shifted_flux_magnitude(p_eff)
+        return pred
+
+    if shift_id == "gamma_7_2":
+        # Power-law memory kernel.
+        from mirrorlab.shifts import thermal_g_7_2 as _g72_mod
+
+        _k0d = float(_attr(p, ("k0",), 1.0))
+        _p0 = float(_attr(p, ("p",), 0.5))
+        _tau0 = float(_attr(p, ("tau_min",), 1e-3))
+
+        def pred(*, T_hot, T_cold, L, t,
+                 k=_k0d, p_exp=_p0, tau_min=_tau0, **_):
+            p_eff = _g72_mod.ThermalGamma72Params(
+                k0=k, p=p_exp, L=L, T_hot=T_hot, T_cold=T_cold, tau_min=tau_min,
+            )
+            return _g72_mod.shifted_flux(t, p_eff)
+        return pred
+
+    if shift_id == "delta_7_1":
+        # PDE sink, step()-based truth: instantiate and integrate per
+        # call. Slow (~ms each) but blueprint §3.2.1 accepts this for
+        # the 7 step()-only cells.
+        from mirrorlab.shifts import thermal_d_7_1 as _d71_mod
+
+        _alpha0 = float(_attr(p, ("alpha",), 1e-4))
+        _lam0 = float(_attr(p, ("lam",), 1e-3))
+        _Tref0 = float(_attr(p, ("T_ref",), 300.0))
+        _Ta0 = float(_attr(p, ("T_a",), 373.0))
+        _Tb0 = float(_attr(p, ("T_b",), 293.0))
+        _dx0 = float(_attr(p, ("dx",), 0.1))
+
+        def pred(*, t,
+                 alpha=_alpha0, lam=_lam0, T_ref=_Tref0, **_):
+            p_eff = _d71_mod.ThermalDelta71Params(
+                alpha=alpha, lam=lam, T_ref=T_ref,
+                T_a=_Ta0, T_b=_Tb0, dx=_dx0,
+            )
+            inst = _d71_mod.ThermalDelta71Instance(p_eff)
+            return inst.step(t)["T_a"]
+        return pred
+
+    # Baseline: Fourier q = k·(T_hot − T_cold)/L.
+    _k0d = float(_attr(p, ("k",), 1.0))
+
+    def pred(*, T_hot, T_cold, L, k=_k0d, **_):
+        return k * (T_hot - T_cold) / max(L, 1e-12)
     return pred
 
 
@@ -655,6 +717,37 @@ def _coulomb_delta_5_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]
     ]
 
 
+def _thermal_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [{"name": "k", "value": float(getattr(p, "k"))}]
+
+
+def _thermal_gamma_7_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k", "value": float(getattr(p, "k0"))},
+        {"name": "beta", "value": float(getattr(p, "beta"))},
+    ]
+
+
+def _thermal_gamma_7_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "k", "value": float(getattr(p, "k0"))},
+        {"name": "p_exp", "value": float(getattr(p, "p"))},
+        {"name": "tau_min", "value": float(getattr(p, "tau_min"))},
+    ]
+
+
+def _thermal_delta_7_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
+    p = scenario.sim.params
+    return [
+        {"name": "alpha", "value": float(getattr(p, "alpha"))},
+        {"name": "lam", "value": float(getattr(p, "lam"))},
+        {"name": "T_ref", "value": float(getattr(p, "T_ref"))},
+    ]
+
+
 _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[str, Any]]]] = {
     ("gravity", "gamma_2_1"): _gravity_gamma_2_1_params,
     ("hooke", "baseline"): _hooke_baseline_params,
@@ -665,6 +758,10 @@ _DECLARED_PARAMS: Dict[Tuple[str, str], Callable[[ScenarioInstance], List[Dict[s
     ("coulomb", "gamma_5_1"): _coulomb_gamma_5_1_params,
     ("coulomb", "gamma_5_2"): _coulomb_gamma_5_2_params,
     ("coulomb", "delta_5_1"): _coulomb_delta_5_1_params,
+    ("thermal", "baseline"): _thermal_baseline_params,
+    ("thermal", "gamma_7_1"): _thermal_gamma_7_1_params,
+    ("thermal", "gamma_7_2"): _thermal_gamma_7_2_params,
+    ("thermal", "delta_7_1"): _thermal_delta_7_1_params,
 }
 
 

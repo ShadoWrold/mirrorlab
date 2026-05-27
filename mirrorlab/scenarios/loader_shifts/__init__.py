@@ -91,3 +91,4 @@ __all__ = [
 from mirrorlab.scenarios.loader_shifts import coulomb as _coulomb  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import gravity as _gravity  # noqa: E402,F401
 from mirrorlab.scenarios.loader_shifts import hooke as _hooke  # noqa: E402,F401
+from mirrorlab.scenarios.loader_shifts import thermal as _thermal  # noqa: E402,F401
