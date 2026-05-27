@@ -3,6 +3,10 @@
 > 域 2 / Newtonian gravity / γ-tier / shift_id = `gamma_2_2`
 > 代码：[`mirrorlab/shifts/gravity_g_2_2.py`](../../mirrorlab/shifts/gravity_g_2_2.py)
 > Catalog Round-2 状态：APPROVED
+> **人工二审 errata (2026-05-27)**：
+> - 🟡 1D radial sim + v0=0 径向落入 → 完全无轨道 → **看不到 Bertrand 破缺最自然的 fingerprint（进动）**。shift 命题（"破 SCALE"）与可观测物理错位（[v2-todo TODO-5](../v2-todo.md)）。
+> - ✅ step() 输出干净，无 leak（仅 t / r / v / F primitives）。
+> - 不在 Sprint 4 sweep 的 4-domain subset 内，v1 paper 数据不受影响。
 
 ---
 

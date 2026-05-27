@@ -98,4 +98,25 @@ leak 严重度不取决于 "agent 自己会不会想到测这个量"，而取决
 
 ---
 
+### TODO-5 (2026-05-27, γ-2-2 触发；claim-vs-implementation mismatch)
+
+**问题**：γ-2-2 catalog 声称破 **SCALE / Bertrand closure**，最自然的可观测 fingerprint 是**轨道进动（precession）**。但实现是 **1D 径向 sim**（状态只有 (r, v)，IC v0=0 径向落入），**完全没有轨道**，根本看不到进动。
+
+**后果**：
+- agent 只能从 `F(r)` 偏离 `1/r²` 推断破缺 —— 这更像 β-type 常数修改，不是 γ-type 结构破缺
+- shift 的命题（"SCALE 破缺"）与实际可观测物理错位
+- paper claim "我们破了 SCALE 对称性 → 观察到 Bertrand 破缺" **名不副实**
+
+**对 v1 的影响**：γ-2-2 **不在** Sprint 4 sweep 的 4-domain subset 内（subset 是 hooke / coulomb / thermal / decay），**目前无数据被污染**。但 v2 / camera-ready 扩展到 48 pair 时必修。
+
+**v2 修法**：
+1. 升级 γ-2-2 sim 为 **2D**：状态 (x, y, vx, vy)，IC 给近圆轨道（参考 γ-2-1 的 sampler 但只用 1D 径向 force）
+2. step() 输出 (x, y, vx, vy, F_x, F_y)
+3. 这样 agent 可以观察轨道形状偏离闭合椭圆 → 直接看到进动
+4. **注意**：升级后**也要避免** L_z leak（参考 TODO-2 准则，不输出 derived L）
+
+**适用范围**：检查所有 catalog 声称破 "SCALE / Bertrand / closure / precession" 类的 shift 是否都有维度匹配。已知至少 γ-2-2 影响。
+
+---
+
 (后续待补录)
