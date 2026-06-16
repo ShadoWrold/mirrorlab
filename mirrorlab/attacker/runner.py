@@ -22,10 +22,9 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
 
 from mirrorlab.attacker.lookup import AttackResult, LookupAttacker
-from mirrorlab.eval.scoring import score_submission
 from mirrorlab.scenarios.loader import ScenarioInstance, load as load_scenario
 
 log = logging.getLogger(__name__)
@@ -55,75 +54,19 @@ ATTACK_SLICE: Tuple[Tuple[str, str], ...] = (
 DEFAULT_SEEDS: Tuple[int, ...] = (0, 1, 2)
 
 
-def _target_dim(scenario: ScenarioInstance) -> Optional[str]:
-    """Extract the single output unit string from the scenario dim sig."""
-    outputs = scenario.dim_signature.get("outputs") or {}
-    if not outputs:
-        return None
-    # Just the first declared output channel — v1 scenarios are scalar.
-    return next(iter(outputs.values()))
-
-
-def _pack_grids(scenario: ScenarioInstance) -> Dict[str, list]:
-    """Convert raw x-arrays in ``scenario.test_grids`` to (inputs, gt) tuples.
-
-    The loader stores test grids as raw input-axis ``np.ndarray`` and leaves
-    ground-truth packing to the eval driver. We pack here using the live
-    ``sim._force`` callable so the scorer (which expects ``(inputs_dict,
-    ground_truth)`` tuples per :mod:`mirrorlab.eval.numeric`) can consume it.
-
-    Only Hooke is wired in Sprint 3 (single ``x`` input axis). Other
-    domains return ``{}``, which scores 0 — *conservative* for an attacker
-    sweep (under-counts the attacker's effectiveness, never over-counts).
-    """
-    sim = scenario.sim
-    force = getattr(sim, "_force", None)
-    params = getattr(sim, "params", None)
-    grids = scenario.test_grids
-    if force is None or params is None or not grids:
-        return {}
-    # Sprint 3 limit: only the Hooke domain ships packable grids whose sole
-    # input axis is ``x``. Other domains' loader output stays {} until the
-    # calibrator wires them.
-    if scenario.domain_id != "hooke":
-        return {}
-    packed: Dict[str, list] = {}
-    for key, arr in grids.items():
-        # Post-T7: loader_shifts/hooke.py emits tuple lists like every
-        # other domain. Pre-T7: ndarrays of floats. Detect and route.
-        if isinstance(arr, list) and arr and isinstance(arr[0], tuple):
-            packed[key] = list(arr)
-            continue
-        try:
-            packed[key] = [
-                ({"x": float(x)}, float(force(float(x), params)))
-                for x in arr
-            ]
-        except Exception:  # noqa: BLE001
-            packed[key] = []
-    return packed
-
-
 def _score_attack(scenario: ScenarioInstance, result: AttackResult) -> float:
     """Score an attacker submission against the scenario.
 
-    Returns 0 if the scenario's test grids are not yet packable (other
-    domains, pre-calibrator). This is a conservative lower bound for the
-    attacker — strictly favorable to the attacker, so a passing aggregate
-    here remains a valid CAL-9 lower-bound guarantee.
+    Delegates to :func:`mirrorlab.runners.sprint3_pilot.score_against_scenario`,
+    which packs the X+Y truth-form test grids for *all 12 domains* (the same
+    path the T23 ceiling sweep uses) — no longer the Sprint-3 hooke-only
+    stub that silently returned 0 on 11/12 domains.
     """
-    target = _target_dim(scenario)
-    if target is None:
-        return 0.0
-    packed = _pack_grids(scenario)
-    if not packed:
-        return 0.0
-    return score_submission(
-        result.submission,
-        target_dim=target,
-        test_grids=packed,
-        gt_symmetry=None,
-    )
+    # Lazy import: sprint3_pilot imports this module at top level, so a
+    # top-level import here would be circular.
+    from mirrorlab.runners.sprint3_pilot import score_against_scenario
+
+    return float(score_against_scenario(scenario, result.submission))
 
 
 # ---- Attack report -----------------------------------------------------
@@ -143,6 +86,7 @@ class AttackReport:
 
     def as_dict(self) -> Dict[str, Any]:
         return {
+            "xy_version": 1,
             "s_bench_lookup": round(self.s_bench_lookup, 6),
             "threshold": self.threshold,
             "passed": self.passed,

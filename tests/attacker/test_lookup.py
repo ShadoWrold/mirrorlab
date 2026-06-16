@@ -137,32 +137,36 @@ def test_attacker_identifies_baseline_high_score():
     assert score > 0.9, f"expected high score on baseline, got {score}"
 
 
-def test_attacker_confuses_gamma_shift_low_score():
-    """A canonical Hooke submission with the WRONG k → low S on a shifted scenario.
+def test_attacker_confuses_strong_shift_low_score():
+    """A canonical baseline-form submission collapses on a STRONG shift.
 
-    This exercises the runner's score-collection path against a deliberately
-    non-matching predictor (analogue of a lookup-attacker who picks the right
-    law family but wrong parameters on a counterfactual shift). The RMSLE-
-    based scorer must collapse the score well below 0.50.
+    Under X+Y, ``k`` (and every law coefficient) is a free parameter the
+    evaluator overrides per-point on sub-grid (c), so a "wrong-k" canonical
+    Hooke no longer scores differently from a right-k one — the old
+    ``test_attacker_confuses_gamma_shift_low_score`` premise ("wrong
+    parameters → low score") is void.
 
-    NOTE: we use a *deliberately* mis-fit predictor rather than relying on the
-    γ-1-1 shift's deviation from canonical Hooke, because the existing Hooke
-    test grid only varies ``x`` (velocity-dependent and high-η-tanh terms
-    don't manifest in a 1-D x-only grid). End-to-end attack-vs-shift behavior
-    is the integrator's real-sweep concern, not a unit-test property.
+    What DOES collapse is a baseline-form predictor on a shift whose broken
+    symmetry the canonical law structurally cannot express. Gravity γ-2-1
+    (ROT break, 3-D anisotropic) is such a cell: T23 shows the textbook
+    inverse-square radial form scores ~0 there. We assert the attacker's
+    canonical submission lands well under the CAL-9 gate on this cell.
+
+    NOTE: this is a *per-cell* property only for STRONG cells. Weak shifts
+    (hooke γ-1-1/δ-1-1, several T-modulated δ cells) score high by physics —
+    see ``test_run_attack_sweep_gate_is_macro_mean`` for the aggregate gate.
     """
-    scenario = load_scenario("hooke", "gamma_1_1", seed=0)
-    # Submit canonical Hooke shape with a wildly wrong stiffness — predictor
-    # value diverges from ground truth → low score.
+    scenario = load_scenario("gravity", "gamma_2_1", seed=0)
     sub = [{
-        "law_id": "hooke",
-        "formula": "F = -k*x",
+        "law_id": "newton_gravity",
+        "formula": "F = -G*M*m/r**2",
         "predictor": {"lang": "python",
-                      "code": "def f(x, k):\n    return -k*x\n"},
-        "inputs":  [{"name": "x", "units": "m"}],
+                      "code": "def f(r, G, M, m):\n    return -G*M*m/(r*r)\n"},
+        "inputs":  [{"name": "r", "units": "m"}],
         "outputs": [{"name": "F", "units": DIM_FORCE}],
-        "params":  [{"name": "k", "units": "kg*s**-2",
-                     "value": 100.0 * float(scenario.sim.params.k) + 50.0}],
+        "params":  [{"name": "G", "units": "m**3*kg**-1*s**-2", "value": 6.674e-11},
+                    {"name": "M", "units": "kg", "value": 1.0e21},
+                    {"name": "m", "units": "kg", "value": 1.0}],
         "claim_broken_symmetry": "none",
     }]
     responses = [FakeMsg(tool_calls=[_tc("c1", SUBMIT_TOOL, {"submission": sub})])]
@@ -171,8 +175,8 @@ def test_attacker_confuses_gamma_shift_low_score():
 
     score = _score_attack(scenario, result)
     assert score < 0.50, (
-        f"a wildly wrong canonical Hooke submission should score under "
-        f"the gate, got {score:.3f}"
+        f"a canonical inverse-square submission should collapse on the "
+        f"ROT-broken gravity γ-2-1 cell, got {score:.3f}"
     )
 
 
@@ -306,27 +310,32 @@ def test_aggregate_handles_empty():
 
 # ---- Sweep driver -------------------------------------------------------
 
-def test_run_attack_sweep_passes_threshold_on_confused_attacker():
-    """Locked attacker that always submits canonical Hooke is confused by γ-1-1
-    and δ-1-1 → S_bench^lookup < 0.50.
+def test_run_attack_sweep_gate_is_macro_mean_on_strong_cells():
+    """The CAL-9 gate is the 24-cell *macro-mean*, not a per-cell property.
 
-    We restrict the slice to the Hooke pair only so the partial test-grid
-    wiring (only Hooke has (a)/(b)/(c) grids today) doesn't bias the
-    aggregate to 0 from missing grids.
+    A locked attacker submitting the canonical inverse-square law collapses
+    on STRONG cells (gravity γ-2-1, coulomb γ-5-1 — both ROT-broken, ~0 in
+    T23). Restricting the slice to those, the aggregate must sit under the
+    gate. We deliberately do NOT use hooke γ-1-1/δ-1-1 here: under X+Y those
+    are weak shifts where a textbook 1-D linear form scores ~0.65–0.86 by
+    physics, so a 2-cell hooke slice does NOT pass the gate — that is real
+    benchmark physics, not a runner bug. The honest aggregate gate over the
+    full γ∪δ slice is validated by the real T24 LLM sweep, not this unit test.
     """
     def llm_call(messages, tools):
-        # Scenario is identified by the user prompt; pick the right baseline
-        # k by reading the SystemContext-attached scenario id is not visible,
-        # so we just emit a fixed-k canonical Hooke. RMSLE-based scoring will
-        # naturally collapse it on the shifted scenario regardless of k.
+        # Canonical Newtonian gravity (also dimensionally valid as a generic
+        # inverse-square force on coulomb's force channel). On a ROT-broken
+        # cell its radial form cannot track the 3-D anisotropy → score ~0.
         sub = [{
-            "law_id": "hooke",
-            "formula": "F = -k*x",
+            "law_id": "inverse_square",
+            "formula": "F = -G*M*m/r**2",
             "predictor": {"lang": "python",
-                          "code": "def f(x, k):\n    return -k*x\n"},
-            "inputs":  [{"name": "x", "units": "m"}],
+                          "code": "def f(r, G, M, m):\n    return -G*M*m/(r*r)\n"},
+            "inputs":  [{"name": "r", "units": "m"}],
             "outputs": [{"name": "F", "units": DIM_FORCE}],
-            "params":  [{"name": "k", "units": "kg*s**-2", "value": 10.0}],
+            "params":  [{"name": "G", "units": "m**3*kg**-1*s**-2", "value": 6.674e-11},
+                        {"name": "M", "units": "kg", "value": 1.0e21},
+                        {"name": "m", "units": "kg", "value": 1.0}],
             "claim_broken_symmetry": "none",
         }]
         return FakeMsg(tool_calls=[_tc("c1", SUBMIT_TOOL, {"submission": sub})])
@@ -334,7 +343,7 @@ def test_run_attack_sweep_passes_threshold_on_confused_attacker():
     attacker = LookupAttacker(llm_call=llm_call)
     report = run_attack_sweep(
         attacker,
-        slice_pairs=(("hooke", "gamma_1_1"), ("hooke", "delta_1_1")),
+        slice_pairs=(("gravity", "gamma_2_1"), ("coulomb", "gamma_5_1")),
         seeds=(0, 1, 2),
     )
     assert report.n_scenarios == 6  # 2 cells × 3 seeds
