@@ -1,0 +1,4251 @@
+{
+  "xy_version": 1,
+  "s_bench_lookup": 0.159082,
+  "threshold": 0.5,
+  "passed": true,
+  "n_scenarios": 72,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "cell_scores": {
+    "hooke/gamma_1_1": 0.0,
+    "hooke/delta_1_1": 0.860379,
+    "gravity/gamma_2_1": 0.0,
+    "gravity/delta_2_1": 0.931872,
+    "damped_ho/gamma_3_1": 0.121861,
+    "damped_ho/delta_3_1": 0.336858,
+    "pendulum/gamma_4_1": 0.0,
+    "pendulum/delta_4_1": 0.0,
+    "coulomb/gamma_5_1": 0.0,
+    "coulomb/delta_5_1": 0.0,
+    "rlc/gamma_6_1": 0.0,
+    "rlc/delta_6_1": 0.0,
+    "thermal/gamma_7_1": 0.518729,
+    "thermal/delta_7_1": 0.0,
+    "wave/gamma_8_1": 0.0,
+    "wave/delta_8_1": 0.0,
+    "optics/gamma_9_1": 0.0,
+    "optics/delta_9_1": 0.0,
+    "fluid/gamma_10_1": 0.018685,
+    "fluid/delta_10_1": 0.345707,
+    "kinetics/gamma_11_1": 0.0,
+    "kinetics/delta_11_1": 0.298383,
+    "decay/gamma_12_1": 0.385486,
+    "decay/delta_12_1": 0.0
+  },
+  "scenarios": [
+    {
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_1",
+      "seed": 0,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 20,
+      "llm_turns": 15,
+      "elapsed_s": 44.1685,
+      "terminated_by": "budget",
+      "score": 0.0
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_1",
+      "seed": 1,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 10,
+      "llm_turns": 8,
+      "elapsed_s": 87.5004,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_1",
+      "seed": 2,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 13,
+      "llm_turns": 11,
+      "elapsed_s": 69.0939,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "delta_1_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "hooke",
+          "formula": "F = -k x",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, k):\n    return -k*x"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "N/m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 18.78985266149949
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "hooke",
+      "claimed_formula": "F = -k x",
+      "tool_calls": 7,
+      "llm_turns": 6,
+      "elapsed_s": 20.0229,
+      "terminated_by": "submit",
+      "score": 0.950221
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "delta_1_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "hooke",
+          "formula": "F = -k x",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, k):\n    return -k*x"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "N/m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 10.55949744398164
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "hooke",
+      "claimed_formula": "F = -k x",
+      "tool_calls": 19,
+      "llm_turns": 14,
+      "elapsed_s": 39.9596,
+      "terminated_by": "submit",
+      "score": 0.69736
+    },
+    {
+      "domain_id": "hooke",
+      "shift_id": "delta_1_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "hooke",
+          "formula": "F = -k x",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, k):\n    return -k*x"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "N/m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 3.335986377275544
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "hooke",
+      "claimed_formula": "F = -k x",
+      "tool_calls": 12,
+      "llm_turns": 11,
+      "elapsed_s": 41.0253,
+      "terminated_by": "submit",
+      "score": 0.933557
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "newton_gravitation",
+          "formula": "F = G M m / r^2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m):\n    G = 6.67430e-11\n    M = 1.421e24\n    return G*M*m/(r**2)\n"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2",
+              "value": 6.6743e-11
+            },
+            {
+              "name": "M",
+              "units": "kg",
+              "value": 1.421e+24
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "newton_gravitation",
+      "claimed_formula": "F = G M m / r^2",
+      "tool_calls": 6,
+      "llm_turns": 6,
+      "elapsed_s": 29.6737,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "newton_gravitation",
+          "formula": "F = G*M*m/r**2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m, G, M):\n    return G*M*m/(r**2)\n"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            },
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2"
+            },
+            {
+              "name": "M",
+              "units": "kg"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2",
+              "value": 6.6743e-11
+            },
+            {
+              "name": "M",
+              "units": "kg",
+              "value": 6.243e+24
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "inverse_square_central_force",
+          "formula": "F = k*m/r**2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m, k):\n    return k*m/(r**2)\n"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            },
+            {
+              "name": "k",
+              "units": "m^3 s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "m^3 s^-2",
+              "value": 416722090000000.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "newton_gravitation",
+      "claimed_formula": "F = G*M*m/r**2",
+      "tool_calls": 6,
+      "llm_turns": 6,
+      "elapsed_s": 38.4668,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "newton_gravitation",
+          "formula": "F = G M m / r^2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m, G, M):\n    return G*M*m/(r**2)\n"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            },
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2"
+            },
+            {
+              "name": "M",
+              "units": "kg"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2",
+              "value": 6.6743e-11
+            },
+            {
+              "name": "M",
+              "units": "kg",
+              "value": 1e+24
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "newton_gravitation",
+      "claimed_formula": "F = G M m / r^2",
+      "tool_calls": 6,
+      "llm_turns": 6,
+      "elapsed_s": 24.6755,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "delta_2_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "newton_gravitation",
+          "formula": "F = -G M m / r^2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m, G, M):\n    return -G*M*m/(r*r)"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            },
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2"
+            },
+            {
+              "name": "M",
+              "units": "kg"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2",
+              "value": 6.6743e-11
+            },
+            {
+              "name": "M",
+              "units": "kg",
+              "value": 1.5382812499999997e+18
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "newton_second_law_radial",
+          "formula": "m d^2r/dt^2 = -G M m / r^2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m, G, M):\n    return -G*M/(r*r)"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            },
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2"
+            },
+            {
+              "name": "M",
+              "units": "kg"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "d2r_dt2",
+              "units": "m s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2",
+              "value": 6.6743e-11
+            },
+            {
+              "name": "M",
+              "units": "kg",
+              "value": 1.5382812499999997e+18
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "newton_gravitation",
+      "claimed_formula": "F = -G M m / r^2",
+      "tool_calls": 11,
+      "llm_turns": 10,
+      "elapsed_s": 36.9395,
+      "terminated_by": "submit",
+      "score": 0.949797
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "delta_2_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "newton_gravitation",
+          "formula": "F = -G M m / r^2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m, G, M):\n    return -G*M*m/(r*r)"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            },
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2"
+            },
+            {
+              "name": "M",
+              "units": "kg"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "inverse_square_acceleration",
+          "formula": "F = -k/r^2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, k):\n    return -k/(r*r)"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "N m^2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N m^2",
+              "value": 46689972547892.88
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "newton_gravitation",
+      "claimed_formula": "F = -G M m / r^2",
+      "tool_calls": 11,
+      "llm_turns": 11,
+      "elapsed_s": 35.0943,
+      "terminated_by": "submit",
+      "score": 0.896274
+    },
+    {
+      "domain_id": "gravity",
+      "shift_id": "delta_2_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "newton_gravitation",
+          "formula": "F = -(G M m)/r^2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m):\n    G = 6.67430e-11\n    M = 1.4081669974484963e21\n    return -(G*M*m)/(r**2)\n"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2",
+              "value": 6.6743e-11
+            },
+            {
+              "name": "M",
+              "units": "kg",
+              "value": 1.4081669974484963e+21
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "newton_second_law",
+          "formula": "F = m d v/d t",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(m, dv_dt):\n    return m*dv_dt\n"
+          },
+          "inputs": [
+            {
+              "name": "m",
+              "units": "kg"
+            },
+            {
+              "name": "dv_dt",
+              "units": "m s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "newton_gravitation",
+      "claimed_formula": "F = -(G M m)/r^2",
+      "tool_calls": 10,
+      "llm_turns": 8,
+      "elapsed_s": 37.79,
+      "terminated_by": "submit",
+      "score": 0.949545
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "damped_harmonic_oscillator",
+          "formula": "m*d2x/dt2 + b*dx/dt + k*x = 0",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v, m, b, k):\n    return -(b/m)*v - (k/m)*x"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            },
+            {
+              "name": "b",
+              "units": "kg s^-1"
+            },
+            {
+              "name": "k",
+              "units": "kg s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "a",
+              "units": "m s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "m",
+              "units": "kg",
+              "value": 1.0
+            },
+            {
+              "name": "b",
+              "units": "kg s^-1",
+              "value": 0.25
+            },
+            {
+              "name": "k",
+              "units": "kg s^-2",
+              "value": 5.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "hooke_linear_drag_force",
+          "formula": "F = -k*x - b*v",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v, b, k):\n    return -k*x - b*v"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            },
+            {
+              "name": "b",
+              "units": "kg s^-1"
+            },
+            {
+              "name": "k",
+              "units": "kg s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "b",
+              "units": "kg s^-1",
+              "value": 0.25
+            },
+            {
+              "name": "k",
+              "units": "kg s^-2",
+              "value": 5.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "damped_harmonic_oscillator",
+      "claimed_formula": "m*d2x/dt2 + b*dx/dt + k*x = 0",
+      "tool_calls": 9,
+      "llm_turns": 8,
+      "elapsed_s": 27.858,
+      "terminated_by": "submit",
+      "score": 0.140572
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_1",
+      "seed": 1,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 5,
+      "llm_turns": 4,
+      "elapsed_s": 79.8516,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "damped_harmonic_oscillator",
+          "formula": "F = -k x - c v",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v, k=1.0, c=0.2425):\n    return -k*x - c*v"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N m^-1",
+              "value": 1.0
+            },
+            {
+              "name": "c",
+              "units": "N s m^-1",
+              "value": 0.2425
+            },
+            {
+              "name": "m",
+              "units": "kg",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "damped_harmonic_oscillator",
+      "claimed_formula": "F = -k x - c v",
+      "tool_calls": 12,
+      "llm_turns": 12,
+      "elapsed_s": 44.0433,
+      "terminated_by": "submit",
+      "score": 0.22501
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "delta_3_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "damped_harmonic_oscillator",
+          "formula": "F = -k x - c v",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v, k, c):\n    return -k*x - c*v"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            },
+            {
+              "name": "k",
+              "units": "N m^-1"
+            },
+            {
+              "name": "c",
+              "units": "N s m^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N m^-1",
+              "value": 11.4
+            },
+            {
+              "name": "c",
+              "units": "N s m^-1",
+              "value": 0.56
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "newton_second_law_damped_sho",
+          "formula": "m d2x/dt2 + c dx/dt + k x = 0",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v, k, c, m):\n    return (-k*x - c*v)/m"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            },
+            {
+              "name": "k",
+              "units": "N m^-1"
+            },
+            {
+              "name": "c",
+              "units": "N s m^-1"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "a",
+              "units": "m s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N m^-1",
+              "value": 11.4
+            },
+            {
+              "name": "c",
+              "units": "N s m^-1",
+              "value": 0.56
+            },
+            {
+              "name": "m",
+              "units": "kg",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "damped_harmonic_oscillator",
+      "claimed_formula": "F = -k x - c v",
+      "tool_calls": 9,
+      "llm_turns": 8,
+      "elapsed_s": 45.4213,
+      "terminated_by": "submit",
+      "score": 0.867535
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "delta_3_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "hooke",
+          "formula": "F = -k x",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, k):\n    return -k*x"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "N/m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "linear_drag",
+          "formula": "F = -b v",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(v, b):\n    return -b*v"
+          },
+          "inputs": [
+            {
+              "name": "v",
+              "units": "m/s"
+            },
+            {
+              "name": "b",
+              "units": "N*s/m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "damped_harmonic_oscillator",
+          "formula": "m d2x/dt2 + b dx/dt + k x = 0",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v, k, b):\n    return -k*x - b*v"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m/s"
+            },
+            {
+              "name": "k",
+              "units": "N/m"
+            },
+            {
+              "name": "b",
+              "units": "N*s/m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "hooke",
+      "claimed_formula": "F = -k x",
+      "tool_calls": 7,
+      "llm_turns": 7,
+      "elapsed_s": 30.132,
+      "terminated_by": "submit",
+      "score": 0.14304
+    },
+    {
+      "domain_id": "damped_ho",
+      "shift_id": "delta_3_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "damped_harmonic_oscillator",
+          "formula": "F = -k*x - c*v",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v, k, c):\n    return -k*x - c*v"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            },
+            {
+              "name": "k",
+              "units": "N m^-1"
+            },
+            {
+              "name": "c",
+              "units": "N s m^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "damped_harmonic_oscillator",
+      "claimed_formula": "F = -k*x - c*v",
+      "tool_calls": 7,
+      "llm_turns": 7,
+      "elapsed_s": 29.7548,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "physical_pendulum",
+          "formula": "domega/dt = -(g/l_eff) * sin(theta), dtheta/dt = omega",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, theta, omega, g, l_eff):\n    return -(g/l_eff) * __import__('math').sin(theta)\n"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            },
+            {
+              "name": "l_eff",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "alpha",
+              "units": "s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "g",
+              "units": "m s^-2",
+              "value": 9.81
+            },
+            {
+              "name": "l_eff",
+              "units": "m",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "pendulum_small_angle",
+          "formula": "domega/dt = -(g/l_eff) * theta, dtheta/dt = omega",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta, g, l_eff):\n    return -(g/l_eff) * theta\n"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            },
+            {
+              "name": "l_eff",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "alpha",
+              "units": "s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "g",
+              "units": "m s^-2",
+              "value": 9.81
+            },
+            {
+              "name": "l_eff",
+              "units": "m",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "physical_pendulum",
+      "claimed_formula": "domega/dt = -(g/l_eff) * sin(theta), dtheta/dt = omega",
+      "tool_calls": 3,
+      "llm_turns": 4,
+      "elapsed_s": 14.4704,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "pendulum",
+          "formula": "dtheta/dt = omega; domega/dt = -(g/L) sin(theta)",
+          "predictor": {
+            "lang": "python",
+            "code": "import math\n\ndef f(t, theta, omega, g_over_L=9.81):\n    return -(g_over_L)*math.sin(theta)\n"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "g_over_L",
+              "units": "s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "domega_dt",
+              "units": "s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "g_over_L",
+              "units": "s^-2",
+              "value": 9.81
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "pendulum_small_angle",
+          "formula": "dtheta/dt = omega; domega/dt = -(g/L) theta",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, theta, omega, g_over_L=9.81):\n    return -(g_over_L)*theta\n"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "g_over_L",
+              "units": "s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "domega_dt",
+              "units": "s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "g_over_L",
+              "units": "s^-2",
+              "value": 9.81
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "pendulum",
+      "claimed_formula": "dtheta/dt = omega; domega/dt = -(g/L) sin(theta)",
+      "tool_calls": 4,
+      "llm_turns": 4,
+      "elapsed_s": 23.5031,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_1",
+      "seed": 2,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 11,
+      "llm_turns": 11,
+      "elapsed_s": 62.4362,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "delta_4_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "physical_pendulum",
+          "formula": "dtheta/dt = omega; domega/dt = -(g/ell_eff) sin(theta)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, theta0, omega0, ell_eff):\n    import math\n    # small-step RK4 integration of the canonical physical-pendulum equation\n    g = 9.81\n    n = max(1, int(abs(t)/0.001))\n    dt = t / n\n    th = theta0\n    om = omega0\n    def a(theta):\n        return -(g/ell_eff) * math.sin(theta)\n    for _ in range(n):\n        k1_th = om\n        k1_om = a(th)\n        k2_th = om + 0.5*dt*k1_om\n        k2_om = a(th + 0.5*dt*k1_th)\n        k3_th = om + 0.5*dt*k2_om\n        k3_om = a(th + 0.5*dt*k2_th)\n        k4_th = om + dt*k3_om\n        k4_om = a(th + dt*k3_th)\n        th += (dt/6.0)*(k1_th + 2*k2_th + 2*k3_th + k4_th)\n        om += (dt/6.0)*(k1_om + 2*k2_om + 2*k3_om + k4_om)\n    return th"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "theta0",
+              "units": "rad"
+            },
+            {
+              "name": "omega0",
+              "units": "rad/s"
+            },
+            {
+              "name": "ell_eff",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            }
+          ],
+          "params": [
+            {
+              "name": "g",
+              "units": "m/s^2",
+              "value": 9.81
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "small_angle_pendulum",
+          "formula": "d2theta/dt^2 + (g/ell_eff) theta = 0",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, theta0, omega0, ell_eff):\n    import math\n    w = math.sqrt(9.81/ell_eff)\n    return theta0*math.cos(w*t) + (omega0/w)*math.sin(w*t)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "theta0",
+              "units": "rad"
+            },
+            {
+              "name": "omega0",
+              "units": "rad/s"
+            },
+            {
+              "name": "ell_eff",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            }
+          ],
+          "params": [
+            {
+              "name": "g",
+              "units": "m/s^2",
+              "value": 9.81
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "physical_pendulum",
+      "claimed_formula": "dtheta/dt = omega; domega/dt = -(g/ell_eff) sin(theta)",
+      "tool_calls": 3,
+      "llm_turns": 4,
+      "elapsed_s": 18.2018,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "delta_4_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "physical_pendulum",
+          "formula": "dtheta/dt = omega; domega/dt = -(g/l_eff) sin(theta)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, theta, omega, g, l_eff):\n    return -(g/l_eff)*__import__('math').sin(theta)\n"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            },
+            {
+              "name": "l_eff",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "alpha",
+              "units": "s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "g",
+              "units": "m s^-2",
+              "value": 9.81
+            },
+            {
+              "name": "l_eff",
+              "units": "m",
+              "value": 1.081
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "small_angle_pendulum",
+          "formula": "dtheta/dt = omega; domega/dt = -(g/l_eff) theta",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, theta, omega, g, l_eff):\n    return -(g/l_eff)*theta\n"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            },
+            {
+              "name": "l_eff",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "alpha",
+              "units": "s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "g",
+              "units": "m s^-2",
+              "value": 9.81
+            },
+            {
+              "name": "l_eff",
+              "units": "m",
+              "value": 1.081
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "physical_pendulum",
+      "claimed_formula": "dtheta/dt = omega; domega/dt = -(g/l_eff) sin(theta)",
+      "tool_calls": 3,
+      "llm_turns": 4,
+      "elapsed_s": 14.5032,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "pendulum",
+      "shift_id": "delta_4_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "physical_pendulum",
+          "formula": "domega/dt = -(g/l_eff) * sin(theta), dtheta/dt = omega",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, theta, omega, g, l_eff):\n    return -(g/l_eff)*__import__('math').sin(theta)\n"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "1"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            },
+            {
+              "name": "l_eff",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "alpha",
+              "units": "s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "g",
+              "units": "m s^-2",
+              "value": 9.81
+            },
+            {
+              "name": "l_eff",
+              "units": "m",
+              "value": 10.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "small_angle_pendulum",
+          "formula": "d2theta/dt^2 + (g/l_eff) theta = 0",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta, g, l_eff):\n    return -(g/l_eff)*theta\n"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "1"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            },
+            {
+              "name": "l_eff",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "alpha",
+              "units": "s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "g",
+              "units": "m s^-2",
+              "value": 9.81
+            },
+            {
+              "name": "l_eff",
+              "units": "m",
+              "value": 10.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "physical_pendulum",
+      "claimed_formula": "domega/dt = -(g/l_eff) * sin(theta), dtheta/dt = omega",
+      "tool_calls": 3,
+      "llm_turns": 4,
+      "elapsed_s": 15.0066,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "coulomb",
+          "formula": "F = k*q1*q2/r**2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(q1, q2, r, k):\n    return k*q1*q2/(r*r)\n"
+          },
+          "inputs": [
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            },
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "N*m^2/C^2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "coulomb",
+      "claimed_formula": "F = k*q1*q2/r**2",
+      "tool_calls": 5,
+      "llm_turns": 5,
+      "elapsed_s": 14.0833,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "coulomb",
+          "formula": "F = k*q1*q2/r**2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(q1, q2, r):\n    k = 8.9875517923e9\n    return k*q1*q2/(r**2)\n"
+          },
+          "inputs": [
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            },
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N*m^2/C^2",
+              "value": 8987551792.3
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "coulomb",
+      "claimed_formula": "F = k*q1*q2/r**2",
+      "tool_calls": 5,
+      "llm_turns": 5,
+      "elapsed_s": 14.159,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "coulomb",
+          "formula": "F = k_e * |q1*q2| / r**2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, q1, q2, k_e):\n    return k_e * abs(q1*q2) / (r**2)\n"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            },
+            {
+              "name": "k_e",
+              "units": "N m^2 C^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "coulomb",
+      "claimed_formula": "F = k_e * |q1*q2| / r**2",
+      "tool_calls": 6,
+      "llm_turns": 6,
+      "elapsed_s": 18.9249,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "delta_5_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "coulomb",
+          "formula": "F = k_e * |q1*q2| / r**2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(q1, q2, r, k_e):\n    return k_e * abs(q1*q2) / (r**2)"
+          },
+          "inputs": [
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            },
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "k_e",
+              "units": "N m^2 C^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "N m^2 C^-2",
+              "value": 8987551787.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "coulomb",
+      "claimed_formula": "F = k_e * |q1*q2| / r**2",
+      "tool_calls": 10,
+      "llm_turns": 10,
+      "elapsed_s": 37.3407,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "delta_5_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "coulomb",
+          "formula": "F = k_e * q1 * q2 / r**2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(q1, q2, r, k_e=8.9875517923e9):\n    return k_e * q1 * q2 / (r**2)"
+          },
+          "inputs": [
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            },
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "N m^2 C^-2",
+              "value": 8987551792.3
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "coulomb",
+      "claimed_formula": "F = k_e * q1 * q2 / r**2",
+      "tool_calls": 11,
+      "llm_turns": 11,
+      "elapsed_s": 34.8507,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "coulomb",
+      "shift_id": "delta_5_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "coulomb",
+          "formula": "F = k_e * q1 * q2 / r**2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(q1, q2, r, k_e=8.9875517923e9):\n    return k_e * q1 * q2 / (r**2)"
+          },
+          "inputs": [
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            },
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "N m^2 C^-2",
+              "value": 8987551792.3
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "coulomb",
+      "claimed_formula": "F = k_e * q1 * q2 / r**2",
+      "tool_calls": 7,
+      "llm_turns": 7,
+      "elapsed_s": 25.3991,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_1",
+      "seed": 0,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 6,
+      "llm_turns": 5,
+      "elapsed_s": 75.9736,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "kirchhoff_series_rlc",
+          "formula": "L*d2q/dt2 + R*dq/dt + q/C = V(t)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(q, i, dq_dt, d2q_dt2, R, L, C):\n    return L*d2q_dt2 + R*dq_dt + q/C\n"
+          },
+          "inputs": [
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            },
+            {
+              "name": "dq_dt",
+              "units": "A"
+            },
+            {
+              "name": "d2q_dt2",
+              "units": "A/s"
+            },
+            {
+              "name": "R",
+              "units": "ohm"
+            },
+            {
+              "name": "L",
+              "units": "H"
+            },
+            {
+              "name": "C",
+              "units": "F"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "V",
+              "units": "V"
+            }
+          ],
+          "params": [
+            {
+              "name": "R",
+              "units": "ohm",
+              "value": 100.0
+            },
+            {
+              "name": "L",
+              "units": "H",
+              "value": 0.01
+            },
+            {
+              "name": "C",
+              "units": "F",
+              "value": 1e-06
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "current_charge_relation",
+          "formula": "i = dq/dt",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(dq_dt):\n    return dq_dt\n"
+          },
+          "inputs": [
+            {
+              "name": "dq_dt",
+              "units": "A"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "kirchhoff_series_rlc",
+      "claimed_formula": "L*d2q/dt2 + R*dq/dt + q/C = V(t)",
+      "tool_calls": 11,
+      "llm_turns": 11,
+      "elapsed_s": 51.886,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "kirchhoff_rlc_series",
+          "formula": "L*d2q/dt2 + R*dq/dt + q/C = V(t)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(L, R, C, q, i, di_dt):\n    return L*di_dt + R*i + q/C\n"
+          },
+          "inputs": [
+            {
+              "name": "L",
+              "units": "H"
+            },
+            {
+              "name": "R",
+              "units": "ohm"
+            },
+            {
+              "name": "C",
+              "units": "F"
+            },
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            },
+            {
+              "name": "di_dt",
+              "units": "A/s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "V",
+              "units": "V"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "current_charge_relation",
+          "formula": "i = dq/dt",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(dq_dt):\n    return dq_dt\n"
+          },
+          "inputs": [
+            {
+              "name": "dq_dt",
+              "units": "C/s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "kirchhoff_rlc_series",
+      "claimed_formula": "L*d2q/dt2 + R*dq/dt + q/C = V(t)",
+      "tool_calls": 10,
+      "llm_turns": 10,
+      "elapsed_s": 43.5944,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "delta_6_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "kirchhoff_rlc_series",
+          "formula": "L*d2q/dt^2 + R*dq/dt + q/C = V(t)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, q, i, L, R, C, V):\n    return (V - R*i - q/C)/L\n"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            },
+            {
+              "name": "L",
+              "units": "H"
+            },
+            {
+              "name": "R",
+              "units": "ohm"
+            },
+            {
+              "name": "C",
+              "units": "F"
+            },
+            {
+              "name": "V",
+              "units": "V"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "di_dt",
+              "units": "A/s"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "capacitor_current",
+          "formula": "i = dq/dt",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(dq_dt):\n    return dq_dt\n"
+          },
+          "inputs": [
+            {
+              "name": "dq_dt",
+              "units": "A"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "kirchhoff_rlc_series",
+      "claimed_formula": "L*d2q/dt^2 + R*dq/dt + q/C = V(t)",
+      "tool_calls": 11,
+      "llm_turns": 11,
+      "elapsed_s": 40.0071,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "delta_6_1",
+      "seed": 1,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 10,
+      "llm_turns": 8,
+      "elapsed_s": 65.5361,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "rlc",
+      "shift_id": "delta_6_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "kirchhoff_loop_rlc",
+          "formula": "L*d2q/dt^2 + R*dq/dt + q/C = V(t)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, q, i, L, R, C):\n    return L*0.0 + R*i + q/C\n"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "V",
+              "units": "V"
+            }
+          ],
+          "params": [
+            {
+              "name": "L",
+              "units": "H",
+              "value": 1.0
+            },
+            {
+              "name": "R",
+              "units": "ohm",
+              "value": 1.0
+            },
+            {
+              "name": "C",
+              "units": "F",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "current_charge_relation",
+          "formula": "i = dq/dt",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, q_dot):\n    return q_dot\n"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "q_dot",
+              "units": "A"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "kirchhoff_loop_rlc",
+      "claimed_formula": "L*d2q/dt^2 + R*dq/dt + q/C = V(t)",
+      "tool_calls": 10,
+      "llm_turns": 10,
+      "elapsed_s": 39.1877,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "fourier_heat_conduction",
+          "formula": "q = k*(T_hot - T_cold)/L",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L, k):\n    return k*(T_hot - T_cold)/L"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "W m^-1 K^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W m^-2"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "fourier_heat_conduction",
+      "claimed_formula": "q = k*(T_hot - T_cold)/L",
+      "tool_calls": 5,
+      "llm_turns": 6,
+      "elapsed_s": 18.5445,
+      "terminated_by": "submit",
+      "score": 0.775085
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "fourier",
+          "formula": "q = k*(T_hot - T_cold)/L",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L, k):\n    return k*(T_hot - T_cold)/L"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "W/(m*K)"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W/m^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "W/(m*K)",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "fourier",
+      "claimed_formula": "q = k*(T_hot - T_cold)/L",
+      "tool_calls": 6,
+      "llm_turns": 7,
+      "elapsed_s": 23.9485,
+      "terminated_by": "submit",
+      "score": 0.064505
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "fourier_heat_conduction",
+          "formula": "q = k*(T_hot - T_cold)/L",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L, k):\n    return k*(T_hot - T_cold)/L"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "W m^-1 K^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W m^-2"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "fourier_heat_conduction",
+      "claimed_formula": "q = k*(T_hot - T_cold)/L",
+      "tool_calls": 9,
+      "llm_turns": 9,
+      "elapsed_s": 29.5806,
+      "terminated_by": "submit",
+      "score": 0.716595
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "delta_7_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "fourier",
+          "formula": "q = k*(T_hot - T_cold)/L",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L, k):\n    return k*(T_hot - T_cold)/L"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "W m^-1 K^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W m^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "W m^-1 K^-1",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "fourier",
+      "claimed_formula": "q = k*(T_hot - T_cold)/L",
+      "tool_calls": 8,
+      "llm_turns": 9,
+      "elapsed_s": 29.2445,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "delta_7_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "fourier",
+          "formula": "q = k*(T_hot - T_cold)/L",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L, k):\n    return k*(T_hot - T_cold)/L"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "W m^-1 K^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W m^-2"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "fourier",
+      "claimed_formula": "q = k*(T_hot - T_cold)/L",
+      "tool_calls": 6,
+      "llm_turns": 7,
+      "elapsed_s": 22.6581,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "thermal",
+      "shift_id": "delta_7_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "fourier",
+          "formula": "q = k*(T_hot - T_cold)/L",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L, k):\n    return k*(T_hot - T_cold)/L"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            },
+            {
+              "name": "k",
+              "units": "W m^-1 K^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W m^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "W m^-1 K^-1",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "fourier",
+      "claimed_formula": "q = k*(T_hot - T_cold)/L",
+      "tool_calls": 7,
+      "llm_turns": 7,
+      "elapsed_s": 22.6632,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "gamma_8_1",
+      "seed": 0,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 6,
+      "llm_turns": 5,
+      "elapsed_s": 136.9849,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "gamma_8_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "simple_harmonic_oscillator_time_derivative",
+          "formula": "du_dt = A*omega*cos(omega*t + phi), with u = A*sin(omega*t + phi)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, A, omega, phi):\n    import math\n    return A*omega*math.cos(omega*t + phi)\n"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "A",
+              "units": "1"
+            },
+            {
+              "name": "omega",
+              "units": "s^-1"
+            },
+            {
+              "name": "phi",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "du_dt",
+              "units": "s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "1",
+              "value": 0.1
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 20.0
+            },
+            {
+              "name": "phi",
+              "units": "1",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "simple_harmonic_oscillator_field",
+          "formula": "u = A*sin(omega*t + phi)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, A, omega, phi):\n    import math\n    return A*math.sin(omega*t + phi)\n"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "A",
+              "units": "1"
+            },
+            {
+              "name": "omega",
+              "units": "s^-1"
+            },
+            {
+              "name": "phi",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "u",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "1",
+              "value": 0.1
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 20.0
+            },
+            {
+              "name": "phi",
+              "units": "1",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "shm_ode",
+          "formula": "d2u_dt2 + omega^2*u = 0",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(u, omega):\n    return -(omega**2)*u\n"
+          },
+          "inputs": [
+            {
+              "name": "u",
+              "units": "1"
+            },
+            {
+              "name": "omega",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "d2u_dt2",
+              "units": "s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 20.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "simple_harmonic_oscillator_time_derivative",
+      "claimed_formula": "du_dt = A*omega*cos(omega*t + phi), with u = A*sin(omega*t + phi)",
+      "tool_calls": 6,
+      "llm_turns": 6,
+      "elapsed_s": 35.5472,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "gamma_8_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "harmonic_oscillator_probe",
+          "formula": "du_dt = -A*omega*sin(phi)*sin(omega*t) + A*omega*cos(phi)*cos(omega*t), with u(t)=A*sin(omega*t+phi) equivalently du_dt^2 + omega^2 u^2 = A^2 omega^2",
+          "predictor": {
+            "lang": "python",
+            "code": "import math\nA=0.1\nomega=2300.0\nphi=1.0\ndef f(t,u):\n    return A*omega*math.cos(omega*t+phi)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "u",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "du_dt",
+              "units": "s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "1",
+              "value": 0.1
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 2300.0
+            },
+            {
+              "name": "phi",
+              "units": "1",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "harmonic_oscillator_probe",
+      "claimed_formula": "du_dt = -A*omega*sin(phi)*sin(omega*t) + A*omega*cos(phi)*cos(omega*t), with u(t)=A*sin(omega*t+phi) equivalently du_dt^2 + omega^2 u^2 = A^2 omega^2",
+      "tool_calls": 6,
+      "llm_turns": 5,
+      "elapsed_s": 31.9908,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "delta_8_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "sho_time_evolution",
+          "formula": "du_dt = \u00b1\u03c9*sqrt(A^2 - u^2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(u, A, omega):\n    import math\n    z = A*A - u*u\n    if z < 0:\n        z = 0.0\n    return omega*math.sqrt(z)\n"
+          },
+          "inputs": [
+            {
+              "name": "u",
+              "units": "arb"
+            },
+            {
+              "name": "A",
+              "units": "arb"
+            },
+            {
+              "name": "omega",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "du_dt",
+              "units": "arb s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "arb",
+              "value": 0.1
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 125.66370614359172
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "harmonic_oscillator",
+          "formula": "d^2u/dt^2 + \u03c9^2 u = 0",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, A, omega, phi):\n    import math\n    return A*math.cos(omega*t + phi)\n"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "A",
+              "units": "arb"
+            },
+            {
+              "name": "omega",
+              "units": "s^-1"
+            },
+            {
+              "name": "phi",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "u",
+              "units": "arb"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "arb",
+              "value": 0.1
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 125.66370614359172
+            },
+            {
+              "name": "phi",
+              "units": "1",
+              "value": 0.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "harmonic_oscillator_velocity",
+          "formula": "du_dt = -A\u03c9 sin(\u03c9 t + \u03c6)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, A, omega, phi):\n    import math\n    return -A*omega*math.sin(omega*t + phi)\n"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "A",
+              "units": "arb"
+            },
+            {
+              "name": "omega",
+              "units": "s^-1"
+            },
+            {
+              "name": "phi",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "du_dt",
+              "units": "arb s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "arb",
+              "value": 0.1
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 125.66370614359172
+            },
+            {
+              "name": "phi",
+              "units": "1",
+              "value": 0.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "sho_time_evolution",
+      "claimed_formula": "du_dt = \u00b1\u03c9*sqrt(A^2 - u^2)",
+      "tool_calls": 7,
+      "llm_turns": 7,
+      "elapsed_s": 47.1682,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "delta_8_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "simple_harmonic_oscillator",
+          "formula": "du_dt = v, dv_dt = -omega**2 * u",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, u, omega):\n    return - (omega**2) * u\n"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "u",
+              "units": "1"
+            },
+            {
+              "name": "omega",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "d2u_dt2",
+              "units": "s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 20.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "sinusoidal_time_dependence",
+          "formula": "u(t) = A*cos(omega*t + phi), du_dt = -A*omega*sin(omega*t + phi)",
+          "predictor": {
+            "lang": "python",
+            "code": "import math\n\ndef f(t, A, omega, phi):\n    return -A*omega*math.sin(omega*t + phi)\n"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "A",
+              "units": "1"
+            },
+            {
+              "name": "omega",
+              "units": "s^-1"
+            },
+            {
+              "name": "phi",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "du_dt",
+              "units": "s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "1",
+              "value": 0.1
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 20.0
+            },
+            {
+              "name": "phi",
+              "units": "1",
+              "value": 0.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "simple_harmonic_oscillator",
+      "claimed_formula": "du_dt = v, dv_dt = -omega**2 * u",
+      "tool_calls": 5,
+      "llm_turns": 6,
+      "elapsed_s": 28.3714,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "wave",
+      "shift_id": "delta_8_1",
+      "seed": 2,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 5,
+      "llm_turns": 5,
+      "elapsed_s": 121.2422,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "gamma_9_1",
+      "seed": 0,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 20,
+      "llm_turns": 15,
+      "elapsed_s": 41.7849,
+      "terminated_by": "budget",
+      "score": 0.0
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "gamma_9_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "snell",
+          "formula": "n1*sin(theta1) = n2*sin(theta2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta1, n1, n2):\n    import math\n    x = (n1/n2)*math.sin(theta1)\n    x = max(-1.0, min(1.0, x))\n    return math.asin(x)"
+          },
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "rad"
+            },
+            {
+              "name": "n1",
+              "units": "1"
+            },
+            {
+              "name": "n2",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "rad"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "snell",
+      "claimed_formula": "n1*sin(theta1) = n2*sin(theta2)",
+      "tool_calls": 4,
+      "llm_turns": 5,
+      "elapsed_s": 16.1325,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "gamma_9_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "snell",
+          "formula": "n1*sin(theta1) = n2*sin(theta2)",
+          "predictor": {
+            "lang": "python",
+            "code": "import math\n\ndef f(theta1, k=0.625):\n    return math.asin(k*math.sin(theta1))"
+          },
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "rad"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "rad"
+            }
+          ],
+          "params": [
+            {
+              "name": "k=n1/n2",
+              "units": "1",
+              "value": 0.625
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "snell",
+      "claimed_formula": "n1*sin(theta1) = n2*sin(theta2)",
+      "tool_calls": 12,
+      "llm_turns": 9,
+      "elapsed_s": 27.2503,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "delta_9_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "snell",
+          "formula": "n1*sin(theta1) = n2*sin(theta2)",
+          "predictor": {
+            "lang": "python",
+            "code": "import math\n\ndef f(theta1, n1, n2):\n    x = (n1/n2)*math.sin(theta1)\n    if x < -1 or x > 1:\n        return float('nan')\n    return math.asin(x)"
+          },
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "rad"
+            },
+            {
+              "name": "n1",
+              "units": "1"
+            },
+            {
+              "name": "n2",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "rad"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "snell",
+      "claimed_formula": "n1*sin(theta1) = n2*sin(theta2)",
+      "tool_calls": 11,
+      "llm_turns": 11,
+      "elapsed_s": 33.7819,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "delta_9_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "snell",
+          "formula": "n1*sin(theta1) = n2*sin(theta2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta1, n1, n2):\n    import math\n    return math.asin((n1/n2)*math.sin(theta1))"
+          },
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "1"
+            },
+            {
+              "name": "n1",
+              "units": "1"
+            },
+            {
+              "name": "n2",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "1"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "snell",
+      "claimed_formula": "n1*sin(theta1) = n2*sin(theta2)",
+      "tool_calls": 16,
+      "llm_turns": 16,
+      "elapsed_s": 49.5831,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "optics",
+      "shift_id": "delta_9_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "snell",
+          "formula": "n1*sin(theta1) = n2*sin(theta2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta1, n1, n2):\n    import math\n    x = (n1/n2)*math.sin(theta1)\n    x = max(-1.0, min(1.0, x))\n    return math.asin(x)"
+          },
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "1"
+            },
+            {
+              "name": "n1",
+              "units": "1"
+            },
+            {
+              "name": "n2",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "1"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "snell",
+      "claimed_formula": "n1*sin(theta1) = n2*sin(theta2)",
+      "tool_calls": 6,
+      "llm_turns": 6,
+      "elapsed_s": 16.6758,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "bernoulli",
+          "formula": "p + (1/2) rho v^2 + rho g h = p2 + (1/2) rho v2^2 + rho g h2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(v,h,p,v2,h2,rho,g):\n    return p + 0.5*rho*(v*v - v2*v2) + rho*g*(h - h2)"
+          },
+          "inputs": [
+            {
+              "name": "v",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h",
+              "units": "m"
+            },
+            {
+              "name": "p",
+              "units": "Pa"
+            },
+            {
+              "name": "v2",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            },
+            {
+              "name": "rho",
+              "units": "kg m^-3"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho",
+              "units": "kg m^-3",
+              "value": 1000.0
+            },
+            {
+              "name": "g",
+              "units": "m s^-2",
+              "value": 9.81
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "bernoulli",
+      "claimed_formula": "p + (1/2) rho v^2 + rho g h = p2 + (1/2) rho v2^2 + rho g h2",
+      "tool_calls": 7,
+      "llm_turns": 7,
+      "elapsed_s": 22.4815,
+      "terminated_by": "submit",
+      "score": 0.014241
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "bernoulli",
+          "formula": "p2 = p + (1/2)*rho*(v^2 - v2^2) + rho*g*(h - h2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(p, v, h, v2, h2, rho, g):\n    return p + 0.5*rho*(v*v - v2*v2) + rho*g*(h - h2)"
+          },
+          "inputs": [
+            {
+              "name": "p",
+              "units": "kg m^-1 s^-2"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h",
+              "units": "m"
+            },
+            {
+              "name": "v2",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            },
+            {
+              "name": "rho",
+              "units": "kg m^-3"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "kg m^-1 s^-2"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "bernoulli",
+      "claimed_formula": "p2 = p + (1/2)*rho*(v^2 - v2^2) + rho*g*(h - h2)",
+      "tool_calls": 5,
+      "llm_turns": 5,
+      "elapsed_s": 15.9574,
+      "terminated_by": "submit",
+      "score": 0.017372
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "bernoulli",
+          "formula": "p2 = p + (1/2)*rho*(v^2 - v2^2) + rho*g*(h - h2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(v, h, p, v2, h2, rho, g):\n    return p + 0.5*rho*(v*v - v2*v2) + rho*g*(h - h2)"
+          },
+          "inputs": [
+            {
+              "name": "v",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h",
+              "units": "m"
+            },
+            {
+              "name": "p",
+              "units": "Pa"
+            },
+            {
+              "name": "v2",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            },
+            {
+              "name": "rho",
+              "units": "kg m^-3"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "bernoulli",
+      "claimed_formula": "p2 = p + (1/2)*rho*(v^2 - v2^2) + rho*g*(h - h2)",
+      "tool_calls": 6,
+      "llm_turns": 6,
+      "elapsed_s": 17.4801,
+      "terminated_by": "submit",
+      "score": 0.024443
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "delta_10_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "bernoulli",
+          "formula": "p_2 = p_1 + \\tfrac{1}{2}\\rho\\left(v_1^2-v_2^2\\right) + \\rho g\\left(h_1-h_2\\right)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(p1, v1, h1, v2, h2, rho, g):\n    return p1 + 0.5*rho*(v1**2 - v2**2) + rho*g*(h1 - h2)\n"
+          },
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "Pa"
+            },
+            {
+              "name": "v1",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "v2",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            },
+            {
+              "name": "rho",
+              "units": "kg m^-3"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "bernoulli",
+      "claimed_formula": "p_2 = p_1 + \\tfrac{1}{2}\\rho\\left(v_1^2-v_2^2\\right) + \\rho g\\left(h_1-h_2\\right)",
+      "tool_calls": 18,
+      "llm_turns": 17,
+      "elapsed_s": 53.1512,
+      "terminated_by": "submit",
+      "score": 0.99245
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "delta_10_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "bernoulli",
+          "formula": "p2 = p + rho*g*(h - h2) + 0.5*rho*(v^2 - v2^2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(v, h, p, v2, h2, rho):\n    g = 9.81\n    return p + rho*g*(h - h2) + 0.5*rho*(v*v - v2*v2)"
+          },
+          "inputs": [
+            {
+              "name": "v",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h",
+              "units": "m"
+            },
+            {
+              "name": "p",
+              "units": "Pa"
+            },
+            {
+              "name": "v2",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            },
+            {
+              "name": "rho",
+              "units": "kg m^-3"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa"
+            }
+          ],
+          "params": [
+            {
+              "name": "g",
+              "units": "m s^-2",
+              "value": 9.81
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "bernoulli",
+      "claimed_formula": "p2 = p + rho*g*(h - h2) + 0.5*rho*(v^2 - v2^2)",
+      "tool_calls": 7,
+      "llm_turns": 7,
+      "elapsed_s": 20.5908,
+      "terminated_by": "submit",
+      "score": 0.024916
+    },
+    {
+      "domain_id": "fluid",
+      "shift_id": "delta_10_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "bernoulli",
+          "formula": "p2 = p + (1/2)*rho*(v^2 - v2^2) + rho*g*(h - h2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(p, v, h, v2, h2, rho, g):\n    return p + 0.5*rho*(v**2 - v2**2) + rho*g*(h - h2)"
+          },
+          "inputs": [
+            {
+              "name": "p",
+              "units": "Pa"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h",
+              "units": "m"
+            },
+            {
+              "name": "v2",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            },
+            {
+              "name": "rho",
+              "units": "kg m^-3"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho",
+              "units": "kg m^-3",
+              "value": 1000.0
+            },
+            {
+              "name": "g",
+              "units": "m s^-2",
+              "value": 9.81
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "bernoulli",
+      "claimed_formula": "p2 = p + (1/2)*rho*(v^2 - v2^2) + rho*g*(h - h2)",
+      "tool_calls": 7,
+      "llm_turns": 7,
+      "elapsed_s": 20.7941,
+      "terminated_by": "submit",
+      "score": 0.019757
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_1",
+      "seed": 0,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 7,
+      "llm_turns": 5,
+      "elapsed_s": 82.7418,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "first_order_rate_law",
+          "formula": "rate = dC/dt = -k C",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(C, k):\n    return -k*C"
+          },
+          "inputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            },
+            {
+              "name": "k",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "rate",
+              "units": "mol m^-3 s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "s^-1",
+              "value": 0.00017
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "first_order_rate_law",
+      "claimed_formula": "rate = dC/dt = -k C",
+      "tool_calls": 12,
+      "llm_turns": 11,
+      "elapsed_s": 50.9754,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_1",
+      "seed": 2,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 16,
+      "llm_turns": 15,
+      "elapsed_s": 70.9194,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "delta_11_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "first_order_rate_law",
+          "formula": "rate = -k C",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(C, k):\n    return -k*C"
+          },
+          "inputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            },
+            {
+              "name": "k",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "rate",
+              "units": "mol m^-3 s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "s^-1",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "second_order_rate_law",
+          "formula": "rate = -k C^2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(C, k):\n    return -k*C*C"
+          },
+          "inputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            },
+            {
+              "name": "k",
+              "units": "m^3 mol^-1 s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "rate",
+              "units": "mol m^-3 s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "m^3 mol^-1 s^-1",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "zero_order_rate_law",
+          "formula": "rate = -k",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(k):\n    return -k"
+          },
+          "inputs": [
+            {
+              "name": "k",
+              "units": "mol m^-3 s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "rate",
+              "units": "mol m^-3 s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "mol m^-3 s^-1",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "first_order_rate_law",
+      "claimed_formula": "rate = -k C",
+      "tool_calls": 12,
+      "llm_turns": 12,
+      "elapsed_s": 34.7248,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "delta_11_1",
+      "seed": 1,
+      "submission": [
+        {
+          "law_id": "first_order_rate_law",
+          "formula": "rate = dC/dt = -k C",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(C, k):\n    return -k*C"
+          },
+          "inputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            },
+            {
+              "name": "k",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "rate",
+              "units": "mol m^-3 s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "s^-1",
+              "value": 0.071
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "integrated_first_order_decay",
+          "formula": "C(t) = C0 exp(-k t)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, C0, k):\n    import math\n    return C0*math.exp(-k*t)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol m^-3"
+            },
+            {
+              "name": "k",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "s^-1",
+              "value": 0.071
+            },
+            {
+              "name": "C0",
+              "units": "mol m^-3",
+              "value": 1.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "first_order_rate_law",
+      "claimed_formula": "rate = dC/dt = -k C",
+      "tool_calls": 13,
+      "llm_turns": 12,
+      "elapsed_s": 48.2888,
+      "terminated_by": "submit",
+      "score": 0.895148
+    },
+    {
+      "domain_id": "kinetics",
+      "shift_id": "delta_11_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "nth_order_rate_law",
+          "formula": "rate = dC/dt = -k*C**n",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(C, k, n):\n    return -k*(C**n)\n"
+          },
+          "inputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "rate",
+              "units": "mol m^-3 s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "m^(3*(n-1)) mol^(1-n) s^-1",
+              "value": 0.0017053025658242404
+            },
+            {
+              "name": "n",
+              "units": "1",
+              "value": 2.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "second_order_integrated_rate_law",
+          "formula": "C(t) = C0 / (1 + k*C0*t)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, C0, k):\n    return C0/(1.0 + k*C0*t)\n"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol m^-3"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "m^3 mol^-1 s^-1",
+              "value": 0.0017053025658242404
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "nth_order_rate_law",
+      "claimed_formula": "rate = dC/dt = -k*C**n",
+      "tool_calls": 15,
+      "llm_turns": 15,
+      "elapsed_s": 49.1129,
+      "terminated_by": "submit",
+      "score": 0.0
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "gamma_12_1",
+      "seed": 0,
+      "submission": [
+        {
+          "law_id": "radioactive_decay",
+          "formula": "dN/dt = -\\lambda N",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, N, lam):\n    return -lam * N"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "N",
+              "units": "1"
+            },
+            {
+              "name": "lam",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "rate",
+              "units": "s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "lam",
+              "units": "s^-1",
+              "value": 0.0003121770566431807
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "radioactive_decay_integrated",
+          "formula": "N(t) = N_0 e^{-\\lambda t}",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, N0, lam):\n    import math\n    return N0 * math.exp(-lam * t)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "N0",
+              "units": "1"
+            },
+            {
+              "name": "lam",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "N0",
+              "units": "1",
+              "value": 1000000.0
+            },
+            {
+              "name": "lam",
+              "units": "s^-1",
+              "value": 0.0003121770566431807
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "radioactive_decay",
+      "claimed_formula": "dN/dt = -\\lambda N",
+      "tool_calls": 9,
+      "llm_turns": 9,
+      "elapsed_s": 60.307,
+      "terminated_by": "submit",
+      "score": 0.206459
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "gamma_12_1",
+      "seed": 1,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 7,
+      "llm_turns": 6,
+      "elapsed_s": 63.8309,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "gamma_12_1",
+      "seed": 2,
+      "submission": [
+        {
+          "law_id": "exponential_growth",
+          "formula": "dN/dt = lambda*N",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, N, lambda_):\n    return lambda_ * N"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "N",
+              "units": "1"
+            },
+            {
+              "name": "lambda_",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "dNdt",
+              "units": "s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "lambda_",
+              "units": "s^-1",
+              "value": 0.001471385
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "exponential_population",
+          "formula": "N(t) = N0*exp(lambda*t)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, N0, lambda_):\n    import math\n    return N0 * math.exp(lambda_ * t)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "N0",
+              "units": "1"
+            },
+            {
+              "name": "lambda_",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "lambda_",
+              "units": "s^-1",
+              "value": 0.001471385
+            },
+            {
+              "name": "N0",
+              "units": "1",
+              "value": 1000000.0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "claimed_law": "exponential_growth",
+      "claimed_formula": "dN/dt = lambda*N",
+      "tool_calls": 9,
+      "llm_turns": 9,
+      "elapsed_s": 32.3633,
+      "terminated_by": "submit",
+      "score": 0.95
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "delta_12_1",
+      "seed": 0,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 10,
+      "llm_turns": 9,
+      "elapsed_s": 60.5592,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "delta_12_1",
+      "seed": 1,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 9,
+      "llm_turns": 8,
+      "elapsed_s": 74.5041,
+      "terminated_by": "wall",
+      "score": 0.0
+    },
+    {
+      "domain_id": "decay",
+      "shift_id": "delta_12_1",
+      "seed": 2,
+      "submission": [],
+      "claimed_law": null,
+      "claimed_formula": null,
+      "tool_calls": 8,
+      "llm_turns": 7,
+      "elapsed_s": 67.4856,
+      "terminated_by": "wall",
+      "score": 0.0
+    }
+  ]
+}
