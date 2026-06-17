@@ -24,12 +24,12 @@ Cells (4 representative domains × 3 tiers):
   | thermal  | baseline | gamma_7_1  | delta_7_1  |
   | decay    | baseline | gamma_12_1 | delta_12_1 |
 
-Models (slots 1-5, user-confirmed):
-  1. claude-opus-4.6           (anthropic, 4141)
+Models (slots 1-5, T25 non-claude panel):
+  1. gpt-5.5                   (anthropic-fmt proxy, 4141)
   2. gpt-5.4-20260305          (openai,    4142/v1)
-  3. gemini-3.1-pro-preview    (anthropic, 4141)
-  4. claude-sonnet-4.5         (anthropic, 4141)
-  5. gpt-4.1-20250414          (openai,    4142/v1)  [Sprint 4 swap: gpt-4o unrouted on proxy]
+  3. gemini-3.1-pro-preview    (anthropic-fmt proxy, 4141)
+  4. gemini-3.5-flash          (anthropic-fmt proxy, 4141)
+  5. gpt-4.1-20250414          (openai,    4142/v1)
 
 Hard cap: 2000 LLM turns. Stops the sweep mid-stride and writes a
 ``stopped_at_cap`` flag if exceeded by 20 % (i.e. ≥ 2400).
@@ -84,11 +84,11 @@ class ModelSpec:
 
 
 MODEL_PANEL: Tuple[ModelSpec, ...] = (
-    ModelSpec(1, "claude-opus-4.6",        "anthropic", "http://127.0.0.1:4141", None, "dummy"),
-    ModelSpec(2, "gpt-5.4-20260305",       "openai",    "http://127.0.0.1:4142/v1", "MIRRORLAB_LLM_API_KEY"),
-    ModelSpec(3, "gemini-3.1-pro-preview", "anthropic", "http://127.0.0.1:4141", None, "dummy"),
-    ModelSpec(4, "claude-sonnet-4.5",      "anthropic", "http://127.0.0.1:4141", None, "dummy"),
-    ModelSpec(5, "gpt-4.1-20250414",       "openai",    "http://127.0.0.1:4142/v1", "MIRRORLAB_LLM_API_KEY"),
+    ModelSpec(1, "gpt-5.5",                 "anthropic", "http://127.0.0.1:4141", None, "dummy"),
+    ModelSpec(2, "gpt-5.4-20260305",        "openai",    "http://127.0.0.1:4142/v1", "MIRRORLAB_LLM_API_KEY"),
+    ModelSpec(3, "gemini-3.1-pro-preview",  "gemini",    "http://127.0.0.1:4141", None, "dummy"),
+    ModelSpec(4, "gemini-3.5-flash",        "gemini",    "http://127.0.0.1:4141", None, "dummy"),
+    ModelSpec(5, "gpt-4.1-20250414",        "openai",    "http://127.0.0.1:4142/v1", "MIRRORLAB_LLM_API_KEY"),
 )
 
 
@@ -278,6 +278,7 @@ def run_sweep(
 
     meta = {
         "schema_version": 1,
+        "xy_version": 1,
         "n_models": len(models),
         "n_cells": len(cells),
         "n_runs_planned": n_runs_total,
