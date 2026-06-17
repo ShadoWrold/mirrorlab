@@ -62,3 +62,32 @@ def test_match_dim_missing_units_fails_closed():
 def test_match_dim_garbage_units_fails_closed():
     entry = {"outputs": [{"name": "F", "units": "foo"}]}
     assert match_dim(entry, "kg*m*s**-2") is False
+
+
+# ---- "name = expansion" equivalence declarations (T25 parser bug) -------
+# LLMs frequently write a unit as "<named> = <base-SI expansion>", e.g.
+# gpt-5.5 submitted "N = kg m s^-2" for force. The two sides are the SAME
+# dimension written two ways; the parser must NOT multiply them together.
+
+def test_parse_named_equals_expansion_force():
+    # Was the bug: parsed N(1,1,-2) * kg*m*s^-2(1,1,-2) = (2,2,-4).
+    assert parse_dim("N = kg m s^-2") == (1, 1, -2, 0, 0, 0, 0)
+
+
+def test_parse_named_equals_expansion_spring_constant():
+    assert parse_dim("N m^-1 = kg s^-2") == (1, 0, -2, 0, 0, 0, 0)
+
+
+def test_parse_expansion_equals_named_either_side():
+    # Equivalence is symmetric: expansion on the left must also work.
+    assert parse_dim("kg m s^-2 = N") == (1, 1, -2, 0, 0, 0, 0)
+
+
+def test_parse_space_separated_base_si():
+    # "kg m s^-2" (space-separated, ^ exponent) must equal the canonical form.
+    assert parse_dim("kg m s^-2") == (1, 1, -2, 0, 0, 0, 0)
+
+
+def test_match_dim_accepts_named_equals_expansion():
+    entry = {"outputs": [{"name": "F", "units": "N = kg m s^-2"}]}
+    assert match_dim(entry, "kg*m*s**-2") is True

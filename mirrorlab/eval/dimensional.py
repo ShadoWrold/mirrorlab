@@ -74,6 +74,12 @@ def parse_dim(spec: str) -> Dim7:
     if spec is None:
         raise ValueError("dim spec is None")
     s = spec.strip()
+    # "<named> = <base-SI expansion>" is an equivalence declaration (e.g.
+    # "N = kg m s^-2"), not a product. Both sides denote the same dimension;
+    # parse only the first side. Without this, the token scanner below would
+    # multiply both sides together (N·kg·m·s^-2 → (2,2,-4)).
+    if "=" in s:
+        s = s.split("=", 1)[0].strip()
     abstract_form = s.startswith("[") and s.endswith("]")
     if abstract_form:
         s = s[1:-1]
