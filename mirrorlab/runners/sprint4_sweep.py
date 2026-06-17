@@ -89,6 +89,7 @@ MODEL_PANEL: Tuple[ModelSpec, ...] = (
     ModelSpec(3, "gemini-3.1-pro-preview",  "gemini",    "http://127.0.0.1:4141", None, "dummy"),
     ModelSpec(4, "gemini-3.5-flash",        "gemini",    "http://127.0.0.1:4141", None, "dummy"),
     ModelSpec(5, "gpt-4.1-20250414",        "openai",    "http://127.0.0.1:4142/v1", "MIRRORLAB_LLM_API_KEY"),
+    ModelSpec(6, "claude-opus-4.8",         "anthropic", "http://127.0.0.1:4141", None, "dummy"),
 )
 
 
