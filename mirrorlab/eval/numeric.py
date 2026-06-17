@@ -90,6 +90,35 @@ def _predictor_signature(f: Callable[..., float]) -> tuple[Optional[set[str]], b
     return allowed, has_var_kw
 
 
+def _exec_predictor_code(code: str) -> dict[str, Any]:
+    """Exec predictor source into a fresh namespace, tolerating LLMs that
+    emit literal ``\\n`` (backslash-n) instead of real newlines.
+
+    Some models (observed: gemini on a minority of cells) serialize the
+    predictor body with the newlines left as the two-character sequence
+    ``\\n``. Python then reads ``def f(x):\\n    ...`` as a line-continuation
+    backslash followed by ``n`` and raises SyntaxError, even though the
+    physics is correct. We retry once with the escapes unfolded. The retry
+    only fires when the as-written code fails to compile AND contains a
+    literal ``\\n`` with no real newline, so well-formed multi-line code
+    (and intentional ``"\\n"`` string literals inside compilable code) is
+    never touched.
+    """
+    ns: dict[str, Any] = {}
+    try:
+        exec(code, ns)  # noqa: S102 — trusted within sandbox
+        return ns
+    except SyntaxError:
+        if "\\n" in code and "\n" not in code:
+            # Unfold only the literal newline escape; leave every other
+            # backslash sequence intact so we don't corrupt the body.
+            unfolded = code.replace("\\n", "\n")
+            ns = {}
+            exec(unfolded, ns)  # noqa: S102 — trusted within sandbox
+            return ns
+        raise
+
+
 def _materialize_predictor(entry: Mapping[str, Any]) -> Callable[..., float]:
     """Extract the raw predictor callable from an entry (no closure)."""
     if callable(entry.get("_predictor")):
@@ -97,8 +126,7 @@ def _materialize_predictor(entry: Mapping[str, Any]) -> Callable[..., float]:
     pred = entry.get("predictor") or {}
     if pred.get("lang") != "python" or "code" not in pred:
         raise ValueError("entry has no usable predictor")
-    ns: dict[str, Any] = {}
-    exec(pred["code"], ns)  # noqa: S102 — trusted within sandbox
+    ns = _exec_predictor_code(pred["code"])
     funcs = [v for k, v in ns.items() if callable(v) and not k.startswith("_")]
     if not funcs:
         raise ValueError("predictor code defined no callable")

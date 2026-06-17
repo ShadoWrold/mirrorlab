@@ -130,3 +130,33 @@ def test_constant_predictor_scores_near_zero():
     }
     s = evaluate_entry(entry, grids)
     assert s < 0.9  # well below a fitting predictor on a nontrivial spring
+
+
+# ---- Literal-newline predictor tolerance (gemini serialization quirk) ----
+# Some models emit the predictor body with newlines left as the literal
+# two-char sequence "\n" instead of real newlines. Python reads this as a
+# line-continuation backslash and raises SyntaxError despite correct physics.
+
+def test_materialize_predictor_unfolds_literal_newline():
+    from mirrorlab.eval.numeric import _materialize_predictor
+    entry = {"predictor": {"lang": "python",
+                           "code": "def f(x):\\n    return -10.0 * x"}}
+    f = _materialize_predictor(entry)
+    assert f(2.0) == pytest.approx(-20.0)
+
+
+def test_materialize_predictor_preserves_real_multiline():
+    from mirrorlab.eval.numeric import _materialize_predictor
+    entry = {"predictor": {"lang": "python",
+                           "code": "def g(x):\n    k = 5.0\n    return -k * x"}}
+    g = _materialize_predictor(entry)
+    assert g(3.0) == pytest.approx(-15.0)
+
+
+def test_materialize_predictor_real_syntax_error_still_raises():
+    # A genuinely broken body (no literal-\n escape) must not be silently
+    # rescued — it should still raise.
+    from mirrorlab.eval.numeric import _materialize_predictor
+    entry = {"predictor": {"lang": "python", "code": "def f(x): return ("}}
+    with pytest.raises(SyntaxError):
+        _materialize_predictor(entry)
