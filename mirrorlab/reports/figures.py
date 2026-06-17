@@ -1,9 +1,9 @@
 """Paper-1 figure renderer.
 
 Reads:
-- docs/sprint4-sweep-data-final.json   (5 models x 4 domains x 3 tiers = 60 runs)
-- docs/ceiling-data.json               (48 ceiling pairs, full 12-domain)
-- docs/sprint35-pilot-data.json        (attacker reference, s_bench_lookup = 0)
+- docs/sprint4-sweep-data-final.json   (4 models x 4 domains x 3 tiers = 48 runs)
+- docs/ceiling-data.json               (48 ceiling pairs, full 12-domain, xy_version 1)
+- docs/t24-attacker-data.json          (lookup attacker, s_bench_lookup = 0.159)
 
 Writes 6 paper-grade figures into figures/ as 300dpi PNG + vector PDF.
 
@@ -28,41 +28,37 @@ FIG_DIR = ROOT / "figures"
 
 SWEEP_PATH = DOCS / "sprint4-sweep-data-final.json"
 CEILING_PATH = DOCS / "ceiling-data.json"
-ATTACKER_PATH = DOCS / "sprint35-pilot-data.json"
+ATTACKER_PATH = DOCS / "t24-attacker-data.json"
 
 MODELS = [
-    "claude-opus-4.6",
-    "claude-sonnet-4.5",
-    "gemini-3.1-pro-preview",
-    "gpt-4.1-20250414",
+    "gpt-5.5",
     "gpt-5.4-20260305",
+    "gemini-3.1-pro-preview",
+    "claude-opus-4.8",
 ]
 MODEL_SHORT = {
-    "claude-opus-4.6": "Opus-4.6",
-    "claude-sonnet-4.5": "Sonnet-4.5",
-    "gemini-3.1-pro-preview": "Gemini-3.1-Pro",
-    "gpt-4.1-20250414": "GPT-4.1",
+    "gpt-5.5": "GPT-5.5",
     "gpt-5.4-20260305": "GPT-5.4",
+    "gemini-3.1-pro-preview": "Gemini-3.1-Pro",
+    "claude-opus-4.8": "Opus-4.8",
 }
 TIERS = ["baseline", "gamma", "delta"]
 TIER_LABEL = {"baseline": "Baseline", "gamma": "$\\gamma$-shift", "delta": "$\\delta$-shift"}
 DOMAINS = ["hooke", "coulomb", "thermal", "decay"]
 DOMAIN_LABEL = {"hooke": "Hooke", "coulomb": "Coulomb", "thermal": "Thermal", "decay": "Decay"}
 
-# Set2-derived color-blind-safe palette, 5 distinct hues
+# Set2-derived color-blind-safe palette, 4 distinct hues
 MODEL_COLORS = {
-    "claude-opus-4.6": "#66c2a5",
-    "claude-sonnet-4.5": "#fc8d62",
+    "gpt-5.5": "#66c2a5",
+    "gpt-5.4-20260305": "#fc8d62",
     "gemini-3.1-pro-preview": "#8da0cb",
-    "gpt-4.1-20250414": "#e78ac3",
-    "gpt-5.4-20260305": "#a6d854",
+    "claude-opus-4.8": "#e78ac3",
 }
 MODEL_MARKERS = {
-    "claude-opus-4.6": "o",
-    "claude-sonnet-4.5": "s",
-    "gemini-3.1-pro-preview": "D",
-    "gpt-4.1-20250414": "v",
+    "gpt-5.5": "o",
     "gpt-5.4-20260305": "^",
+    "gemini-3.1-pro-preview": "D",
+    "claude-opus-4.8": "s",
 }
 
 MAX_TOOL_CALLS = 30
@@ -124,7 +120,7 @@ def _ceiling_tier_means(ceiling: dict) -> dict[str, float]:
     for row in ceiling["rows"]:
         sh = row["shift_id"]
         tier = "baseline" if sh == "baseline" else ("gamma" if sh.startswith("gamma") else "delta")
-        bucket[tier].append(row["s_scen"])
+        bucket[tier].append(row["s_scen_ceiling"])
     return {t: float(np.mean(bucket[t])) for t in TIERS}
 
 
@@ -197,7 +193,7 @@ def fig_heatmap(sweep: dict) -> None:
                     color=color, fontsize=6.5)
     cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
     cbar.set_label(r"$S_{\mathrm{scen}}$ on $\gamma$-shift")
-    ax.set_title("Per-domain $\\gamma$-shift score (4 domains $\\times$ 5 models)")
+    ax.set_title("Per-domain $\\gamma$-shift score (4 domains $\\times$ 4 models)")
     _save(fig, "fig2_heatmap_gamma")
 
 
@@ -246,7 +242,8 @@ def fig_radars(sweep: dict) -> None:
     theta = np.linspace(0, 2 * np.pi, n, endpoint=False)
     theta_closed = np.concatenate([theta, theta[:1]])
 
-    fig, axs = plt.subplots(1, 5, figsize=(8.2, 2.0), subplot_kw={"projection": "polar"})
+    fig, axs = plt.subplots(1, len(MODELS), figsize=(1.64 * len(MODELS), 2.0),
+                            subplot_kw={"projection": "polar"})
     for ax, m in zip(axs, MODELS):
         vals = _model_radar_axes(sweep, m)
         vals_closed = vals + vals[:1]
@@ -268,8 +265,8 @@ def fig_radars(sweep: dict) -> None:
 def fig_attacker(sweep: dict, attacker: dict) -> None:
     tier_means = _tier_means(sweep)
     honest = [tier_means[m]["baseline"] for m in MODELS]  # in-domain honest S
-    # Lookup attacker bench score is 0 across the board (verified in sprint3.5 pilot)
-    attacker_s = [attacker["attacker"]["s_bench_lookup"]] * len(MODELS)
+    # Lookup attacker bench score (T24: gpt-5.4 attacker, S_bench^lookup = 0.159)
+    attacker_s = [attacker["s_bench_lookup"]] * len(MODELS)
 
     fig, ax = plt.subplots(figsize=(3.5, 2.4))
     x = np.arange(len(MODELS))
@@ -289,7 +286,7 @@ def fig_attacker(sweep: dict, attacker: dict) -> None:
 
 
 def fig_ceiling_scatter(sweep: dict, ceiling: dict) -> None:
-    ceiling_idx = {(r["domain_id"], r["shift_id"]): r["s_scen"] for r in ceiling["rows"]}
+    ceiling_idx = {(r["domain_id"], r["shift_id"]): r["s_scen_ceiling"] for r in ceiling["rows"]}
     # 12 cells = 4 domains x 3 tiers (baseline, gamma, delta), with shift_id from sweep
     sweep_cells: dict[tuple[str, str], dict[str, float]] = defaultdict(dict)
     for e in sweep["entries"]:
@@ -322,7 +319,7 @@ def fig_ceiling_scatter(sweep: dict, ceiling: dict) -> None:
     ax.set_xlim(0, 1.15)
     ax.set_ylim(-0.05, 1.15)
     ax.set_xlabel(r"Ceiling $S_{\mathrm{scen}}$")
-    ax.set_ylabel(r"Best-of-5 LLM $S_{\mathrm{scen}}$")
+    ax.set_ylabel(r"Best-of-4 LLM $S_{\mathrm{scen}}$")
     ax.set_title("Ceiling vs. best LLM (12 cells)")
     ax.legend(frameon=False, loc="lower right")
     _save(fig, "fig5_ceiling_scatter")

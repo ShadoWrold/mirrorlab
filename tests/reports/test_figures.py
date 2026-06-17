@@ -1,8 +1,8 @@
-"""Smoke render test for the Sprint-4 paper figures.
+"""Smoke render test for the Paper-1 figures (X+Y rebuild).
 
 Renders all 6 figures into a tmp dir and checks that each (.png, .pdf) pair
 exists and has non-trivial size. Headline numbers from the cliff plot are
-verified against the team-lead's rescored mean S_scen table.
+verified against the X+Y 4-model sweep (docs/sprint4-sweep-data-final.json).
 """
 
 from __future__ import annotations
@@ -13,12 +13,14 @@ from pathlib import Path
 import pytest
 
 
+# X+Y mean S_scen per (model, tier) — from docs/sprint4-sweep-data-final.json.
+# gemini's delta mean folds in one FAIL cell (hooke/delta_1_1 SyntaxError),
+# counted as 0, hence the delta=0.000.
 HEADLINE_EXPECTED = {
-    "claude-opus-4.6":         (0.258, 0.000, 0.249),
-    "claude-sonnet-4.5":       (0.250, 0.000, 0.499),
-    "gemini-3.1-pro-preview":  (0.483, 0.110, 0.583),
-    "gpt-4.1-20250414":        (0.033, 0.000, 0.000),
-    "gpt-5.4-20260305":        (0.571, 0.698, 0.474),
+    "gpt-5.5":                 (0.935, 0.000, 0.473),
+    "gpt-5.4-20260305":        (0.949, 0.481, 0.238),
+    "gemini-3.1-pro-preview":  (0.725, 0.184, 0.000),
+    "claude-opus-4.8":         (0.713, 0.194, 0.461),
 }
 
 FIG_NAMES = [
