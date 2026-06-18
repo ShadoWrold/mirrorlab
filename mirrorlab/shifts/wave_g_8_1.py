@@ -20,7 +20,7 @@ import numpy as np
 
 from mirrorlab.shifts import ShiftImpl
 
-GAMMA_MIN, GAMMA_MAX = 1e-4, 1e-1
+GAMMA_MIN, GAMMA_MAX = 0.10, 0.2
 C_MIN, C_MAX = 50.0, 5000.0
 
 
@@ -61,8 +61,12 @@ class WaveGamma81Instance:
 
 def sampler(seed: int) -> WaveGamma81Params:
     rng = np.random.default_rng(seed)
-    L0 = float(np.exp(rng.uniform(np.log(GAMMA_MIN), np.log(GAMMA_MAX))))
-    gamma = float(rng.uniform(-L0, L0))
+    # Dispersion strength: force |gamma| into [GAMMA_MIN, GAMMA_MAX] with a
+    # random sign. The old `uniform(-L0, L0)` with L0 itself log-sampled from
+    # [1e-4, 1e-1] double-shrank gamma toward 0, so the γ·k correction (k=2)
+    # was usually negligible and a textbook ω=c·k fit scored high.
+    mag = float(rng.uniform(GAMMA_MIN, GAMMA_MAX))
+    gamma = mag if rng.uniform() < 0.5 else -mag
     c = float(np.exp(rng.uniform(np.log(C_MIN), np.log(C_MAX))))
     return WaveGamma81Params(A=0.1, k=2.0, c=c, gamma=gamma, x_probe=0.5)
 

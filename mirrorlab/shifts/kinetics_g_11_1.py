@@ -22,7 +22,7 @@ import numpy as np
 
 from mirrorlab.shifts import ShiftImpl
 
-BETA_MIN, BETA_MAX = 0.55, 0.95
+BETA_MIN, BETA_MAX = 0.55, 0.80
 N_MIN, N_MAX = 0.5, 2.5
 K_MIN, K_MAX = 1e-4, 1e-1
 

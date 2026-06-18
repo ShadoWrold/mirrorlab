@@ -72,10 +72,12 @@ def sampler(seed: int) -> FluidGamma102Params:
     q = float(rng.uniform(Q_MIN, Q_MAX))
     h0 = float(np.exp(rng.uniform(np.log(H0_MIN), np.log(H0_MAX))))
     eps = min(0.5, 0.5 / (H_MAX / h0) ** q)
-    while True:
-        lam = float(rng.uniform(-eps, eps))
-        if abs(lam) >= 0.01:
-            break
+    # Force |lam| into the upper half [0.6·eps, eps] with a random sign,
+    # instead of uniform(-eps, eps) which clustered near 0. The h-potential
+    # nonlinearity λ(h/h0)^q was otherwise too weak to show against the
+    # textbook Bernoulli term.
+    mag = float(rng.uniform(0.6 * eps, eps))
+    lam = mag if rng.uniform() < 0.5 else -mag
     rho = float(rng.uniform(800.0, 1200.0))
     return FluidGamma102Params(
         rho=rho, g=9.81, h0=h0, lam=lam, q=q,

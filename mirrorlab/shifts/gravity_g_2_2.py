@@ -17,7 +17,7 @@ from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
 G_DEFAULT = 6.67430e-11
-ALPHA_MIN, ALPHA_MAX = 0.05, 0.5
+ALPHA_MIN, ALPHA_MAX = 0.30, 0.8
 
 
 @dataclass(frozen=True)

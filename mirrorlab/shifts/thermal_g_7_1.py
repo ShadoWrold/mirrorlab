@@ -18,7 +18,7 @@ import numpy as np
 from mirrorlab.shifts import ShiftImpl
 
 K0_MIN, K0_MAX = 0.1, 50.0
-BETA_MIN, BETA_MAX = 0.05, 5.0
+BETA_MIN, BETA_MAX = 0.8, 5.0
 
 
 @dataclass(frozen=True)

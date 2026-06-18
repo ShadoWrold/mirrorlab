@@ -38,7 +38,10 @@ def shifted_force(x: float, v: float, p: HookeDelta11Params) -> float:
 def sampler(seed: int) -> HookeDelta11Params:
     rng = np.random.default_rng(seed)
     k = loguniform(rng, K_MIN, K_MAX)
-    c = loguniform(rng, C_MIN, C_MAX)
+    # Linear-uniform c (was loguniform, median ~0.03 → c/k ~ 0.003, the drag
+    # term −c(x²/L²)v vanished). 0.1-1.0 lifts the median so the amplitude-
+    # conditioned drag is visible against the −k·x restoring force.
+    c = float(rng.uniform(0.1, C_MAX))
     L = loguniform(rng, L_MIN, L_MAX)
     return HookeDelta11Params(k=k, c=c, L=L, m=1.0, x0=0.1, v0=0.0)
 

@@ -17,7 +17,7 @@ from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
 OMEGA_MIN, OMEGA_MAX = 0.5, 10.0
-EPS_MIN, EPS_MAX = 0.05, 0.3
+EPS_MIN, EPS_MAX = 0.15, 0.3
 
 
 @dataclass(frozen=True)
@@ -39,11 +39,13 @@ def shifted_law(x: float, v: float, t: float, p: DampedHOGamma32Params) -> float
 def sampler(seed: int) -> DampedHOGamma32Params:
     rng = np.random.default_rng(seed)
     omega0 = loguniform(rng, OMEGA_MIN, OMEGA_MAX)
-    # ε must satisfy ε < 4γ/ω₀ (sub-threshold) AND ε ∈ [EPS_MIN, EPS_MAX].
-    # Rejection-sample γ to preserve the loguniform distribution rather than
-    # silently mutating it when the upper bound collapses below EPS_MIN.
+    # ε must satisfy ε < 4γ/ω₀ (sub-threshold, a real stability bound) AND
+    # ε ∈ [EPS_MIN, EPS_MAX]. Raising the damping-ratio floor 0.01→0.10 lifts
+    # the 4γ/ω₀ ceiling so ε can reach EPS_MAX (0.3) instead of being pinned
+    # near EPS_MIN — that pinning was why the stiffness modulation was
+    # invisible. Stability is preserved because the ε<4γ/ω₀ guard still holds.
     for _ in range(100):
-        gamma = omega0 * loguniform(rng, 0.01, 0.3)
+        gamma = omega0 * loguniform(rng, 0.10, 0.3)
         if 0.95 * 4.0 * gamma / omega0 > EPS_MIN:
             break
     else:

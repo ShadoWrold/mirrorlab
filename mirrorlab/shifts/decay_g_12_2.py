@@ -58,8 +58,12 @@ class DecayGamma122Instance:
 def sampler(seed: int) -> DecayGamma122Params:
     rng = np.random.default_rng(seed)
     lam0 = float(np.exp(rng.uniform(np.log(LAM0_MIN), np.log(LAM0_MAX))))
-    eps = float(rng.uniform(EPS_MIN, EPS_MAX))
-    omega = float(np.exp(rng.uniform(np.log(OMEGA_MIN), np.log(OMEGA_MAX))))
+    eps = float(rng.uniform(0.20, EPS_MAX))
+    # Tie ω to λ0 (a few oscillations per decay horizon 1/λ0) and clamp into
+    # the validator band. Independently log-sampling ω over [1e-3,1] usually
+    # gave ω≫λ0, so the cos(ωt) modulation completed many cycles within the
+    # observation window and time-averaged out of the exponent — invisible.
+    omega = float(min(OMEGA_MAX, max(OMEGA_MIN, lam0 * rng.uniform(1.0, 4.0))))
     return DecayGamma122Params(lam0=lam0, eps=eps, omega=omega, N_init=1.0e6)
 
 

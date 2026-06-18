@@ -76,8 +76,11 @@ class WaveDelta81Instance:
 
 def sampler(seed: int) -> WaveDelta81Params:
     rng = np.random.default_rng(seed)
-    alpha0 = float(np.exp(rng.uniform(np.log(ALPHA_MIN), np.log(ALPHA_MAX))))
-    u_ref = float(np.exp(rng.uniform(np.log(U_REF_MIN), np.log(U_REF_MAX))))
+    # Linear-uniform alpha0 (was loguniform, median ~0.017 — far too weak)
+    # and u_ref tied near the wave amplitude A=0.1 so the amplitude gate
+    # |u|/u_ref is O(1) and the damping break actually bites.
+    alpha0 = float(rng.uniform(0.1, 0.3))
+    u_ref = float(rng.uniform(0.05, 0.15))
     c = float(np.exp(rng.uniform(np.log(C_MIN), np.log(C_MAX))))
     return WaveDelta81Params(A=0.1, k=2.0, c=c, alpha0=alpha0, u_ref=u_ref)
 
