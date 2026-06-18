@@ -114,7 +114,11 @@ def test_subgrid_weights_default_match_cal1():
 
 
 def test_tau_default_matches_cal4():
-    assert TAU_DEFAULT == 0.5
+    # CAL-4 calibrated 0.5 -> 0.20: τ=0.5 was too lenient, scoring textbook
+    # "lookup" submissions ~0.47 on real breaks (soft cells). The tau_sweep
+    # calibration picked 0.20 as the value maximizing oracle/baseline-vs-
+    # shift-stub separation while keeping oracle ≥0.85 and baseline-stub ≥0.70.
+    assert TAU_DEFAULT == 0.20
 
 
 def test_constant_predictor_scores_near_zero():

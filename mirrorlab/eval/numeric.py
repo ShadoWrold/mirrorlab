@@ -4,7 +4,7 @@ Per spec §6.2: a surviving entry's predictor is evaluated on a held-out test
 grid composed of three sub-grids — in-domain (a), OOD (b), counterfactual (c)
 — with default share weights (0.40, 0.40, 0.20) from CAL-1. Per-point error
 is RMSLE (CAL-13: clamped at 1e6 before computing). Per-entry score is
-``s_entry = exp(-R_bar / τ)`` with τ = 0.5 (CAL-4 default).
+``s_entry = exp(-R_bar / τ)`` with τ = 0.20 (CAL-4, calibrated).
 
 Force-channel values can be negative, so we use the signed-log variant
 ``slog(x) = sign(x) · log1p(|x|)`` for RMSLE — this preserves RMSLE's
@@ -21,7 +21,7 @@ from typing import Any, Callable, Mapping, Optional, Sequence
 import numpy as np
 
 CLAMP = 1.0e6           # CAL-13
-TAU_DEFAULT = 0.5       # CAL-4
+TAU_DEFAULT = 0.20      # CAL-4 (calibrated: maximizes oracle/baseline-vs-shift-stub separation)
 SUBGRID_WEIGHTS = {"a": 0.40, "b": 0.40, "c": 0.20}   # CAL-1
 
 TestPoint = tuple[Mapping[str, float], float]
