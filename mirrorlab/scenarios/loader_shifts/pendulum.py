@@ -63,7 +63,10 @@ def baseline_grids(sim: Any, seed: int, magnitude: float):
 
 
 def gamma_4_1_grids(sim: Any, seed: int, magnitude: float):
-    theta0 = abs(_attr(sim.params, ("theta0",), 0.3)) or 0.3
+    # Wide-swing grid (±1.2 rad ≈ ±70°): the α·(1−cos θ) PAR break vanishes
+    # at small θ ((1−cos0.3)≈0.045) and only becomes visible at large angle
+    # ((1−cos1.2)≈0.64). Sampling at ±0.3 (the baseline IC) hid it.
+    theta0 = 1.2
 
     def gt(inputs):
         th = inputs["theta"]
@@ -81,7 +84,9 @@ def gamma_4_1_grids(sim: Any, seed: int, magnitude: float):
 
 
 def gamma_4_2_grids(sim: Any, seed: int, magnitude: float):
-    theta0 = abs(_attr(sim.params, ("theta0",), 0.3)) or 0.3
+    # Same rationale as γ-4-1: the height-graded g_eff break scales with
+    # (1−cos θ), so a wide-swing ±1.2 rad grid is needed to expose it.
+    theta0 = 1.2
 
     def gt(inputs):
         th = inputs["theta"]

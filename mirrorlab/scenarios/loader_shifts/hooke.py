@@ -62,7 +62,11 @@ def baseline_grids(sim: Any, seed: int, magnitude: float):
 # ---- γ-1-1 (saturating asymmetric, 1D) -------------------------------------
 
 def gamma_1_1_grids(sim: Any, seed: int, magnitude: float):
-    x_amp = abs(_attr(sim.params, ("x_scale", "x0"), 1.0)) or 1.0
+    # Sample out to 4·x_scale: the η·tanh(x/x_scale) even-parity break is
+    # still in its linear regime inside |x|<x_scale (tanh(1)=0.76); pushing
+    # to |x|≈4·x_scale drives tanh→1 so the saturating asymmetry is visible
+    # and a textbook -k·x fit can no longer hide it.
+    x_amp = 4.0 * (abs(_attr(sim.params, ("x_scale", "x0"), 1.0)) or 1.0)
 
     def gt(inputs: Dict[str, float]):
         x = inputs["x"]

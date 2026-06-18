@@ -26,10 +26,14 @@ from mirrorlab.shifts import (
 )
 
 
-def _t_grid(period: float, mode: str) -> np.ndarray:
+def _t_grid(period: float, mode: str, n_period: float = 2.0) -> np.ndarray:
+    # n_period sets the in-domain window length in wave periods. Dispersion
+    # (γ-8-1) and amplitude-gated damping (δ-8-1) need many periods for the
+    # phase drift / decay to accumulate above the textbook form, so those
+    # builders pass a larger n_period; baseline/others keep the default 2.
     if mode == "b":
-        return np.linspace(2.0 * period, 5.0 * period, _GRID_SIZE)
-    return np.linspace(0.0, 2.0 * period, _GRID_SIZE)
+        return np.linspace(n_period * period, (n_period + 3.0) * period, _GRID_SIZE)
+    return np.linspace(0.0, n_period * period, _GRID_SIZE)
 
 
 # ---- baseline (sin(kx − ωt) with ω = c·k) ----------------------------------
@@ -82,7 +86,7 @@ def gamma_8_1_grids(sim, seed: int, magnitude: float):
         return fn
 
     def build(rng, mode):
-        ts = _t_grid(period, mode)
+        ts = _t_grid(period, mode, n_period=20.0)
         return [({"t": float(t)}, gt({"t": float(t)})) for t in ts]
 
     return _pack(seed, magnitude, sim, build)
@@ -141,7 +145,7 @@ def delta_8_1_grids(sim, seed: int, magnitude: float):
         return fn
 
     def build(rng, mode):
-        ts = _t_grid(period, mode)
+        ts = _t_grid(period, mode, n_period=20.0)
         return [({"t": float(t)}, gt({"t": float(t)})) for t in ts]
 
     return _pack(seed, magnitude, sim, build)
