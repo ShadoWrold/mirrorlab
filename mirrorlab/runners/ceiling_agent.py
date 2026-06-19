@@ -135,15 +135,15 @@ def _hooke_pred(scenario: ScenarioInstance) -> PredictorFn:
         _xi0 = float(_attr(p, ("xi",), 0.0))
         _phi0 = float(_attr(p, ("phi",), 0.0))
 
-        def pred(*, x, y, k0=_k0, xi=_xi0, phi=_phi0, **_):
+        def pred(*, x, y, k=_k0, xi=_xi0, phi=_phi0, **_):
             r2 = x * x + y * y
             r = math.sqrt(r2)
             if r == 0.0:
                 return 0.0
             theta = math.atan2(y, x)
-            K_theta = k0 * (1.0 + xi * math.cos(2.0 * (theta - phi)))
+            K_theta = k * (1.0 + xi * math.cos(2.0 * (theta - phi)))
             F_r = -K_theta * r
-            F_theta = k0 * xi * r * math.sin(2.0 * (theta - phi))
+            F_theta = k * xi * r * math.sin(2.0 * (theta - phi))
             # Convert (F_r, F_θ) → (Fx, Fy) so we can apply the standard
             # signed-|F|·r̂ projection used in loader_shifts/hooke.py.
             rhat_x, rhat_y = x / r, y / r
@@ -457,12 +457,15 @@ def _pendulum_pred(scenario: ScenarioInstance) -> PredictorFn:
             return -g_over_L * factor * math.sin(theta)
         return pred
 
-    # baseline
-    _gol = float(_attr(p, ("g_over_L", "g0_over_L"),
-                       _attr(p, ("g",), 9.81) / max(_attr(p, ("L",), 1.0), 1e-9)))
+    # baseline. The cf sub-grid (c) perturbs the law params L and g and
+    # delivers them via the canonical kwargs ``L``/``g`` (see
+    # _PREDICTOR_NAME_MAP[PendulumParams]); accept those directly so the
+    # per-point overrides win instead of being swallowed by **_.
+    _L0 = float(_attr(p, ("L",), 1.0)) or 1.0
+    _g0 = float(_attr(p, ("g",), 9.81))
 
-    def pred(*, theta, g_over_L=_gol, **_):
-        return -g_over_L * math.sin(theta)
+    def pred(*, theta, L=_L0, g=_g0, **_):
+        return -(g / L) * math.sin(theta)
     return pred
 
 
@@ -483,9 +486,9 @@ def _rlc_pred(scenario: ScenarioInstance) -> PredictorFn:
         _Is0 = float(_attr(p, ("I_sat",), 1.0))
 
         def pred(*, q, i,
-                 L_0=_L0, R=_R0, C=_C0, I_sat=_Is0, **_):
+                 L=_L0, R=_R0, C=_C0, I_sat=_Is0, **_):
             p_eff = _g61_m.RLCGamma61Params(
-                L0=L_0, R=R, C=C, I_sat=I_sat,
+                L0=L, R=R, C=C, I_sat=I_sat,
                 q0=getattr(p, "q0", 0.0), i0=getattr(p, "i0", 0.0),
             )
             return float(_g61_m.shifted_law(q, i, p_eff))
@@ -523,9 +526,9 @@ def _rlc_pred(scenario: ScenarioInstance) -> PredictorFn:
         _Op = float(_attr(p, ("Omega_p",), 0.0))
 
         def pred(*, q, i, t,
-                 L_0=_L0, R=_R0, C=_C0, eps=_e0, Omega_p=_Op, **_):
+                 L=_L0, R=_R0, C=_C0, eps=_e0, Omega_p=_Op, **_):
             p_eff = _d61_m.RLCDelta61Params(
-                L0=L_0, R=R, C=C, eps=eps, Omega_p=Omega_p,
+                L0=L, R=R, C=C, eps=eps, Omega_p=Omega_p,
                 q0=getattr(p, "q0", 0.0), i0=getattr(p, "i0", 0.0),
             )
             return float(_d61_m.shifted_law(q, i, t, p_eff))

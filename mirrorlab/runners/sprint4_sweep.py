@@ -73,6 +73,25 @@ REPRESENTATIVE_CELLS: Tuple[SweepCell, ...] = (
 )
 
 
+def _all_cells() -> Tuple[SweepCell, ...]:
+    """Every (domain, shift) in the registry, tagged with its tier.
+
+    Used by ``--all-cells`` for a full-catalog sweep (48 cells) instead of
+    the 12-cell representative subset. Tier is derived from the shift id:
+    ``baseline`` / ``gamma_*`` -> "gamma" / ``delta_*`` -> "delta".
+    """
+    from mirrorlab.scenarios.registry import REGISTRY
+
+    def tier(shift: str) -> str:
+        if shift == "baseline":
+            return "baseline"
+        return "gamma" if shift.startswith("gamma") else "delta"
+
+    return tuple(
+        (dom, shift, tier(shift)) for dom, shift in sorted(set(REGISTRY.keys()))
+    )
+
+
 @dataclass(frozen=True)
 class ModelSpec:
     slot: int
@@ -95,8 +114,11 @@ MODEL_PANEL: Tuple[ModelSpec, ...] = (
 
 SWEEP_HONEST_MAX_TOOL_CALLS = 30
 SWEEP_HONEST_MAX_WALL = 180
-SWEEP_HARD_CAP = 2000
-SWEEP_HARD_CAP_OVERRUN = 2400  # 2000 × 1.2 — stop here even if cells remain
+# Sized for a full 48-cell × 3-model sweep (~13 turns/run × 144 = ~1900/seed).
+# The old 2000/2400 caps were set for the 12-cell representative subset and
+# truncated a full --all-cells run mid-seed.
+SWEEP_HARD_CAP = 8000
+SWEEP_HARD_CAP_OVERRUN = 9600  # 8000 × 1.2
 
 
 # ---- Per-cell result ---------------------------------------------------
@@ -407,7 +429,9 @@ def _parse_cells(arg: Optional[str]) -> List[SweepCell]:
     if not arg:
         return list(REPRESENTATIVE_CELLS)
     out: List[SweepCell] = []
-    by_id = {(c[0], c[1]): c for c in REPRESENTATIVE_CELLS}
+    # Allow any catalog cell, not just the representative subset, so an
+    # explicit --cells filter can target a freshly-hardened cell.
+    by_id = {(c[0], c[1]): c for c in _all_cells()}
     for token in arg.split(","):
         token = token.strip()
         if not token:
@@ -416,7 +440,7 @@ def _parse_cells(arg: Optional[str]) -> List[SweepCell]:
             raise SystemExit(f"--cells token {token!r} must be 'domain/shift'")
         dom, shift = token.split("/", 1)
         if (dom, shift) not in by_id:
-            raise SystemExit(f"unknown cell {token!r}; not in REPRESENTATIVE_CELLS")
+            raise SystemExit(f"unknown cell {token!r}; not in catalog")
         out.append(by_id[(dom, shift)])
     return out
 
@@ -447,6 +471,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         default="docs/sprint4-sweep-summary.md")
     parser.add_argument("--cells", default=None,
                         help="comma-separated domain/shift filter")
+    parser.add_argument("--all-cells", action="store_true",
+                        help="sweep every catalog cell (48) instead of the "
+                             "12-cell representative subset")
     parser.add_argument("--models", default=None,
                         help="comma-separated model id or slot filter")
     parser.add_argument("--seed", type=int, default=0)
@@ -466,7 +493,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.verbose:
         logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    cells = _parse_cells(args.cells)
+    cells = _all_cells() if args.all_cells else _parse_cells(args.cells)
+    cells = list(cells)
     models = _parse_models(args.models)
 
     if args.summary_only:
