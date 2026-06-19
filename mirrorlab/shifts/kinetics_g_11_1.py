@@ -41,7 +41,15 @@ def _step_fractional(params: KineticsGamma111Params, t_target: float) -> List[fl
     """Predictor-corrector for Caputo fractional ODE on uniform grid."""
     if t_target <= 0:
         return [params.C0]
+    # Hard cap on the step count. The scheme is O(n_steps²) (each step builds
+    # an n-length weight history), so an agent tool call that asks for a
+    # measurement at a large t with a small dt — or a counterfactual-perturbed
+    # dt — could blow n_steps up and wedge the process at 100% CPU. Capping
+    # here protects every caller (sandbox measurement tools, the GT builder,
+    # and the oracle), coarsening the grid instead of hanging.
+    _MAX_STEPS = 2000
     n_steps = max(int(math.ceil(t_target / params.dt)), 1)
+    n_steps = min(n_steps, _MAX_STEPS)
     h = t_target / n_steps
     beta = params.beta
     gb = math.gamma(beta + 2)  # for fractional Adams-Bashforth-Moulton weights
