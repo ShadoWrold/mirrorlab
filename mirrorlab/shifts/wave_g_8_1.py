@@ -68,7 +68,12 @@ def sampler(seed: int) -> WaveGamma81Params:
     mag = float(rng.uniform(GAMMA_MIN, GAMMA_MAX))
     gamma = mag if rng.uniform() < 0.5 else -mag
     c = float(np.exp(rng.uniform(np.log(C_MIN), np.log(C_MAX))))
-    return WaveGamma81Params(A=0.1, k=2.0, c=c, gamma=gamma, x_probe=0.5)
+    # A raised 0.1→1.0 so |u| leaves the slog(log1p) near-linear toe where the
+    # dispersion break was compressed to an invisible ripple (textbook ω=ck fit
+    # scored high). GT is a closed-form sin, so the oracle stays exact. (The
+    # cf-vs-grid k clash that also capped this cell's ceiling is fixed
+    # separately by removing k from the wave γ-8-1 counterfactual set.)
+    return WaveGamma81Params(A=1.0, k=2.0, c=c, gamma=gamma, x_probe=0.5)
 
 
 def validator(params: WaveGamma81Params) -> bool:

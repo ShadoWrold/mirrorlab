@@ -23,7 +23,7 @@ from scipy.integrate import solve_ivp
 from mirrorlab.shifts import ShiftImpl
 
 ALPHA_MIN, ALPHA_MAX = 1e-3, 0.3
-U_REF_MIN, U_REF_MAX = 1e-3, 1.0
+U_REF_MIN, U_REF_MAX = 1e-3, 2.0
 C_MIN, C_MAX = 50.0, 5000.0
 
 
@@ -76,13 +76,17 @@ class WaveDelta81Instance:
 
 def sampler(seed: int) -> WaveDelta81Params:
     rng = np.random.default_rng(seed)
-    # Linear-uniform alpha0 (was loguniform, median ~0.017 — far too weak)
-    # and u_ref tied near the wave amplitude A=0.1 so the amplitude gate
-    # |u|/u_ref is O(1) and the damping break actually bites.
+    # Linear-uniform alpha0 (was loguniform, median ~0.017 — far too weak).
+    # A raised 0.1→1.0 with u_ref scaled ×10 to [0.5,1.5]: this is a pure
+    # rescaling of the wave amplitude so |u| leaves the slog(log1p) near-linear
+    # toe (where the amplitude-gated damping break was invisible and the stub
+    # scored high), while keeping the gate ratio |u|/u_ref at the same O(1)
+    # operating point so the break physics is unchanged. The oracle runs the
+    # same ODE so the ceiling stays exact.
     alpha0 = float(rng.uniform(0.1, 0.3))
-    u_ref = float(rng.uniform(0.05, 0.15))
+    u_ref = float(rng.uniform(0.5, 1.5))
     c = float(np.exp(rng.uniform(np.log(C_MIN), np.log(C_MAX))))
-    return WaveDelta81Params(A=0.1, k=2.0, c=c, alpha0=alpha0, u_ref=u_ref)
+    return WaveDelta81Params(A=1.0, k=2.0, c=c, alpha0=alpha0, u_ref=u_ref)
 
 
 def validator(params: WaveDelta81Params) -> bool:

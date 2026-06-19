@@ -21,7 +21,16 @@ from mirrorlab.shifts import ShiftImpl
 
 LAM0_MIN, LAM0_MAX = 1e-6, 1e-1
 EPS_MIN, EPS_MAX = 0.05, 0.40
-OMEGA_MIN, OMEGA_MAX = 1e-3, 1.0
+# Modulation frequency. ω is tied to λ₀ at a SUB-period ratio so the
+# parametric drive (ε/ω)·sin(ωt) does not complete a full cycle within the
+# decay horizon. Counter-intuitively this is what makes the T-trans break
+# detectable: at ω≪λ₀ the in-domain window looks like an effective constant
+# rate λ₀(1+ε) (absorbable), but the OOD extrapolation half of the grid
+# (t·λ₀∈[0.5,5]) develops a phase drift that NO single re-fit λ_eff can
+# match — so even an agent that re-fits the decay constant scores low.
+# OMEGA_MIN lowered 1e-3→1e-7 so small-λ₀ seeds are not clamped (ω=λ₀·0.2
+# reaches ~2e-7 at λ₀=1e-6).
+OMEGA_MIN, OMEGA_MAX = 1e-7, 1.0
 
 
 @dataclass(frozen=True)
@@ -58,12 +67,12 @@ class DecayGamma122Instance:
 def sampler(seed: int) -> DecayGamma122Params:
     rng = np.random.default_rng(seed)
     lam0 = float(np.exp(rng.uniform(np.log(LAM0_MIN), np.log(LAM0_MAX))))
-    eps = float(rng.uniform(0.20, EPS_MAX))
-    # Tie ω to λ0 (a few oscillations per decay horizon 1/λ0) and clamp into
-    # the validator band. Independently log-sampling ω over [1e-3,1] usually
-    # gave ω≫λ0, so the cos(ωt) modulation completed many cycles within the
-    # observation window and time-averaged out of the exponent — invisible.
-    omega = float(min(OMEGA_MAX, max(OMEGA_MIN, lam0 * rng.uniform(1.0, 4.0))))
+    eps = float(rng.uniform(0.30, EPS_MAX))
+    # ω at a sub-period ratio of λ₀ (0.2-0.5): the modulation stays below one
+    # cycle over the decay horizon, so the un-absorbable T-trans signal lives
+    # in the OOD extrapolation region's phase drift rather than the
+    # in-domain window. See the OMEGA_MIN note above.
+    omega = float(lam0 * rng.uniform(0.2, 0.5))
     return DecayGamma122Params(lam0=lam0, eps=eps, omega=omega, N_init=1.0e6)
 
 

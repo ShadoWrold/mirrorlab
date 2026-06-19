@@ -16,8 +16,13 @@ from scipy.integrate import solve_ivp
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
-OMEGA_MIN, OMEGA_MAX = 0.5, 10.0
-EPS_MIN, EPS_MAX = 0.15, 0.3
+# OMEGA_MIN raised 0.5→2.0: at low ω₀ the acceleration |a|~ω₀²·x0 is so small
+# that slog(log1p) compresses the stiffness-modulation signal to nothing and
+# even a textbook stub scores high. EPS_MAX raised 0.3→0.55 (with the damping
+# floor below) so the parametric pumping depth ε is large enough to be
+# un-absorbable by a constant-stiffness re-fit.
+OMEGA_MIN, OMEGA_MAX = 2.0, 10.0
+EPS_MIN, EPS_MAX = 0.15, 0.55
 
 
 @dataclass(frozen=True)
@@ -39,19 +44,19 @@ def shifted_law(x: float, v: float, t: float, p: DampedHOGamma32Params) -> float
 def sampler(seed: int) -> DampedHOGamma32Params:
     rng = np.random.default_rng(seed)
     omega0 = loguniform(rng, OMEGA_MIN, OMEGA_MAX)
-    # ε must satisfy ε < 4γ/ω₀ (sub-threshold, a real stability bound) AND
-    # ε ∈ [EPS_MIN, EPS_MAX]. Raising the damping-ratio floor 0.01→0.10 lifts
-    # the 4γ/ω₀ ceiling so ε can reach EPS_MAX (0.3) instead of being pinned
-    # near EPS_MIN — that pinning was why the stiffness modulation was
-    # invisible. Stability is preserved because the ε<4γ/ω₀ guard still holds.
+    # ε must satisfy ε < 4γ/ω₀ (sub-threshold parametric-resonance stability
+    # bound) AND ε ∈ [0.40, EPS_MAX]. The damping-ratio floor is 0.20 (raised
+    # from 0.10) so the 4γ/ω₀ ceiling clears 0.40 and ε reaches the deep
+    # modulation needed to break a constant-stiffness re-fit. Stability still
+    # holds because ε<4γ/ω₀ is enforced.
     for _ in range(100):
-        gamma = omega0 * loguniform(rng, 0.10, 0.3)
-        if 0.95 * 4.0 * gamma / omega0 > EPS_MIN:
+        gamma = omega0 * loguniform(rng, 0.20, 0.40)
+        if 0.95 * 4.0 * gamma / omega0 > 0.40:
             break
     else:
         raise RuntimeError("γ-3-2 sampler: 100 rejection attempts failed")
     eps_hi = min(EPS_MAX, 0.95 * 4.0 * gamma / omega0)
-    eps = float(rng.uniform(EPS_MIN, eps_hi))
+    eps = float(rng.uniform(0.40, eps_hi))
     Omega_p = omega0 * float(rng.uniform(0.3, 1.7))
     return DampedHOGamma32Params(omega0=omega0, gamma=gamma, eps=eps,
                                  Omega_p=Omega_p, m=1.0, x0=0.1, v0=0.0)

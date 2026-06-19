@@ -303,12 +303,19 @@ def evaluate_entry(
                     if cf_params_obj is not None
                     else {}
                 )
-                # Merge order: declared < cf_overrides < inputs.
-                # cf_overrides win over declared params (Y plumbing), and
-                # input values win over coefficient values (a malformed
-                # submission whose input name collides with a coefficient
-                # name will score badly on that point — see §2.3 last note).
-                kwargs = {**declared_params, **cf_overrides, **aliased}
+                # Merge order: declared < inputs < cf_overrides.
+                # On sub-grid (c) the counterfactual params are the AUTHORITY
+                # that defines the ground truth (gt is computed from the
+                # perturbed cf params in the loader), so cf_overrides must win
+                # over everything — including the scenario-constant values that
+                # pack_grids injects into the input dict. An earlier merge let
+                # `aliased` win "to stop a predictor input name colliding with
+                # a coefficient", but inputs are state variables (x,v,t,…) that
+                # never collide with law-coefficient names, whereas the
+                # injected UNPERTURBED coefficients (eps, gamma, …) were
+                # silently overriding the cf perturbation and penalising the
+                # oracle on (c).
+                kwargs = {**declared_params, **aliased, **cf_overrides}
                 preds.append(_safe_call(raw, kwargs))
                 truths.append(float(gt))
         else:

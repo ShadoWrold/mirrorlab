@@ -38,9 +38,15 @@ def shifted_law(x: float, v: float, p: DampedHODelta31Params) -> float:
 def sampler(seed: int) -> DampedHODelta31Params:
     rng = np.random.default_rng(seed)
     omega0 = loguniform(rng, OMEGA_MIN, OMEGA_MAX)
-    # Damping ratio raised 0.01-0.2 (loguniform, median ~0.045) → 0.15-0.3
-    # so the sign-reversing drag 2γ(|x|/L−1)·v is no longer swamped by ω₀²x.
-    gamma = omega0 * float(rng.uniform(0.15, 0.3))
+    # Damping ratio raised to 0.8-1.2 (was 0.15-0.3). At the old low ζ the
+    # sign-reversing gated drag 2γ(|x|/L−1)·v was a small ripple on the
+    # stiffness term ω₀²x, so a constant effective-damping re-fit absorbed it
+    # (cell was soft, refit≈0.75). At ζ≈1 the gated drag is the same order as
+    # the restoring term and its sign reversal (negative damping for |x|<L)
+    # drives the limit cycle — a constant (c1,c2) can no longer fit it. ζ
+    # straddles 1.0 but the system stays a legitimate strongly-damped self-
+    # sustained oscillator (van der Pol-like), not over-damped relaxation.
+    gamma = omega0 * float(rng.uniform(0.8, 1.2))
     L = loguniform(rng, L_MIN, L_MAX)
     return DampedHODelta31Params(omega0=omega0, gamma=gamma, L=L,
                                  m=1.0, x0=0.5 * L, v0=0.0)
@@ -55,7 +61,7 @@ def validator(p) -> bool:
         return False
     if p.gamma <= 0 or p.m <= 0:
         return False
-    if not (0.15 <= p.gamma / p.omega0 <= 0.3):
+    if not (0.8 <= p.gamma / p.omega0 <= 1.2):
         return False
     return True
 

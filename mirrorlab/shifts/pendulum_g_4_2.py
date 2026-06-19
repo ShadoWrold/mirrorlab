@@ -41,9 +41,15 @@ def sampler(seed: int) -> PendulumGamma42Params:
     g0_over_L = loguniform(rng, GL_MIN, GL_MAX)
     alpha = float(rng.uniform(ALPHA_MIN, ALPHA_MAX))
     L = loguniform(rng, 0.1, 2.0)
-    # H ≥ 2·α·L for the safety bound α·L/H < 0.5; use comfortable factor of 4.
-    H_min_safe = max(0.5 * L, 4.0 * alpha * L)
-    H = H_min_safe * loguniform(rng, 1.0, 50.0)
+    # Sample the break strength r = α·L/H directly and back-solve H. The old
+    # H = H_min_safe·loguniform(1,50) let H grow up to 50× the safe minimum,
+    # so r collapsed toward ~0.006 for many seeds and the height-grading
+    # correction α·L(1−cosθ)/H vanished — both the textbook stub AND a smart
+    # constant-g_eff re-fit then scored high (cell was soft). Pinning
+    # r ∈ [0.40, 0.47] keeps the correction a visible, non-absorbable fraction
+    # while staying under the g_eff>0 safety bound r<0.5.
+    r = float(rng.uniform(0.40, 0.47))
+    H = alpha * L / r
     return PendulumGamma42Params(g0_over_L=g0_over_L, alpha=alpha, L=L, H=H,
                                  theta0=0.3, omega0=0.0)
 
@@ -57,7 +63,11 @@ def validator(p) -> bool:
         return False
     if p.L <= 0 or p.H <= 0:
         return False
-    if p.alpha * p.L / p.H >= 0.5:
+    # Break strength r = α·L/H must stay in the visible, non-absorbable band
+    # the sampler targets (lower bound) and below the g_eff>0 safety bound
+    # (upper bound). The lower bound also stops an externally-constructed
+    # weak-break param (r≈0.006) from re-creating the old soft cell.
+    if not (0.385 <= p.alpha * p.L / p.H < 0.5):
         return False
     if abs(p.theta0) > math.pi / 2:
         return False

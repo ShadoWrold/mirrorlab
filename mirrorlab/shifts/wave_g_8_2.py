@@ -75,7 +75,13 @@ def sampler(seed: int) -> WaveGamma82Params:
     theta_k = float(rng.uniform(0.0, math.pi))
     c = float(np.exp(rng.uniform(np.log(C_MIN), np.log(C_MAX))))
     return WaveGamma82Params(
-        A=0.1, k=2.0, theta_k=theta_k, c=c, beta=beta, theta0=theta0, x_probe=0.5,
+        # A raised 0.1→1.0 so the wave amplitude |u| sits in the log-faithful
+        # region of the slog(log1p) metric. At A=0.1 the output |u|~0.07 fell
+        # in log1p's near-linear toe, which compressed the multiplicative
+        # angle-dispersion break into an invisible ripple and the textbook
+        # stub scored high. The GT is a closed-form sin, so scaling A leaves
+        # the oracle exact (ceil stays 1.0).
+        A=1.0, k=2.0, theta_k=theta_k, c=c, beta=beta, theta0=theta0, x_probe=0.5,
     )
 
 

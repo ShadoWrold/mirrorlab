@@ -159,7 +159,7 @@ def gamma_12_2_grids(sim: Any, seed: int, magnitude: float):
     return _pack(seed, magnitude, sim, build)
 
 
-# ---- δ-12-1 (branching loss; GT = N_A) -------------------------------------
+# ---- δ-12-1 (branching loss; GT = N_A + N_B total) -------------------------
 
 def delta_12_1_grids(sim: Any, seed: int, magnitude: float):
     lam0 = float(_attr(sim.params, ("lam",), 0.1)) or 0.1
@@ -179,7 +179,12 @@ def delta_12_1_grids(sim: Any, seed: int, magnitude: float):
                 return (-lam * NA, (1.0 - xi) * lam * NA)
 
             y_t = _solve_to(rhs, [NA0, NB0], t)
-            return y_t[0]  # N_A(t)
+            # Score the TOTAL N_A + N_B. The broken symmetry is particle
+            # conservation; ξ lives only in N_B's equation, so N_A(t) alone
+            # is a pure exponential identical to the textbook law and the
+            # cell was dead (oracle==stub). The total is (1−ξ)N_A0 + ξ·N_A(t)
+            # + N_B0, which DRIFTS when ξ≠0 versus the conserved constant.
+            return y_t[0] + y_t[1]
 
         return fn
 

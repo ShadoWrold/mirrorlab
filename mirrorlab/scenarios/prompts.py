@@ -56,6 +56,7 @@ def _compose(
     narrative: str,
     observables: Sequence[str],
     tool_names: Sequence[str],
+    output_name: str,
 ) -> str:
     obs_line = ", ".join(observables)
     tool_lines = "\n".join(f"  - {name}" for name in tool_names)
@@ -69,8 +70,16 @@ def _compose(
         "\n"
         "Your task is to propose one or more candidate laws relating the "
         "agent-declared inputs to the agent-declared outputs, together with "
-        "the SI dimensional signature of every quantity in the law. Submit "
-        "your answer in the format specified by the benchmark protocol."
+        "the SI dimensional signature of every quantity in the law. The "
+        f"benchmark scores each candidate law by predicting {output_name}: "
+        f"every law you submit must compute {output_name} from its declared "
+        f"inputs, and its declared output dimension must be that of "
+        f"{output_name}. If you discover that an intermediate quantity (for "
+        "example a rate, a frequency, or a coefficient) depends on a setting "
+        f"you can vary, fold that dependence back into your predictor for "
+        f"{output_name} rather than submitting the intermediate relation on "
+        "its own. Submit your answer in the format specified by the "
+        "benchmark protocol."
     )
 
 
@@ -87,7 +96,7 @@ def hooke_prompt(
         "the system by issuing tool calls; each call returns a measurement "
         "of the system's instantaneous state."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "F")
 
 
 def damped_ho_prompt(
@@ -100,7 +109,7 @@ def damped_ho_prompt(
         "and a motion-opposing influence, both directed back toward an "
         "equilibrium configuration."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "F")
 
 
 def gravity_prompt(
@@ -113,7 +122,7 @@ def gravity_prompt(
         "exerts an attractive influence on the test body whose magnitude "
         "depends on their separation."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "F")
 
 
 def coulomb_prompt(
@@ -126,7 +135,7 @@ def coulomb_prompt(
         "mutual influence whose magnitude depends on their separation "
         "and the magnitude of the charges they carry."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "F")
 
 
 def pendulum_prompt(
@@ -139,7 +148,7 @@ def pendulum_prompt(
         "configuration evolves in time; you may probe the angle and "
         "angular rate at any chosen instant."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "theta")
 
 
 def rlc_prompt(
@@ -151,7 +160,7 @@ def rlc_prompt(
         "three passive elements arranged in series. Probing yields the "
         "instantaneous stored charge, loop current, and driving potential."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "q")
 
 
 def thermal_prompt(
@@ -165,7 +174,7 @@ def thermal_prompt(
         "face; you may interrogate that current along with the boundary "
         "temperatures and the slab thickness."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "q")
 
 
 def wave_prompt(
@@ -177,7 +186,7 @@ def wave_prompt(
         "through a 1-D medium. At a fixed probe location you may sample "
         "the instantaneous field amplitude and its time-derivative."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "u")
 
 
 def optics_prompt(
@@ -190,7 +199,7 @@ def optics_prompt(
         "theta1 and emerges into the second medium at an angle theta2 "
         "measured from the same surface normal."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "theta2")
 
 
 def fluid_prompt(
@@ -204,7 +213,7 @@ def fluid_prompt(
         "you wish to predict the downstream pressure given the upstream "
         "state."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "p2")
 
 
 def kinetics_prompt(
@@ -217,7 +226,7 @@ def kinetics_prompt(
         "instant you may sample C and the instantaneous time-rate at "
         "which it changes."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "C")
 
 
 def decay_prompt(
@@ -230,7 +239,7 @@ def decay_prompt(
         "removes it from the population. You may sample the population "
         "count N and its instantaneous time-rate."
     )
-    return _compose(narrative, observables, tool_names)
+    return _compose(narrative, observables, tool_names, "N")
 
 
 __all__ = [

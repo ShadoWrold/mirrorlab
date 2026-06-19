@@ -21,7 +21,7 @@ def test_validator_passes_1000_samples():
 
 def test_par_preserved_eom_invariant():
     """Under θ→−θ the EOM is preserved (height term depends on cos θ, even)."""
-    p = PendulumGamma42Params(g0_over_L=9.8, alpha=0.2, L=1.0, H=10.0,
+    p = PendulumGamma42Params(g0_over_L=9.8, alpha=0.2, L=1.0, H=0.45,
                               theta0=0.0, omega0=0.0)
     a_pos = shifted_law(0.4, p)
     a_neg = shifted_law(-0.4, p)
@@ -30,7 +30,7 @@ def test_par_preserved_eom_invariant():
 
 def test_baseline_and_shift_differ():
     from mirrorlab.domains.pendulum import PendulumParams
-    p = PendulumGamma42Params(g0_over_L=9.8, alpha=0.2, L=1.0, H=10.0,
+    p = PendulumGamma42Params(g0_over_L=9.8, alpha=0.2, L=1.0, H=0.45,
                               theta0=0.5, omega0=0.0)
     sh = make("pendulum", "gamma_4_2", params=p)
     base = make("pendulum", "baseline",

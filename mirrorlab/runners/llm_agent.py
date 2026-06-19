@@ -48,6 +48,10 @@ from mirrorlab.tools.sandbox import SandboxContext
 
 log = logging.getLogger(__name__)
 
+# Bounded retry for transient proxy/network drops on the per-turn LLM call.
+_LLM_MAX_RETRIES = 3
+_LLM_RETRY_BASE_S = 0.5
+
 Submission = List[Dict[str, Any]]
 
 SYSTEM_PROMPT_TEMPLATE = (
@@ -265,10 +269,33 @@ class LLMAgent:
                 trace.elapsed_s = self._elapsed(deadline)
                 return self._finalize(scenario, trace, partial_text=None), trace
 
-            try:
-                msg = caller(messages, tools)
-            except Exception as exc:  # noqa: BLE001 — network/proxy failures
-                log.error("LLM call failed (turn %d): %s", trace.llm_turns, exc)
+            # Transient proxy/network failures are retried with bounded
+            # exponential backoff rather than aborting the whole run: the
+            # local LLM proxy intermittently drops long-lived connections
+            # mid-episode, which would otherwise strand the agent before it
+            # ever reaches submit. Only a persistent failure (retries
+            # exhausted, or no wall budget left to back off) terminates.
+            msg = None
+            last_exc: Optional[Exception] = None
+            for attempt in range(_LLM_MAX_RETRIES + 1):
+                try:
+                    msg = caller(messages, tools)
+                    last_exc = None
+                    break
+                except Exception as exc:  # noqa: BLE001 — network/proxy failures
+                    last_exc = exc
+                    if attempt >= _LLM_MAX_RETRIES:
+                        break
+                    backoff = _LLM_RETRY_BASE_S * (2 ** attempt)
+                    if time.monotonic() + backoff >= deadline:
+                        break  # no wall budget left to retry
+                    log.warning("LLM call failed (turn %d, attempt %d/%d): %s — "
+                                "retrying in %.1fs", trace.llm_turns, attempt + 1,
+                                _LLM_MAX_RETRIES + 1, exc, backoff)
+                    time.sleep(backoff)
+            if last_exc is not None:
+                log.error("LLM call failed (turn %d) after %d attempts: %s",
+                          trace.llm_turns, _LLM_MAX_RETRIES + 1, last_exc)
                 trace.terminated_by = "llm_error"
                 trace.elapsed_s = self._elapsed(deadline)
                 return self._finalize(scenario, trace, partial_text=None), trace

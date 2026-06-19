@@ -20,7 +20,17 @@ from scipy.integrate import quad
 
 from mirrorlab.shifts import ShiftImpl
 
-ZETA_MIN, ZETA_MAX = 1e-4, 1e-1
+# Dissipation coefficient. The loss term ζ·∫|v−v_∞|^m ds was previously
+# ζ∈[1e-4,1e-1] with an O(1) integral, giving a loss of ~0.01 Pa. Against a
+# ~1e5 Pa pressure the RMSLE-log score could not see it, so textbook
+# Bernoulli was bit-identical and the cell was dead (stub==ceiling). Raised
+# to [3e3,1.5e4] so the loss is O(2e4-5e4) Pa — a visible 20-50% of the
+# working pressure — while keeping p1 at atmospheric so p2 stays positive
+# (dropping p1 to a gauge kPa made p2 cross zero on some grid points and
+# destabilised the RMSLE-log ceiling). v_inf is pinned to 0 (lab frame):
+# the old v_inf∈[0,2] sat *inside* the v∈[0.2,4.5] sweep, so |v−v_∞|^m
+# collapsed toward zero for some seeds and the loss integral was unstable.
+ZETA_MIN, ZETA_MAX = 3e3, 1.5e4
 M_MIN, M_MAX = 1.5, 2.8
 
 
@@ -74,11 +84,13 @@ def sampler(seed: int) -> FluidDelta101Params:
     rng = np.random.default_rng(seed)
     zeta = float(np.exp(rng.uniform(np.log(ZETA_MIN), np.log(ZETA_MAX))))
     m = float(rng.uniform(M_MIN, M_MAX))
-    v_inf = float(rng.uniform(0.0, 2.0))
     rho = float(rng.uniform(800.0, 1200.0))
+    # p1 stays atmospheric (keeps p2 positive for stable RMSLE-log); the
+    # large ζ above is what makes the dissipation visible. v_inf=0 (lab
+    # frame) keeps the |v−v_∞|^m integral stable across seeds.
     return FluidDelta101Params(
         rho=rho, g=9.81, h1=2.0, v1=1.0, p1=1.01e5, h2=0.0, v2=3.0,
-        zeta=zeta, m=m, v_inf=v_inf, L_path=1.0,
+        zeta=zeta, m=m, v_inf=0.0, L_path=1.0,
     )
 
 

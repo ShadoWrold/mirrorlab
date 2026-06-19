@@ -21,7 +21,7 @@ def test_validator_passes_1000_samples():
 
 def test_anti_damping_inside_core():
     """For |x| < L the gate (|x|/L − 1) < 0 ⇒ anti-damping ⇒ energy can grow from small IC."""
-    p = DampedHODelta31Params(omega0=2.0, gamma=0.4, L=1.0, m=1.0,
+    p = DampedHODelta31Params(omega0=2.0, gamma=2.0, L=1.0, m=1.0,
                               x0=0.01, v0=0.0)
     inst = make("damped_ho", "delta_3_1", params=p)
 
@@ -36,7 +36,7 @@ def test_anti_damping_inside_core():
 
 def test_par_invariant_force():
     """Under (x,v) → (-x,-v) the EOM is invariant."""
-    p = DampedHODelta31Params(omega0=2.0, gamma=0.4, L=1.0, m=1.0, x0=0.0, v0=0.0)
+    p = DampedHODelta31Params(omega0=2.0, gamma=2.0, L=1.0, m=1.0, x0=0.0, v0=0.0)
     a1 = shifted_law(0.3, 0.4, p)
     a2 = shifted_law(-0.3, -0.4, p)
     assert abs(a1 + a2) < 1e-9

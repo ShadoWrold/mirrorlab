@@ -137,7 +137,13 @@ _LAW_PARAM_FIELDS: dict[type, tuple[str, ...]] = {
     ThermalGamma72Params: ("k0", "p"),
     ThermalDelta71Params: ("alpha", "lam"),
     # Domain 8 — Wave
-    WaveGamma81Params: ("A", "k", "c", "gamma"),
+    # γ-8-1 sweeps k as the OBSERVATION axis (the dispersion ω(k) is only
+    # exposed by varying k), so the test grid sets k per point. k must NOT be
+    # in the counterfactual set here, else the cf perturbation overrides the
+    # grid's k and the ground truth (computed at grid-k) no longer matches the
+    # predictor (run at cf-k), capping the oracle on sub-grid (c). The break
+    # coefficient gamma and the speed c remain perturbable.
+    WaveGamma81Params: ("A", "c", "gamma"),
     WaveGamma82Params: ("A", "k", "c", "beta"),
     WaveDelta81Params: ("A", "k", "c", "alpha0", "u_ref"),
     # Domain 9 — Optics
@@ -246,7 +252,11 @@ _PREDICTOR_NAME_MAP: dict[type, dict[str, str]] = {
     ThermalGamma72Params: {"k0": "k", "p": "p"},
     ThermalDelta71Params: {"alpha": "alpha", "lam": "lam"},
     # Domain 8 — Wave
-    WaveGamma81Params: {"A": "A", "k": "k", "c": "c", "gamma": "gamma"},
+    # γ-8-1: k is the observation axis (swept by the test grid), not a law
+    # coefficient, so it is omitted from the predictor-kwargs map too — else
+    # the cf sub-grid (c) would emit the sampler's k and override the grid's
+    # swept k, mismatching the ground truth (computed at grid-k).
+    WaveGamma81Params: {"A": "A", "c": "c", "gamma": "gamma"},
     WaveGamma82Params: {"A": "A", "k": "k", "c": "c", "beta": "beta"},
     WaveDelta81Params: {
         "A": "A", "k": "k", "c": "c", "alpha0": "alpha", "u_ref": "u_ref",

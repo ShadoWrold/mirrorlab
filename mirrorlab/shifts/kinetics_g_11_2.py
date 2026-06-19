@@ -18,8 +18,18 @@ from scipy.integrate import solve_ivp
 from mirrorlab.shifts import ShiftImpl
 
 N_MIN, N_MAX = 1.0, 3.0
-M_MIN, M_MAX = 0.5, 3.0
-C_SAT_MIN, C_SAT_MAX = 1.0, 1e4
+# Saturation sharpness. Raised M_MIN 0.5→1.5 so the saturation knee is steep
+# enough that the dilution-symmetry break dominates the decay (a shallow m
+# leaves the trajectory close to the textbook −k·Cⁿ shape, which RMSLE
+# tolerates).
+M_MIN, M_MAX = 1.5, 3.0
+# Saturation concentration. With the working concentration fixed at C0=1, the
+# old C_sat∈[1,1e4] (log-sampled) usually drew C_sat≫C0, so the saturation
+# factor (C/C_sat)^m ≈ 0 across the whole decay and the rate law collapsed to
+# the textbook −k·Cⁿ — the cell was near-dead (stub≈ceiling). Pinned to
+# [0.2,0.4] (<C0) so (C0/C_sat)^m ≫ 1 and the system genuinely sits in the
+# saturated regime where the dilution-symmetry break is expressed.
+C_SAT_MIN, C_SAT_MAX = 0.2, 0.4
 K_MIN, K_MAX = 1e-4, 1e-1
 
 

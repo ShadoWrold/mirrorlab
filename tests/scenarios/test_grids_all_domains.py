@@ -80,6 +80,10 @@ def test_inputs_match_observables(domain_id: str, shift_id: str) -> None:
             "x", "y", "z", "t", "q1", "q2", "dx", "dy", "dz",
             "theta_i", "theta_pol",
             "q_1", "q_2", "i_1", "i_2",
+            # wave γ-8-1 (dispersion) sweeps the wavenumber k as an
+            # observation axis: ω(k)=ck√(1+γk) is only exposed by varying k,
+            # so the test grid carries k as a configurable-turned-input.
+            "k",
         }
         leaked = sample_keys - obs - allowed_extras
         assert not leaked, (

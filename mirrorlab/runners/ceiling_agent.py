@@ -871,14 +871,19 @@ def _kinetics_pred(scenario: ScenarioInstance) -> PredictorFn:
 
         def pred(*, t, k=_k0, n=_n0, eta=_e0,
                  C_A0=_CA0, C_B0=_CB0, **_):
+            # GT scores the TOTAL C_A+C_B (stoichiometry break), so the
+            # oracle reports the total too. With C_B0 and dC_B/dt=η(−dC_A/dt),
+            # total = C_A(t) + C_B0 + η(C_A0 − C_A(t)).
             try:
                 p_eff = _d111_m.KineticsDelta111Params(
                     k=k, n=n, eta=eta, C_A0=C_A0, C_B0=C_B0,
                 )
                 inst = _d111_m.KineticsDelta111Instance(p_eff)
-                return inst.step(t)["C_A"]
+                s = inst.step(t)
+                return s["C_A"] + s["C_B"]
             except (ValueError, TypeError):
-                return _baseline_C_closed(k, n, C_A0, t)
+                C_A = _baseline_C_closed(k, n, C_A0, t)
+                return C_A + C_B0 + eta * (C_A0 - C_A)
         return pred
 
     # baseline n-th order
@@ -960,10 +965,12 @@ def _decay_pred(scenario: ScenarioInstance) -> PredictorFn:
 
         def pred(*, t, lam=_lam0, xi=_xi0,
                  N_A0=_NA0, N_B0=_NB0, **_):
+            # GT scores the TOTAL N_A+N_B (particle-conservation break).
             def rhs(_t, y):
                 NA, _NB = y
                 return (-lam * NA, (1.0 - xi) * lam * NA)
-            return _integrate(rhs, [N_A0, N_B0], t)[0]
+            y = _integrate(rhs, [N_A0, N_B0], t)
+            return y[0] + y[1]
         return pred
 
     # Baseline: closed-form N(t) = N₀·exp(−λ t).

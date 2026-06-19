@@ -175,7 +175,13 @@ def baseline_grids(sim, seed: int, magnitude: float):
 
 def gamma_2_2_grids(sim, seed: int, magnitude: float):
     from mirrorlab.shifts import gravity_g_2_2 as _g22
-    r0 = abs(_attr(sim.params, ("r0", "r_scale"), 1.0e7)) or 1.0e7
+    # Center the grid on r_scale (the Lorentzian bump center), NOT r0 (the
+    # orbital radius). GravityGamma22Params has both fields and _attr was
+    # picking r0 first (~1e7) while the bump sits at r_scale (~1e6), so the
+    # grid spanned 1e6..5e7 with the bump stranded at the far-left edge and
+    # diluted by the 1/r² far field. Sampling [0.3, 3]·r_scale concentrates
+    # points where the bump is largest.
+    r_scale = abs(_attr(sim.params, ("r_scale", "r0"), 1.0e6)) or 1.0e6
 
     def gt(inputs):
         r = inputs["r"]
@@ -186,12 +192,10 @@ def gamma_2_2_grids(sim, seed: int, magnitude: float):
         return fn
 
     def build(rng, mode):
-        # Span 0.1·r_scale to 5·r_scale so the Lorentzian bump's peak
-        # (around r ≈ r_scale) is sampled both below and above.
         if mode == "b":
-            rs = np.geomspace(5.0 * r0, 50.0 * r0, _GRID_SIZE)
+            rs = np.geomspace(3.0 * r_scale, 15.0 * r_scale, _GRID_SIZE)
         else:
-            rs = np.geomspace(0.1 * r0, 5.0 * r0, _GRID_SIZE)
+            rs = np.geomspace(0.3 * r_scale, 3.0 * r_scale, _GRID_SIZE)
         return [({"r": float(r)}, gt({"r": float(r)})) for r in rs]
 
     return _pack(seed, magnitude, sim, build)

@@ -132,7 +132,7 @@ def gamma_11_2_grids(sim, seed: int, magnitude: float):
     return _pack(seed, magnitude, sim, build)
 
 
-# ---- δ-11-1 (branching to dark product B; GT = C_A) ------------------------
+# ---- δ-11-1 (branching to dark product B; GT = C_A + C_B total) ------------
 
 def delta_11_1_grids(sim, seed: int, magnitude: float):
     k0 = float(_attr(sim.params, ("k",), 1.0)) or 1.0
@@ -142,11 +142,24 @@ def delta_11_1_grids(sim, seed: int, magnitude: float):
         t = inputs["t"]
 
         def fn(p):
+            # Score the TOTAL concentration C_A + C_B. The broken symmetry is
+            # stoichiometry (mass conservation A+B=const). With C_B0=0 and
+            # dC_B/dt = η·(−dC_A/dt), the total is η·C_A0 + (1−η)·C_A(t),
+            # which DRIFTS when η≠1 — whereas the textbook conserved law
+            # predicts a constant C_A0+C_B0. Scoring C_A alone made the cell
+            # dead (η lives only in C_B's equation), so oracle==stub.
             try:
                 inst = _d111.KineticsDelta111Instance(p)
-                return inst.step(t)["C_A"]
+                s = inst.step(t)
+                return s["C_A"] + s["C_B"]
             except (ValueError, TypeError):
-                return _baseline_C(t, p)
+                # cf-perturbed params refused: reconstruct the total
+                # analytically from the baseline C_A decay plus the η drift.
+                C_A = _baseline_C(t, p)
+                eta = float(_attr(p, ("eta",), 1.0))
+                C_A0 = float(_attr(p, ("C_A0", "C0"), 1.0)) or 1.0
+                C_B0 = float(_attr(p, ("C_B0",), 0.0))
+                return C_A + C_B0 + eta * (C_A0 - C_A)
 
         return fn
 
