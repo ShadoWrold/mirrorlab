@@ -577,9 +577,13 @@ def _thermal_pred(scenario: ScenarioInstance) -> PredictorFn:
         _tau0 = float(_attr(p, ("tau_min",), 1e-3))
 
         def pred(*, T_hot, T_cold, L, t,
-                 k=_k0d, p_exp=_p0, tau_min=_tau0, **_):
+                 k=_k0d, p=_p0, tau_min=_tau0, **_):
+            # The kwarg MUST be named `p` (the canonical name the cf machinery
+            # emits) — a `p_exp` kwarg would not match the cf override, so the
+            # perturbed power exponent would be swallowed by **_ and the oracle
+            # would silently use the unperturbed default, capping sub-grid (c).
             p_eff = _g72_mod.ThermalGamma72Params(
-                k0=k, p=p_exp, L=L, T_hot=T_hot, T_cold=T_cold, tau_min=tau_min,
+                k0=k, p=p, L=L, T_hot=T_hot, T_cold=T_cold, tau_min=tau_min,
             )
             return _g72_mod.shifted_flux(t, p_eff)
         return pred
@@ -933,12 +937,15 @@ def _decay_pred(scenario: ScenarioInstance) -> PredictorFn:
         _Ni0 = float(_attr(p, ("N_init",), 1.0e6))
 
         def pred(*, t,
-                 lam=_lam0, alpha=_alpha0, p_exp=_p0,
+                 lam=_lam0, alpha=_alpha0, p=_p0,
                  N_scale=_Ns0, N_init=_Ni0, **_):
+            # kwarg named `p` (the canonical cf name) so the perturbed power
+            # exponent reaches the oracle on sub-grid (c); a `p_exp` kwarg
+            # would be swallowed by **_ and silently use the default.
             def rhs(_t, y):
                 (N,) = y
                 Ns = max(N, 0.0)
-                return (-lam * Ns * (1.0 + alpha * (Ns / N_scale) ** p_exp),)
+                return (-lam * Ns * (1.0 + alpha * (Ns / N_scale) ** p),)
             return _integrate(rhs, [N_init], t)[0]
         return pred
 
@@ -1141,7 +1148,7 @@ def _thermal_gamma_7_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]
     p = scenario.sim.params
     return [
         {"name": "k", "value": float(getattr(p, "k0"))},
-        {"name": "p_exp", "value": float(getattr(p, "p"))},
+        {"name": "p", "value": float(getattr(p, "p"))},
         {"name": "tau_min", "value": float(getattr(p, "tau_min"))},
     ]
 
@@ -1168,7 +1175,7 @@ def _decay_gamma_12_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]
     return [
         {"name": "lam", "value": float(getattr(p, "lam"))},
         {"name": "alpha", "value": float(getattr(p, "alpha"))},
-        {"name": "p_exp", "value": float(getattr(p, "p"))},
+        {"name": "p", "value": float(getattr(p, "p"))},
         {"name": "N_scale", "value": float(getattr(p, "N_scale"))},
     ]
 
