@@ -30,16 +30,47 @@ SubGrid = Sequence[TestPoint]
 TestGrids = Mapping[str, Sequence]   # heterogeneous: (a)/(b) are 2-tuples, (c) is 3-tuples
 
 
-def _slog(x: np.ndarray) -> np.ndarray:
+# Per-cell relative floor for the signed-log metric (CAL-14). The distance is
+# log1p(|x|/floor) with floor = REL_FLOOR_ALPHA · median(|ground truth|) over
+# the whole cell. This removes log1p's small-magnitude bias: a plain log1p(|x|)
+# collapses to a near-linear toe for |x|≪1, compressing multiplicative physics
+# breaks on small-output cells into an invisible additive ripple (textbook stub
+# scored spuriously high). With a relative floor every cell sits at
+# |y|/floor ≈ 1/α ≈ 20 — squarely in the faithful log region — so the break's
+# relative size is scored identically regardless of the output's physical
+# magnitude (a force ~1e-3 N and a pressure ~1e5 Pa alike). α is small enough
+# that even ~1e-8-magnitude cells stay in the log region and their oracle is
+# not amplified by numerical noise.
+REL_FLOOR_ALPHA = 0.05
+
+
+def _slog(x: np.ndarray, floor: float = 1.0) -> np.ndarray:
     x = np.clip(x, -CLAMP, CLAMP)
-    return np.sign(x) * np.log1p(np.abs(x))
+    return np.sign(x) * np.log1p(np.abs(x) / floor)
 
 
-def rmsle(predictions: Sequence[float], ground_truth: Sequence[float]) -> float:
+def _rel_floor(truths: Sequence[float]) -> float:
+    """Per-cell relative floor = α · median(|ground truth|), clamped > 0.
+
+    Computed from the ground truth (never the predictions) so the floor is a
+    fixed property of the cell that a predictor cannot game.
+    """
+    mags = [abs(float(y)) for y in truths if np.isfinite(y) and y != 0.0]
+    if not mags:
+        return 1.0
+    f = REL_FLOOR_ALPHA * float(np.median(mags))
+    return f if f > 0.0 else 1.0
+
+
+def rmsle(predictions: Sequence[float], ground_truth: Sequence[float],
+          floor: float = 1.0) -> float:
     """Signed-log RMSE between predictions and ground truth.
 
     Both inputs are clamped at ±1e6 (CAL-13) before the signed-log transform,
-    so a divergent predictor cannot blow the score to ``inf``.
+    so a divergent predictor cannot blow the score to ``inf``. ``floor`` is the
+    per-cell relative scale (CAL-14) dividing |x| inside log1p; the default 1.0
+    reproduces the legacy absolute-magnitude metric for callers that do not
+    supply one.
     """
     p = np.asarray(list(predictions), dtype=float)
     y = np.asarray(list(ground_truth), dtype=float)
@@ -52,7 +83,7 @@ def rmsle(predictions: Sequence[float], ground_truth: Sequence[float]) -> float:
     # NaN to the clamp ceiling instead.
     p = np.where(np.isfinite(p), p, np.sign(np.nan_to_num(p, nan=CLAMP)) * CLAMP)
     p = np.nan_to_num(p, nan=CLAMP, posinf=CLAMP, neginf=-CLAMP)
-    diff = _slog(p) - _slog(y)
+    diff = _slog(p, floor) - _slog(y, floor)
     return float(np.sqrt(np.mean(diff ** 2)))
 
 
@@ -188,33 +219,44 @@ def _alias_inputs(
     entry_inputs: Optional[Sequence[Mapping[str, Any]]],
     canonical_order: Optional[Sequence[str]],
 ) -> dict[str, float]:
-    """Rename grid keys to entry-declared input names when they disagree.
+    """Make the grid's values reachable under the entry's declared input names.
 
-    When the LLM's submission declares input names that differ from the
-    test-grid keys, the canonical order from the scenario dim signature
-    serves as the positional bridge: ``canonical_order[i]`` (the grid key)
-    is renamed to ``entry_inputs[i]['name']``. Keys not covered by the
-    canonical order are passed through untouched so scenario constants
-    (q1/q2/k_e/...) the grid packer injected remain available.
+    Strategy (name-first, then a *safe* positional bridge):
+
+    1. Every grid key is passed through under its own name, so a predictor
+       that declared an input by its real grid name (``r``, ``t``, …) always
+       receives it. This is the common case and must never be disturbed.
+    2. Only when a declared input name is NOT itself a grid key do we bridge
+       it positionally: the canonical grid key at the same position supplies
+       the value — but only if that bridge would not overwrite a value the
+       grid already exposes. This recovers the legacy "the model called the
+       spring coordinate ``q`` instead of ``x``" case.
+
+    The old implementation ``zip(canonical_order, entry_inputs)`` broke when a
+    predictor declared MORE inputs than the domain's canonical order (e.g. a
+    force law ``f(G, M, m, r)`` whose canonical inputs are just ``[r]``): it
+    paired ``canonical[0]=r`` with ``entry[0]=G`` and renamed the grid's ``r``
+    value to ``G``, so the real ``r`` vanished and the predictor was scored
+    on CLAMP. Name-first matching plus the no-clobber guard fixes that without
+    regressing the rename case.
     """
     if not entry_inputs or not canonical_order:
         return dict(raw)
-    pairs = list(zip(canonical_order, entry_inputs))
-    out: dict[str, float] = {}
-    renamed: set[str] = set()
-    for canon, spec in pairs:
-        if canon not in raw:
-            continue
+    out: dict[str, float] = dict(raw)  # name-match: every grid key by its name
+    declared_names: list[str] = []
+    for spec in entry_inputs:
         try:
-            new_name = spec["name"]
+            declared_names.append(str(spec["name"]))
         except (KeyError, TypeError):
-            new_name = canon
-        out[str(new_name)] = raw[canon]
-        renamed.add(canon)
-    for k, v in raw.items():
-        if k in renamed:
+            declared_names.append("")
+    for canon, nm in zip(canonical_order, declared_names):
+        # Bridge only a renamed input (declared name differs from the grid
+        # key) and only when it adds a value rather than overwriting one the
+        # grid already provides under that name.
+        if not nm or nm == canon:
             continue
-        out.setdefault(k, v)
+        if canon in raw and nm not in raw:
+            out.setdefault(nm, raw[canon])
     return out
 
 
@@ -264,7 +306,11 @@ def evaluate_entry(
     raw: Optional[Callable[..., float]] = None
     declared_params = {p["name"]: p["value"] for p in entry.get("params", [])}
     entry_inputs = entry.get("inputs")
-    rbars: list[tuple[float, float]] = []
+    # Collect (weight, preds, truths) per sub-grid first so the per-cell
+    # relative floor can be computed from ALL ground-truth points before
+    # scoring any sub-grid — every sub-grid then shares one consistent floor.
+    collected: list[tuple[float, list[float], list[float]]] = []
+    all_truths: list[float] = []
     for key, grid in test_grids.items():
         if not grid:
             continue
@@ -331,9 +377,12 @@ def evaluate_entry(
                 for ins, _ in grid
             ]
             truths = [float(gt) for _, gt in grid]
-        rbars.append((w, rmsle(preds, truths)))
-    if not rbars:
+        collected.append((w, preds, truths))
+        all_truths.extend(truths)
+    if not collected:
         return 0.0
+    floor = _rel_floor(all_truths)
+    rbars = [(w, rmsle(preds, truths, floor)) for w, preds, truths in collected]
     wsum = sum(w for w, _ in rbars)
     r_bar = sum(w * r for w, r in rbars) / wsum
     return float(math.exp(-r_bar / tau))

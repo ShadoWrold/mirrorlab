@@ -251,7 +251,37 @@ def _scenario_constants(scenario: ScenarioInstance) -> Dict[str, float]:
             if alias in raw:
                 canon[canon_name] = raw[alias]
                 break
+
+    # Physics-synonym exposure (forward direction). A predictor that names a
+    # law coefficient with an accepted physics synonym (e.g. the decay rate as
+    # ``k`` per the textbook dN/dt=−kN, when the benchmark stores it as
+    # ``lam``) would otherwise miss the injected value and be scored on CLAMP.
+    # Expose the same value under each synonym too, but ONLY for synonyms that
+    # are physically unambiguous for that coefficient and only when the synonym
+    # key is not already taken (never overwrite a real value). Domains whose
+    # coefficient names are already unique/unambiguous are omitted; same-
+    # dimension coefficients (coulomb q1/q2) are deliberately NOT aliased to
+    # avoid a wrong-value match.
+    domain_id = getattr(scenario, "domain_id", None)
+    synonyms = _COEFF_SYNONYMS.get(domain_id, {})
+    for src_name, syns in synonyms.items():
+        if src_name not in canon:
+            continue
+        for syn in syns:
+            canon.setdefault(syn, canon[src_name])
     return canon
+
+
+# Per-domain physics-accepted coefficient synonyms (forward exposure). Each
+# maps a coefficient already present under its canonical name to extra keys a
+# predictor might legitimately use. Keep to textbook-equivalent names only —
+# never arbitrary letters, never across same-dimension coefficients.
+_COEFF_SYNONYMS: Dict[str, Dict[str, Tuple[str, ...]]] = {
+    "decay": {"lam": ("k", "lambda_", "decay_rate")},
+    "coulomb": {"k_e": ("k", "ke")},
+    "thermal": {"k": ("kappa", "lam")},
+    "kinetics": {"k": ("k_rate", "rate_const")},
+}
 
 
 def _target_dim(scenario: ScenarioInstance) -> Optional[str]:
