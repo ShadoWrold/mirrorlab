@@ -159,26 +159,28 @@ def _coulomb(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, An
     k_e = _attr(sc.sim, "k_e", 8.9875517873681764e9)
     q1 = _attr(sc.sim, "q1", _attr(sc.sim, "q_src", 1.0e-9))
     q2 = _attr(sc.sim, "q2", _attr(sc.sim, "q_test", 1.0e-9))
+    # Declare the charges under the counterfactual canonical names q_1/q_2 (the
+    # names the cf machinery emits) so the stub tracks the perturbed charges on
+    # sub-grid (c) — otherwise cf overrides miss the q1/q2 kwargs and the stub
+    # scores its unperturbed charges against the perturbed ground truth.
     return _entry(
         "L1",
-        "F = k_e*q1*q2/r**2",
-        "def f(r, k_e, q1, q2):\n    return k_e*q1*q2/(r*r)\n",
+        "F = k_e*q_1*q_2/r**2",
+        "def f(r, k_e, q_1, q_2):\n    return k_e*q_1*q_2/(r*r)\n",
         [{"name": "r", "units": "m"}],
         [{"name": "F", "units": "kg*m*s**-2"}],
         [
             _param("k_e", "kg*m**3*s**-4*A**-2", k_e),
-            _param("q1", "A*s", q1),
-            _param("q2", "A*s", q2),
+            _param("q_1", "A*s", q1),
+            _param("q_2", "A*s", q2),
         ],
     )
 
 
 def _pendulum(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]:
-    # Post-XY (T13): bench builders output θ̈ from input θ but the
-    # pendulum DIM declares output "theta" (unit "1"). The ceiling
-    # entry inherits that declared output schema, so the stub must do
-    # the same to pass stage-1 dim filtering. The numeric output is
-    # still −(g/L)·sin(θ).
+    # Bench scores theta_ddot = -(g/L)·sin(theta) from input theta. With the
+    # dim signature now declaring this contract honestly (output theta_ddot,
+    # units s**-2) the stub no longer needs the old fake-units workaround.
     g_over_L = _attr(
         sc.sim, "g_over_L", _attr(sc.sim, "g0_over_L", _attr(sc.sim, "g", 9.81) / max(_attr(sc.sim, "L", 1.0), 1e-9))
     )
@@ -187,17 +189,15 @@ def _pendulum(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, A
         "theta_dotdot = -(g_over_L)*sin(theta)",
         "import math\ndef f(theta, g_over_L):\n    return -g_over_L*math.sin(theta)\n",
         [{"name": "theta", "units": "1"}],
-        [{"name": "theta", "units": "1"}],
+        [{"name": "theta_ddot", "units": "s**-2"}],
         [_param("g_over_L", "s**-2", g_over_L)],
     )
 
 
 def _rlc(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]:
-    # Post-XY (T13): bench builders return di/dt from inputs {q, i}
-    # (and +t for δ-6-1). The RLC DIM declares output {q, i, V}, but
-    # ceiling and bench operate on the di/dt channel. Stub emits the
-    # Kirchhoff-derived di/dt directly so the stage-1 filter passes
-    # on the same channel.
+    # Bench scores di/dt from inputs {q, i} (and +t for δ-6-1). With the dim
+    # signature now declaring output didt (A*s**-1) the stub declares the true
+    # channel directly — no fake-units workaround.
     L = _attr(sc.sim, "L", _attr(sc.sim, "L0", _attr(sc.sim, "L1", 1.0)))
     R = _attr(sc.sim, "R", _attr(sc.sim, "R1", 1.0))
     C = _attr(sc.sim, "C", _attr(sc.sim, "C1", 1.0e-6))
@@ -212,7 +212,7 @@ def _rlc(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]:
             {"name": "q", "units": "A*s"},
             {"name": "i", "units": "A"},
         ],
-        [{"name": "q", "units": "A*s"}],
+        [{"name": "didt", "units": "A*s**-1"}],
         [
             _param("L", "kg*m**2*s**-2*A**-2", L),
             _param("R", "kg*m**2*s**-3*A**-2", R),

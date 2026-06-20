@@ -37,12 +37,12 @@ HOOKE_OBSERVABLES: tuple[str, ...] = ("t", "x", "v", "F")
 DAMPED_HO_OBSERVABLES: tuple[str, ...] = ("t", "x", "v", "F")
 GRAVITY_OBSERVABLES: tuple[str, ...] = ("t", "r", "v", "F")
 COULOMB_OBSERVABLES: tuple[str, ...] = ("t", "r", "v", "F")
-PENDULUM_OBSERVABLES: tuple[str, ...] = ("t", "theta", "omega")
-RLC_OBSERVABLES: tuple[str, ...] = ("t", "q", "i", "V")
+PENDULUM_OBSERVABLES: tuple[str, ...] = ("theta", "omega", "theta_ddot")
+RLC_OBSERVABLES: tuple[str, ...] = ("q", "i", "didt")
 THERMAL_OBSERVABLES: tuple[str, ...] = ("T_hot", "T_cold", "L", "q")
 WAVE_OBSERVABLES: tuple[str, ...] = ("t", "u", "du_dt")
 OPTICS_OBSERVABLES: tuple[str, ...] = ("theta1", "theta2")
-FLUID_OBSERVABLES: tuple[str, ...] = ("v", "h", "p", "p2")
+FLUID_OBSERVABLES: tuple[str, ...] = ("p1", "v1", "v2", "h1", "h2", "p2")
 KINETICS_OBSERVABLES: tuple[str, ...] = ("t", "C", "rate")
 DECAY_OBSERVABLES: tuple[str, ...] = ("t", "N", "rate")
 
@@ -144,11 +144,12 @@ def pendulum_prompt(
 ) -> str:
     narrative = (
         "You are investigating a rigid body pivoting about a fixed axis "
-        "under a uniform vertical influence. The body's angular "
-        "configuration evolves in time; you may probe the angle and "
-        "angular rate at any chosen instant."
+        "under a uniform vertical influence. At any chosen instant you may "
+        "set the body to an angle theta and read its angular acceleration; "
+        "your goal is the instantaneous law giving the angular acceleration "
+        "as a function of the angle."
     )
-    return _compose(narrative, observables, tool_names, "theta")
+    return _compose(narrative, observables, tool_names, "theta_ddot")
 
 
 def rlc_prompt(
@@ -157,10 +158,12 @@ def rlc_prompt(
 ) -> str:
     narrative = (
         "You are investigating a single-loop electrical configuration with "
-        "three passive elements arranged in series. Probing yields the "
-        "instantaneous stored charge, loop current, and driving potential."
+        "three passive elements arranged in series. At any chosen instant you "
+        "may set the stored charge q and loop current i and read the rate of "
+        "change of the current; your goal is the instantaneous law giving "
+        "that current rate as a function of (q, i)."
     )
-    return _compose(narrative, observables, tool_names, "q")
+    return _compose(narrative, observables, tool_names, "didt")
 
 
 def thermal_prompt(
@@ -207,11 +210,11 @@ def fluid_prompt(
     tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
-        "You are investigating a steady flow of a constant-density "
-        "medium between two cross-sections of a duct. At each section "
-        "you may sample the local elevation, speed, and pressure, and "
-        "you wish to predict the downstream pressure given the upstream "
-        "state."
+        "You are investigating a steady flow of a constant-density medium "
+        "between two cross-sections of a duct, an upstream station 1 and a "
+        "downstream station 2. You may sample the elevation h, speed v, and "
+        "pressure p at each station (h1/v1/p1 upstream, h2/v2 downstream) and "
+        "you wish to predict the downstream pressure p2 from that state."
     )
     return _compose(narrative, observables, tool_names, "p2")
 

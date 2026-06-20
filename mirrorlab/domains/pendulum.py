@@ -61,7 +61,14 @@ class PendulumBaseline:
 
 
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
-    "inputs": {"t": "s"},
-    "outputs": {"theta": "1", "omega": "s**-1"},
+    # The benchmark scores the instantaneous equation-of-motion right-hand
+    # side: given the angle theta, predict the angular acceleration
+    # theta_ddot = -(g/L)·sin(theta) (cf. hooke's F(x), thermal's q(T)). The
+    # old signature declared inputs={t}, outputs={theta, omega} — a trajectory
+    # contract that disagreed with the loader grid (which feeds theta and
+    # scores theta_ddot), so an honest agent that submitted theta(t) was
+    # graded against theta_ddot and scored 0.
+    "inputs": {"theta": "1"},
+    "outputs": {"theta_ddot": "s**-2"},
     "params": {"L": "m", "g": "m*s**-2"},
 }

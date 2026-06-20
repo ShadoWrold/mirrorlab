@@ -61,7 +61,12 @@ class RLCBaseline:
 
 
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
-    "inputs": {"t": "s"},
-    "outputs": {"q": "A*s", "i": "A", "V": "kg*m**2*s**-3*A**-1"},
+    # The benchmark scores the instantaneous loop equation: given the charge q
+    # and current i, predict the current rate didt = -(R·i + q/C)/L. The old
+    # signature declared inputs={t}, outputs={q, i, V} — a trajectory contract
+    # disagreeing with the loader grid (feeds {q, i}, scores didt), so an
+    # honest agent submitting q(t) was graded against didt and scored 0.
+    "inputs": {"q": "A*s", "i": "A"},
+    "outputs": {"didt": "A*s**-1"},
     "params": {"L": "kg*m**2*s**-2*A**-2", "R": "kg*m**2*s**-3*A**-2", "C": "kg**-1*m**-2*s**4*A**2"},
 }

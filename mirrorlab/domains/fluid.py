@@ -43,7 +43,13 @@ class FluidBaseline:
 
 
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
-    "inputs": {"v": "m*s**-1", "h": "m", "p": "kg*m**-1*s**-2"},
+    # Inputs name the upstream/downstream station variables the loader grid
+    # actually feeds (p1, v1, v2, h1, h2), not the unscripted {v, h, p}. The
+    # output p2 (downstream pressure) was already correct.
+    "inputs": {
+        "p1": "kg*m**-1*s**-2", "v1": "m*s**-1", "v2": "m*s**-1",
+        "h1": "m", "h2": "m",
+    },
     "outputs": {"p2": "kg*m**-1*s**-2"},
     "params": {"rho": "kg*m**-3", "g": "m*s**-2"},
 }
