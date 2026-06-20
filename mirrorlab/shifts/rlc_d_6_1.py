@@ -21,7 +21,13 @@ from mirrorlab.shifts._util import loguniform
 L0_MIN, L0_MAX = 1e-3, 1.0
 R_MIN, R_MAX = 0.01, 1e5
 C_MIN, C_MAX = 1e-9, 1e-5
-EPS_MIN, EPS_MAX = 0.05, 0.3
+# Modulation depth raised to [0.30,0.45] so the L(t)=L₀[1+ε cos Ω_p t] break is
+# a large enough multiplicative term that a constant effective-(L₀,R) re-fit
+# cannot absorb it (the old [0.05,0.3] was a "fake hardening" exposed when the
+# dim-signature contract was fixed). The damping-ratio self-adaptation in the
+# sampler keeps R above the sub-threshold parametric-amplification bound, so
+# di/dt stays bounded (no runaway) at this depth.
+EPS_MIN, EPS_MAX = 0.30, 0.45
 
 
 @dataclass(frozen=True)
@@ -146,7 +152,11 @@ shift = ShiftImpl(law=shifted_law, sampler=sampler, validator=validator)
 
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"q": "A*s", "i": "A", "t": "s"},
-    "outputs": {"di_dt": "A*s**-1"},
+    # NOTE: the loader scores against the domain-level DIM_SIGNATURE
+    # (rlc.py: outputs={didt}); this shift-level signature is not read by the
+    # scoring path. Name kept as `didt` to match the domain so the dead field
+    # never disagrees if some future code starts reading it.
+    "outputs": {"didt": "A*s**-1"},
     "params": {"L0": "kg*m**2*s**-2*A**-2", "R": "kg*m**2*s**-3*A**-2",
                "C": "kg**-1*m**-2*s**4*A**2", "eps": "1", "Omega_p": "s**-1"},
 }

@@ -17,7 +17,18 @@ from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
 GL_MIN, GL_MAX = 1.0, 100.0
-EPS_MIN, EPS_MAX = 0.05, 0.3
+# Modulation depth raised to [0.50,0.65] so the g(t)=g₀[1+ε cos Ωt] break is a
+# large, non-absorbable multiplicative term — a constant effective-g re-fit can
+# no longer hide it. (The old [0.05,0.3] with the Mathieu sub-threshold cap was
+# a "fake hardening" that only looked discriminating because of a now-fixed
+# dim-signature contract bug.) To stay physically bounded at this depth the
+# drive ratio Ω/ω₀ is narrowed to [0.3,1.4]: the lower edge of the 2ω₀
+# parametric (Mathieu) resonance tongue widens down to ~1.5 at ε=0.65, so
+# ratios above 1.4 would drive the pendulum into runaway flips (|θ|>π). With
+# ratio≤1.4 the trajectory stays bounded (worst |θ|≈102° over the whole grid,
+# which is why the explicit Mathieu ε-bound is no longer needed.
+EPS_MIN, EPS_MAX = 0.50, 0.65
+RATIO_MIN, RATIO_MAX = 0.3, 1.4
 
 
 @dataclass(frozen=True)
@@ -38,11 +49,8 @@ def sampler(seed: int) -> PendulumDelta41Params:
     rng = np.random.default_rng(seed)
     g0_over_L = loguniform(rng, GL_MIN, GL_MAX)
     omega0 = math.sqrt(g0_over_L)
-    Omega = omega0 * float(rng.uniform(0.3, 1.7))
-    # Sub-threshold of Mathieu tongue: ε ≤ 0.4·|Ω/(2ω₀) − 1|.
-    bound = 0.4 * abs(Omega / (2.0 * omega0) - 1.0)
-    eps_hi = min(EPS_MAX, 0.95 * bound) if bound > EPS_MIN else EPS_MIN
-    eps = float(rng.uniform(EPS_MIN, max(eps_hi, EPS_MIN + 1e-12)))
+    Omega = omega0 * float(rng.uniform(RATIO_MIN, RATIO_MAX))
+    eps = float(rng.uniform(EPS_MIN, EPS_MAX))
     return PendulumDelta41Params(g0_over_L=g0_over_L, eps=eps, Omega=Omega,
                                  theta0=0.3, omega_init=0.0)
 
@@ -58,11 +66,7 @@ def validator(p) -> bool:
         return False
     omega_nat = math.sqrt(p.g0_over_L)
     ratio = p.Omega / omega_nat
-    if not (0.3 <= ratio <= 1.7):
-        return False
-    # sub-threshold Mathieu: ε ≤ 0.4 · |Ω/(2ω₀) − 1|
-    bound = 0.4 * abs(p.Omega / (2.0 * omega_nat) - 1.0)
-    if p.eps > bound:
+    if not (RATIO_MIN <= ratio <= RATIO_MAX):
         return False
     if abs(p.theta0) > math.pi / 2:
         return False
