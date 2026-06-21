@@ -12,7 +12,7 @@ from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 
 
 G_DEFAULT = 6.67430e-11
@@ -79,3 +79,16 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "outputs": {"F": "kg*m*s**-2"},
     "params": {"G": "m**3*kg**-1*s**-2", "M": "kg", "m": "kg"},
 }
+
+
+def law(inputs, p: GravityParams) -> float:
+    """Unified GT/oracle law: Newtonian force F = −G·M·m/r²."""
+    return baseline_force(inputs["r"], p)
+
+
+CELL = CellSpec(
+    domain="gravity", shift="baseline",
+    params_type=GravityParams, law=law,
+    output="F", broken_symmetry="none",
+)
+register_cell(CELL)

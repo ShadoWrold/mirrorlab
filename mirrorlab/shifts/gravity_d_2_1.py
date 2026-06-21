@@ -13,7 +13,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -117,6 +117,12 @@ def build(*, params: GravityDelta21Params | None = None, seed: int = 0) -> _Sim:
 
 shift = ShiftImpl(law=shifted_force, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: GravityDelta21Params) -> float:
+    """Unified GT/oracle law (time-modulated G, depends on t)."""
+    return shifted_force(inputs["r"], inputs["t"], p)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"r": "m", "t": "s"},
     "outputs": {"F": "kg*m*s**-2"},
@@ -124,5 +130,13 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
                "beta": "1", "omega_G": "s**-1"},
 }
 
-__all__ = ["GravityDelta21Params", "shifted_force", "G_of_t", "sampler",
-           "validator", "build", "shift", "DIM_SIGNATURE"]
+CELL = CellSpec(
+    domain="gravity", shift="delta_2_1",
+    params_type=GravityDelta21Params, law=law,
+    sampler=sampler, validator=validator,
+    output="F", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
+__all__ = ["GravityDelta21Params", "shifted_force", "law", "G_of_t", "sampler",
+           "validator", "build", "shift", "DIM_SIGNATURE", "CELL"]

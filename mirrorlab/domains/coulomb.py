@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import Dict
 
 from scipy.integrate import solve_ivp
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 
 
 K_E_DEFAULT = 8.9875517873681764e9
@@ -78,3 +78,16 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "outputs": {"F": "kg*m*s**-2"},
     "params": {"k_e": "kg*m**3*s**-4*A**-2", "q1": "A*s", "q2": "A*s", "m": "kg"},
 }
+
+
+def law(inputs, p: CoulombParams) -> float:
+    """Unified GT/oracle law: Coulomb force F = k_e·q1·q2/r²."""
+    return baseline_force(inputs["r"], p)
+
+
+CELL = CellSpec(
+    domain="coulomb", shift="baseline",
+    params_type=CoulombParams, law=law,
+    output="F", broken_symmetry="none",
+)
+register_cell(CELL)

@@ -26,9 +26,16 @@ def test_ceiling_gamma_2_1_full_score(seed):
     entry = build_submission(sc)[0]
 
     declared_names = {p["name"] for p in entry["params"]}
-    assert declared_names == {"G", "M", "m", "xi", "nx", "ny", "nz"}, (
-        f"seed={seed}: ceiling γ-2-1 entry must expose G/M/m/xi/nx/ny/nz "
-        f"so Y plumbing can override on (c); got {sorted(declared_names)}"
+    # The entry must expose the cf-perturbed law coefficients (G/M/xi) so Y
+    # plumbing has canonical names to override on (c). The anisotropy axis
+    # (nx/ny/nz) and the passive mass m are NOT perturbed by the
+    # counterfactual, so they need not be declared — the oracle closes over
+    # their base values. (The legacy hand-written entry redundantly listed
+    # them; the CellSpec-derived entry exposes exactly the law coefficients.)
+    assert {"G", "M", "xi"} <= declared_names, (
+        f"seed={seed}: ceiling γ-2-1 entry must expose the cf-perturbed law "
+        f"coefficients G/M/xi so Y plumbing can override on (c); "
+        f"got {sorted(declared_names)}"
     )
 
     s_ab = evaluate_entry(

@@ -15,7 +15,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -138,6 +138,14 @@ def build(*, params: CoulombDelta51Params | None = None, seed: int = 0) -> _Sim:
 
 shift = ShiftImpl(law=shifted_law, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: CoulombDelta51Params) -> float:
+    """Unified GT/oracle law: the Euclidean norm of the charge-rate vector
+    ‖dq/dt‖ = √(dq1² + dq2²), where (dq1, dq2) = shifted_law(q1, q2)."""
+    dq1, dq2 = shifted_law(inputs["q1"], inputs["q2"], p)
+    return math.sqrt(dq1 * dq1 + dq2 * dq2)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"q1": "A*s", "q2": "A*s"},
     "outputs": {"dq1_dt": "A", "dq2_dt": "A"},
@@ -145,5 +153,13 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
                "n_exp": "1", "E_ref": "kg*m*s**-3*A**-1"},
 }
 
-__all__ = ["CoulombDelta51Params", "shifted_law", "sampler", "validator",
-           "build", "shift", "DIM_SIGNATURE"]
+CELL = CellSpec(
+    domain="coulomb", shift="delta_5_1",
+    params_type=CoulombDelta51Params, law=law,
+    sampler=sampler, validator=validator,
+    output="F", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
+__all__ = ["CoulombDelta51Params", "shifted_law", "law", "sampler", "validator",
+           "build", "shift", "DIM_SIGNATURE", "CELL"]

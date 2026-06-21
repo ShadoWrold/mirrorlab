@@ -18,7 +18,7 @@ from typing import Dict, Tuple
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -171,6 +171,21 @@ def build(*, params: CoulombGamma52Params | None = None, seed: int = 0) -> _Sim:
 
 shift = ShiftImpl(law=shifted_force, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: CoulombGamma52Params) -> float:
+    """Unified GT/oracle law: 3-D non-reciprocal force projected to signed
+    radial magnitude sign(F·r̂)·|F| (blueprint §2.5), matching the grid GT."""
+    x, y, z = inputs["x"], inputs["y"], inputs["z"]
+    r = math.sqrt(x * x + y * y + z * z)
+    if r == 0.0:
+        return 0.0
+    Fx, Fy, Fz = shifted_force((x, y, z), p)
+    rhx, rhy, rhz = x / r, y / r, z / r
+    dot = Fx * rhx + Fy * rhy + Fz * rhz
+    mag = math.sqrt(Fx * Fx + Fy * Fy + Fz * Fz)
+    return math.copysign(mag, dot) if dot != 0.0 else mag
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"x": "m", "y": "m", "z": "m"},
     "outputs": {"Fx": "kg*m*s**-2", "Fy": "kg*m*s**-2", "Fz": "kg*m*s**-2"},
@@ -178,5 +193,13 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
                "phi0": "kg*m**2*s**-3*A**-1", "q_test": "A*s", "m": "kg"},
 }
 
-__all__ = ["CoulombGamma52Params", "shifted_force", "sampler", "validator",
-           "build", "shift", "DIM_SIGNATURE"]
+CELL = CellSpec(
+    domain="coulomb", shift="gamma_5_2",
+    params_type=CoulombGamma52Params, law=law,
+    sampler=sampler, validator=validator,
+    output="F", broken_symmetry="ROT",
+)
+register_cell(CELL)
+
+__all__ = ["CoulombGamma52Params", "shifted_force", "law", "sampler", "validator",
+           "build", "shift", "DIM_SIGNATURE", "CELL"]
