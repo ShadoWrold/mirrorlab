@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import Dict
 
 from scipy.integrate import solve_ivp
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 
 
 @dataclass(frozen=True)
@@ -68,3 +68,18 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "outputs": {"F": "kg*m*s**-2"},
     "params": {"k": "kg*s**-2", "c": "kg*s**-1", "m": "kg"},
 }
+
+
+def law(inputs, p: DampedHOParams) -> float:
+    """Unified GT/oracle law: the scored channel is the acceleration
+    ẍ = −(k/m)·x − (c/m)·v (matches the loader baseline GT, not the bare
+    force returned by step())."""
+    return -(p.k / p.m) * inputs["x"] - (p.c / p.m) * inputs["v"]
+
+
+CELL = CellSpec(
+    domain="damped_ho", shift="baseline",
+    params_type=DampedHOParams, law=law,
+    output="F", broken_symmetry="none",
+)
+register_cell(CELL)

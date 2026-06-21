@@ -13,7 +13,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -99,11 +99,25 @@ def build(*, params: PendulumGamma41Params | None = None, seed: int = 0) -> _Sim
 
 shift = ShiftImpl(law=shifted_law, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: PendulumGamma41Params) -> float:
+    """Unified GT/oracle law (anharmonic correction)."""
+    return shifted_law(inputs["theta"], p)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"theta": "rad"},
     "outputs": {"theta_ddot": "rad*s**-2"},
     "params": {"g_over_L": "s**-2", "alpha": "1"},
 }
 
-__all__ = ["PendulumGamma41Params", "shifted_law", "sampler", "validator",
-           "build", "shift", "DIM_SIGNATURE"]
+CELL = CellSpec(
+    domain="pendulum", shift="gamma_4_1",
+    params_type=PendulumGamma41Params, law=law,
+    sampler=sampler, validator=validator,
+    output="theta_ddot", broken_symmetry="PAR",
+)
+register_cell(CELL)
+
+__all__ = ["PendulumGamma41Params", "shifted_law", "law", "sampler", "validator",
+           "build", "shift", "DIM_SIGNATURE", "CELL"]

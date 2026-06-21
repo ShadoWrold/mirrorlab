@@ -14,7 +14,7 @@ from typing import Deque, Dict, Tuple
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -136,6 +136,14 @@ def build(*, params: DampedHOGamma31Params | None = None, seed: int = 0) -> _Sim
 
 shift = ShiftImpl(law=shifted_law, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: DampedHOGamma31Params) -> float:
+    """Unified GT/oracle law. The grid uses the single-point ⟨x²⟩ proxy
+    x2_mean = x², matching loader gamma_3_1_grids."""
+    x, v = inputs["x"], inputs["v"]
+    return shifted_law(x, v, x * x, p)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"x": "m", "v": "m*s**-1", "x2_mean": "m**2"},
     "outputs": {"a": "m*s**-2"},
@@ -143,5 +151,13 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
                "tau": "s", "x_ref": "m", "m": "kg"},
 }
 
-__all__ = ["DampedHOGamma31Params", "shifted_law", "sampler", "validator",
-           "build", "shift", "DIM_SIGNATURE"]
+CELL = CellSpec(
+    domain="damped_ho", shift="gamma_3_1",
+    params_type=DampedHOGamma31Params, law=law,
+    sampler=sampler, validator=validator,
+    output="a", broken_symmetry="SCALE",
+)
+register_cell(CELL)
+
+__all__ = ["DampedHOGamma31Params", "shifted_law", "law", "sampler", "validator",
+           "build", "shift", "DIM_SIGNATURE", "CELL"]

@@ -12,7 +12,7 @@ from math import sin
 from typing import Dict
 
 from scipy.integrate import solve_ivp
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 
 
 @dataclass(frozen=True)
@@ -73,3 +73,16 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "outputs": {"theta_ddot": "s**-2"},
     "params": {"L": "m", "g": "m*s**-2"},
 }
+
+
+def law(inputs, p: PendulumParams) -> float:
+    """Unified GT/oracle law: angular acceleration θ̈ = −(g/L)·sin(θ)."""
+    return -(p.g / p.L) * sin(inputs["theta"])
+
+
+CELL = CellSpec(
+    domain="pendulum", shift="baseline",
+    params_type=PendulumParams, law=law,
+    output="theta_ddot", broken_symmetry="none",
+)
+register_cell(CELL)
