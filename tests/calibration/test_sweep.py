@@ -169,10 +169,10 @@ def test_sweep_cal3_magnitude_factory_called_per_value():
 
 def test_sweep_cal3_magnitude_picks_smallest_feasible():
     def factory(m):
-        # Drop hits target at m=0.3.
-        drop = 0.15 if m < 0.3 else 0.30
-        # Encode this in rc; the sweep computes drop from rmsle.
-        rc = 0.5 if m < 0.3 else 1.5
+        # Under TAU_DEFAULT=0.20 the c-only drop is 1 - exp(-rc): rc=0.15 gives
+        # 0.14 (< target 0.20, infeasible); rc=1.5 gives 0.78 (>= target). So the
+        # smallest feasible magnitude is m=0.3, where rc crosses to the high value.
+        rc = 0.15 if m < 0.3 else 1.5
         return [_gamma_record(seed=s, ra=0.0, rb=0.0, rc=rc) for s in range(3)]
 
     res = sweep_cal3_magnitude(
