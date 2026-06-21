@@ -716,20 +716,22 @@ def _optics_pred(scenario: ScenarioInstance) -> PredictorFn:
         _n10 = float(_attr(p, ("n1",), 1.0))
         _n20 = float(_attr(p, ("n2",), 1.5))
         _ka0 = float(_attr(p, ("kappa",), 0.0))
+        from mirrorlab.shifts.optics_g_9_2 import BETA as _BETA92
 
-        def pred(*, theta1, n_1=_n10, n_2=_n20, kappa=_ka0, **_):
+        def pred(*, theta1, nu, n_1=_n10, n_2=_n20, kappa=_ka0, beta=_BETA92, **_):
             s = math.sin(theta1)
             anti = (n_1 - n_2) / (n_1 + n_2) if (n_1 + n_2) != 0 else 0.0
-            return _angle((n_1 / n_2) * s + kappa * anti * s ** 3)
+            return _angle((n_1 / n_2) * s + kappa * anti * s * math.sin(beta * nu * s))
         return pred
 
     if shift_id == "delta_9_1":
-        # Current catalog step() is baseline Snell.
-        _n10 = float(_attr(p, ("n1",), 1.0))
-        _n20 = float(_attr(p, ("n2",), 1.5))
+        # Beer-Lambert transmittance T = (1−R0)·exp(−β/cosθ_i). cf perturbs
+        # R0/beta on (c); declare canonical names so the oracle tracks them.
+        _R0 = float(_attr(p, ("R0",), 0.1))
+        _be = float(_attr(p, ("beta",), 0.5))
 
-        def pred(*, theta1, t=0.0, n_1=_n10, n_2=_n20, **_):
-            return _angle((n_1 / n_2) * math.sin(theta1))
+        def pred(*, theta1, R0=_R0, beta=_be, **_):
+            return (1.0 - R0) * math.exp(-beta / math.cos(theta1))
         return pred
 
     # baseline Snell.
@@ -1307,8 +1309,8 @@ def _optics_gamma_9_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]
 def _optics_delta_9_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
     p = scenario.sim.params
     return [
-        {"name": "n_1", "value": float(getattr(p, "n1"))},
-        {"name": "n_2", "value": float(getattr(p, "n2"))},
+        {"name": "R0", "value": float(getattr(p, "R0"))},
+        {"name": "beta", "value": float(getattr(p, "beta"))},
     ]
 
 

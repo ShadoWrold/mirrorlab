@@ -42,34 +42,29 @@ _P2_CELLS = [
 
 # Soft cells in P2 (real-physics small spread, not bench bug):
 # After the contract-alignment + scoring-core fixes, the ONLY genuinely
-# soft non-baseline cells left are the two optics cells that are
-# structurally unhardenable in the angle channel (see below). Every other
-# γ/δ shift now shows a large oracle−stub spread (≥0.87) and is a real
-# cliff — the earlier exemptions for damped_ho/pendulum/wave/fluid/kinetics
-# γ/δ cells were STALE (hardened by 89a827c/f979ef2; verified stub 0.00–0.12,
-# spread 0.88–1.0) and have been removed so the gate now checks them.
+# soft non-baseline cell left is optics γ-9-1 (structurally unhardenable in
+# the angle channel — see below). Every other γ/δ shift now shows a large
+# oracle−stub spread (≥0.87) and is a real cliff.
 #
 #   * all P2 baselines           — stub IS the canonical law (no shift to
 #                                  detect), so it ties the ceiling by design
-#   * optics γ-9-2 / δ-9-1       — structurally unhardenable in the angle
-#                                  channel: γ-9-2's cubic break +κ·anti·sin³θ
-#                                  is in the SAME polynomial family as the GT
-#                                  (a free refit asin(c·sinθ+d·sin³θ) absorbs
-#                                  it exactly; declaring cf-canonical n_1/n_2
-#                                  scores oracle-identical 1.0). δ-9-1's break
-#                                  is T_TRANS energy (R+T≠1), not in the angle
-#                                  channel at all (catalog step()==baseline).
-#                                  See memory: cf Y-plumbing collapses the
-#                                  hardness gap for closed-form-absorbable
-#                                  breaks. Re-evaluate in the scoring overhaul.
+#   * optics γ-9-1               — sin²(2θ_pol−φ) modulation is a single
+#                                  Fourier mode a 3-param refit absorbs, and
+#                                  the cf Y-plumbing hands a form-refit the
+#                                  perturbed truth on (c). Unhardenable in the
+#                                  angle channel without redesign. (γ-9-2 and
+#                                  δ-9-1 WERE soft for the same reason but have
+#                                  been replaced with refit-resistant breaks —
+#                                  γ-9-2 spatial-dispersion sin(β·ν·sinθ),
+#                                  δ-9-1 Beer-Lambert grazing-cliff T — so they
+#                                  are now real cliffs and checked by the gate.)
 _P2_SOFT_CELLS = {
     ("damped_ho", "baseline"),
     ("pendulum",  "baseline"),
     ("rlc",       "baseline"),
     ("wave",      "baseline"),
     ("optics",    "baseline"),
-    ("optics",    "gamma_9_2"),
-    ("optics",    "delta_9_1"),
+    ("optics",    "gamma_9_1"),
     ("fluid",     "baseline"),
     ("kinetics",  "baseline"),
 }

@@ -1,35 +1,49 @@
-"""δ-9-1 — Snell: angle-power energy non-balance.
+"""δ-9-1 — Optics: absorbing-film energy non-conservation (Beer-Lambert).
 
-Catalog (Domain 9, Tier-2):
-    angles: Snell baseline preserved.
-    intensities: R + T = 1 - ξ |sin θ_i|^p
+Catalog (Domain 9, Tier-2, ROUND-2 redesign):
+    angles: Snell baseline preserved (still observable, but NOT the scored channel).
+    intensity (scored): transmittance through a lossy interface coating
+        T(θ_i) = (1 − R0) · exp(−β / cos θ_i),   β = α·d normal optical depth.
+    energy:  R + T = R0 + (1−R0)·exp(−β/cosθ_i) < 1  ⇒ absorptance A > 0.
 
-Broken : energy conservation (R + T ≠ 1).
-Retained: Snell angle law, reciprocity, SO(2), Fermat, tangential k_∥,
-          polarization U(1), 1↔2 interchange.
+Broken : energy conservation (R + T ≠ 1; the coating absorbs).
+Retained: Snell angle law, reciprocity (loss same in/out), SO(2), Fermat,
+          tangential k_∥, polarization U(1), 1↔2 interchange.
+
+Why refit-resistant (vs the earlier ξ·|sinθ|^p, a closed-form power law that a
+free power-law refit absorbed): exp(−β/cosθ) is FLAT in-domain (cosθ≈1) then
+falls off a CLIFF toward grazing (cosθ→0). A free power-law / polynomial fit to
+the flat in-domain (a) cannot extrapolate the grazing cliff in OOD (b). Using
+cos(θ_i incidence) — not θ_t — makes the cliff reachable for ALL n1,n2 (no TIR
+dependence), so hardness is consistent across seeds.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import asin, nan, sin
+from math import cos, exp
 from typing import Dict
 
 import numpy as np
 
 from mirrorlab.shifts import ShiftImpl
 
-XI_LO, XI_HI = -0.15, 0.40
-P_MIN, P_MAX = 1.2, 3.0
+R0_MIN, R0_MAX = 0.05, 0.20
+BETA_MIN, BETA_MAX = 0.30, 1.00
 
 
 @dataclass(frozen=True)
 class OpticsDelta91Params:
-    n1: float
-    n2: float
+    n1: float       # [1] (angle channel, retained)
+    n2: float       # [1]
     theta_i: float  # [rad]
-    xi: float       # leakage amplitude [1]
-    p: float        # angle-power exponent [1]
+    R0: float       # normal-incidence reflectance [1]
+    beta: float     # normal optical depth α·d [1]
+
+
+def transmittance(theta_i: float, params: OpticsDelta91Params) -> float:
+    """Beer-Lambert transmittance through the absorbing film."""
+    return (1.0 - params.R0) * exp(-params.beta / cos(theta_i))
 
 
 class OpticsDelta91Instance:
@@ -46,12 +60,10 @@ class OpticsDelta91Instance:
         if t < 0:
             raise ValueError("t must be non-negative")
         p = self._params
-        s2 = p.n1 / p.n2 * sin(p.theta_i)
-        theta_t = asin(s2) if -1.0 <= s2 <= 1.0 else nan
         return {
             "t": float(t),
             "theta_i": float(p.theta_i),
-            "theta_t": float(theta_t),
+            "T": float(transmittance(p.theta_i, p)),
         }
 
 
@@ -59,17 +71,17 @@ def sampler(seed: int) -> OpticsDelta91Params:
     rng = np.random.default_rng(seed)
     n1 = float(rng.uniform(1.0, 2.0))
     n2 = float(rng.uniform(1.0, 2.0))
-    xi = float(rng.uniform(XI_LO, XI_HI))
-    p = float(rng.uniform(P_MIN, P_MAX))
-    return OpticsDelta91Params(n1=n1, n2=n2, theta_i=0.3, xi=xi, p=p)
+    R0 = float(rng.uniform(R0_MIN, R0_MAX))
+    beta = float(rng.uniform(BETA_MIN, BETA_MAX))
+    return OpticsDelta91Params(n1=n1, n2=n2, theta_i=0.3, R0=R0, beta=beta)
 
 
 def validator(params: OpticsDelta91Params) -> bool:
     if not isinstance(params, OpticsDelta91Params):
         return False
-    if not (XI_LO <= params.xi <= XI_HI):
+    if not (R0_MIN <= params.R0 <= R0_MAX):
         return False
-    if not (P_MIN <= params.p <= P_MAX):
+    if not (BETA_MIN <= params.beta <= BETA_MAX):
         return False
     if params.n1 <= 0 or params.n2 <= 0:
         return False
@@ -82,15 +94,16 @@ def build(*, params: OpticsDelta91Params | None = None, seed: int = 0) -> Optics
     return OpticsDelta91Instance(params)
 
 
-shift = ShiftImpl(law=lambda t, p: 0.0, sampler=sampler, validator=validator)
+shift = ShiftImpl(law=lambda t, p: transmittance(p.theta_i, p),
+                  sampler=sampler, validator=validator)
 
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"theta_i": "1"},
-    "outputs": {"theta_t": "1"},
-    "params": {"n1": "1", "n2": "1", "xi": "1", "p": "1"},
+    "outputs": {"T": "1"},
+    "params": {"n1": "1", "n2": "1", "R0": "1", "beta": "1"},
 }
 
 __all__ = [
-    "OpticsDelta91Params", "OpticsDelta91Instance",
+    "OpticsDelta91Params", "OpticsDelta91Instance", "transmittance",
     "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
 ]

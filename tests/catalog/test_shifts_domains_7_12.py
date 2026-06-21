@@ -85,7 +85,7 @@ def test_baseline_vs_shift_differs(domain, shift_id, mod):
     primary = {
         "thermal": "q_norm" if shift_id == "gamma_7_1" else "q" if shift_id == "gamma_7_2" else "T_a",
         "wave": "u",
-        "optics": "theta2" if shift_id == "gamma_9_1" else "theta_t",
+        "optics": "theta2" if shift_id == "gamma_9_1" else "T" if shift_id == "delta_9_1" else "theta_t",
         "fluid": "p2",
         "kinetics": "C" if shift_id != "delta_11_1" else "C_A",
         "decay": "N" if shift_id != "delta_12_1" else "N_A",
@@ -124,12 +124,16 @@ def test_gamma_8_1_parity_broken():
 
 
 def test_gamma_9_2_interchange_broken():
-    """Swap n1↔n2: angle should differ (interchange asymmetry)."""
-    p = optics_g_9_2.OpticsGamma92Params(n1=1.4, n2=1.7, kappa=0.1, theta_i=0.4)
+    """Swap n1↔n2: sin θ_t should differ (interchange asymmetry).
+
+    The break κ·anti·sinθ·sin(β·ν·sinθ) carries anti=(n1−n2)/(n1+n2), which
+    flips sign under n1↔n2, so the shifted output is not swap-symmetric.
+    """
+    p = optics_g_9_2.OpticsGamma92Params(n1=1.4, n2=1.7, kappa=4.0, theta_i=0.4, nu=1.5)
     s_forward = optics_g_9_2.shifted_sin_theta_t(p)
-    p_swap = optics_g_9_2.OpticsGamma92Params(n1=1.7, n2=1.4, kappa=0.1, theta_i=0.4)
+    p_swap = optics_g_9_2.OpticsGamma92Params(n1=1.7, n2=1.4, kappa=4.0, theta_i=0.4, nu=1.5)
     s_backward = optics_g_9_2.shifted_sin_theta_t(p_swap)
-    assert abs(s_forward - 1.0 / s_backward * math.sin(0.4) ** 2) > 0 or s_forward != s_backward
+    assert s_forward != s_backward
 
 
 def test_gamma_12_2_t_rev_preserved():

@@ -116,8 +116,17 @@ def gamma_9_1_grids(sim, seed: int, magnitude: float):
 # ---- γ-9-2 (intensity-dependent n, cubic correction) -----------------------
 
 def gamma_9_2_grids(sim, seed: int, magnitude: float):
+    # Spatial-dispersion non-reciprocal break:
+    #   sin θ_t = (n1/n2) sinθ + κ·anti·sinθ·sin(β·ν·sinθ)
+    # ν is a second visible axis (normalized optical frequency). The
+    # oscillatory term non-separably couples θ and ν, so no low-order 2-D
+    # polynomial / separable power law absorbs it; ν-OOD makes overfits
+    # diverge. β is a fixed structural constant (not perturbed by cf).
+    from mirrorlab.shifts.optics_g_9_2 import BETA as _BETA
+
     def gt(inputs):
         th = inputs["theta1"]
+        nu = inputs["nu"]
 
         def fn(p):
             n1 = _attr(p, ("n1",), 1.0)
@@ -125,40 +134,50 @@ def gamma_9_2_grids(sim, seed: int, magnitude: float):
             kappa = _attr(p, ("kappa",), 0.0)
             s = math.sin(th)
             anti = (n1 - n2) / (n1 + n2) if (n1 + n2) != 0 else 0.0
-            return _angle((n1 / n2) * s + kappa * anti * s ** 3)
+            return _angle((n1 / n2) * s + kappa * anti * s * math.sin(_BETA * nu * s))
 
         return fn
 
     def build(rng, mode):
-        ths = _theta_grid(mode)
-        return [({"theta1": float(th)}, gt({"theta1": float(th)})) for th in ths]
+        # ν carries the aggressive OOD (not TIR-limited); θ stays small to
+        # avoid total internal reflection.
+        if mode == "b":
+            ths = np.linspace(0.33, 0.55, _GRID_SIZE)
+            nus = rng.uniform(2.5, 5.0, size=_GRID_SIZE)
+        else:
+            ths = np.linspace(0.05, 0.30, _GRID_SIZE)
+            nus = rng.uniform(0.5, 2.0, size=_GRID_SIZE)
+        return [({"theta1": float(th), "nu": float(nu)},
+                 gt({"theta1": float(th), "nu": float(nu)}))
+                for th, nu in zip(ths, nus)]
 
     return _pack(seed, magnitude, sim, build)
 
 
-# ---- δ-9-1 (time-modulated n; catalog step() is currently baseline) --------
+# ---- δ-9-1 (absorbing-film energy non-conservation; scored channel = T) ----
 
 def delta_9_1_grids(sim, seed: int, magnitude: float):
-    # The catalog's δ-9-1 step() does not actually use ξ/p — its current
-    # form is identical to baseline Snell. We still expose t as a grid
-    # input so a future patch that lights up the ξ-dependence has a
-    # canonical axis ready. GT matches the current step() == baseline.
+    # Beer-Lambert transmittance T(θ_i) = (1−R0)·exp(−β/cosθ_i). The grazing
+    # cliff (cosθ→0) is the refit-resistant feature, so this cell uses its OWN
+    # θ grid (the energy channel has no asin TIR limit): in-domain modest
+    # angles, OOD pushed into the grazing-cliff region. Scored output is the
+    # transmittance T (not the angle), exposing the R+T≠1 energy break.
     def gt(inputs):
         th = inputs["theta1"]
 
         def fn(p):
-            n1 = _attr(p, ("n1",), 1.0)
-            n2 = _attr(p, ("n2",), 1.5)
-            return _angle(_snell_sin(n1, n2, th))
+            R0 = _attr(p, ("R0",), 0.1)
+            beta = _attr(p, ("beta",), 0.5)
+            return (1.0 - R0) * math.exp(-beta / math.cos(th))
 
         return fn
 
     def build(rng, mode):
-        ths = _theta_grid(mode)
-        ts = rng.uniform(0.0, 1.0, size=_GRID_SIZE)  # placeholder axis
-        return [({"theta1": float(th), "t": float(t)},
-                 gt({"theta1": float(th), "t": float(t)}))
-                for th, t in zip(ths, ts)]
+        if mode == "b":
+            ths = np.linspace(0.75, 1.45, _GRID_SIZE)   # grazing-cliff OOD
+        else:
+            ths = np.linspace(0.05, 0.55, _GRID_SIZE)
+        return [({"theta1": float(th)}, gt({"theta1": float(th)})) for th in ths]
 
     return _pack(seed, magnitude, sim, build)
 
