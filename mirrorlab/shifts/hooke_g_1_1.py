@@ -21,7 +21,7 @@ from typing import Dict
 import numpy as np
 
 from mirrorlab.domains.hooke import PotentialLaw, SimInstance, make_potential
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 K_MIN, K_MAX = 1.0, 100.0
@@ -125,6 +125,12 @@ def build(*, params: HookeGamma11Params | None = None, seed: int = 0) -> SimInst
 
 shift = ShiftImpl(law=shifted_force, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: HookeGamma11Params) -> float:
+    """Unified GT/oracle law: law(inputs, params) -> scalar force."""
+    return shifted_force(inputs["x"], p)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"x": "m"},
     "outputs": {"F": "kg*m*s**-2"},
@@ -145,4 +151,14 @@ __all__ = [
     "build",
     "shift",
     "DIM_SIGNATURE",
+    "law",
+    "CELL",
 ]
+
+CELL = CellSpec(
+    domain="hooke", shift="gamma_1_1",
+    params_type=HookeGamma11Params, law=law,
+    sampler=sampler, validator=validator,
+    output="F", broken_symmetry="PAR",
+)
+register_cell(CELL)

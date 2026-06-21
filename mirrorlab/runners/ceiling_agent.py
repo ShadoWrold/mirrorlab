@@ -1582,15 +1582,34 @@ def build_submission(scenario: ScenarioInstance) -> Submission:
     call it directly without ``exec``-ing reconstructed code. A trivial
     ``predictor.code`` stub is still attached to satisfy the schema for
     downstream consumers that re-serialize the submission.
+
+    Migration: when a ``CellSpec`` is registered for this (domain, shift), the
+    oracle predictor, declared params, and broken-symmetry tag are all DERIVED
+    from it (one source of truth). Otherwise the legacy per-domain dispatch
+    tables are used. Both paths produce a byte-identical entry shape.
     """
-    builder = _DISPATCH.get(scenario.domain_id)
-    if builder is None:
-        raise KeyError(f"no ceiling predictor registered for domain {scenario.domain_id!r}")
-    predictor = builder(scenario)
+    from mirrorlab.spec import (
+        has_cell as _has_cell,
+        get_cell as _get_cell,
+        make_oracle_predictor as _make_oracle,
+        declared_params as _declared_params,
+    )
+
     inputs, outputs = _dim_units(scenario)
-    sym = broken_symmetry_for(scenario.domain_id, scenario.shift_id)
-    declared = _DECLARED_PARAMS.get((scenario.domain_id, scenario.shift_id))
-    params = declared(scenario) if declared is not None else []
+    if _has_cell(scenario.domain_id, scenario.shift_id):
+        spec = _get_cell(scenario.domain_id, scenario.shift_id)
+        base = scenario.sim.params
+        predictor = _make_oracle(spec, base)
+        params = _declared_params(spec, base)
+        sym = "none" if scenario.shift_id == "baseline" else spec.broken_symmetry
+    else:
+        builder = _DISPATCH.get(scenario.domain_id)
+        if builder is None:
+            raise KeyError(f"no ceiling predictor registered for domain {scenario.domain_id!r}")
+        predictor = builder(scenario)
+        sym = broken_symmetry_for(scenario.domain_id, scenario.shift_id)
+        declared = _DECLARED_PARAMS.get((scenario.domain_id, scenario.shift_id))
+        params = declared(scenario) if declared is not None else []
     entry: Dict[str, Any] = {
         "law_id": "L1",
         "formula": "oracle: catalog law wrapped via closure",

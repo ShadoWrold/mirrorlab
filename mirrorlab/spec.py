@@ -190,9 +190,57 @@ def has_cell(domain: str, shift: str) -> bool:
     return (domain, shift) in CELL_REGISTRY
 
 
+# --------------------------------------------------------------------------
+# Oracle derivation from a CellSpec
+# --------------------------------------------------------------------------
+#
+# The ceiling oracle is just `spec.law` invoked with the base params, but with
+# the law coefficients exposed as CANONICAL kwargs so sub-grid (c) can override
+# them with the cf-perturbed values (the eval delivers cf overrides under the
+# canonical predictor names). This adapter reconstructs the params object from
+# those overrides and calls the one unified law — so the oracle and the grid GT
+# are literally the same function.
+
+from dataclasses import replace as _dc_replace
+
+
+def make_oracle_predictor(spec: "CellSpec", base_params: Any) -> Callable[..., float]:
+    """Wrap `spec.law` as a predictor `f(**kwargs)` for build_submission.
+
+    kwargs at call time = grid inputs + (on sub-grid (c)) the cf-perturbed law
+    coefficients under their canonical names. Canonical→internal mapping is
+    derived from field metadata; any canonical kwarg present rebuilds the params
+    via `replace`, then the unified law runs on the (possibly perturbed) params.
+    """
+    name_map = predictor_name_map(spec.params_type)      # internal -> canonical
+    canon_to_internal = {c: i for i, c in name_map.items()}
+
+    def pred(**kwargs: float) -> float:
+        overrides = {
+            canon_to_internal[c]: v
+            for c, v in kwargs.items()
+            if c in canon_to_internal
+        }
+        params = _dc_replace(base_params, **overrides) if overrides else base_params
+        return spec.law(kwargs, params)
+
+    return pred
+
+
+def declared_params(spec: "CellSpec", base_params: Any) -> list:
+    """`[{name: canonical, value: float}]` for the cell's law fields.
+
+    Equivalent to the hand-written ceiling `_xxx_params` functions.
+    """
+    return [
+        {"name": canonical, "value": float(getattr(base_params, internal))}
+        for internal, canonical in predictor_name_map(spec.params_type).items()
+    ]
+
+
 __all__ = [
     "P", "CellSpec", "GridBuilder",
     "CELL_REGISTRY", "register_cell", "get_cell", "has_cell",
     "field_role", "field_canonical", "law_fields", "predictor_name_map",
-    "is_fully_tagged",
+    "is_fully_tagged", "make_oracle_predictor", "declared_params",
 ]
