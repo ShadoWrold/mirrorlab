@@ -17,7 +17,7 @@ from typing import Any, Callable, Dict, Optional
 
 import numpy as np
 from scipy.integrate import quad, solve_ivp
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 
 
 ForceLaw = Callable[[float, Any], float]
@@ -161,3 +161,16 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "outputs": {"F": "kg*m*s**-2"},
     "params": {"k": "kg*s**-2", "m": "kg"},
 }
+
+
+def law(inputs, p: HookeParams) -> float:
+    """Unified GT/oracle law: law(inputs, params) -> scalar force."""
+    return baseline_force(inputs["x"], p)
+
+
+CELL = CellSpec(
+    domain="hooke", shift="baseline",
+    params_type=HookeParams, law=law,
+    output="F", broken_symmetry="none",
+)
+register_cell(CELL)

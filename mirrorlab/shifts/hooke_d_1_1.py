@@ -13,7 +13,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -110,11 +110,25 @@ def build(*, params: HookeDelta11Params | None = None, seed: int = 0) -> _Sim:
 
 shift = ShiftImpl(law=shifted_force, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: HookeDelta11Params) -> float:
+    """Unified GT/oracle law: law(inputs, params) -> scalar force."""
+    return shifted_force(inputs["x"], inputs["v"], p)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"x": "m", "v": "m*s**-1"},
     "outputs": {"F": "kg*m*s**-2"},
     "params": {"k": "kg*s**-2", "c": "kg*s**-1", "L": "m", "m": "kg"},
 }
 
-__all__ = ["HookeDelta11Params", "shifted_force", "sampler", "validator",
-           "build", "shift", "DIM_SIGNATURE"]
+CELL = CellSpec(
+    domain="hooke", shift="delta_1_1",
+    params_type=HookeDelta11Params, law=law,
+    sampler=sampler, validator=validator,
+    output="F", broken_symmetry="TR",
+)
+register_cell(CELL)
+
+__all__ = ["HookeDelta11Params", "shifted_force", "law", "sampler", "validator",
+           "build", "shift", "DIM_SIGNATURE", "CELL"]

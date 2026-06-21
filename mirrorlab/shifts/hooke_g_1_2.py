@@ -14,7 +14,7 @@ from typing import Dict, Tuple
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -135,11 +135,37 @@ def build(*, params: HookeGamma12Params | None = None, seed: int = 0) -> _Sim:
 
 shift = ShiftImpl(law=shifted_force, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: HookeGamma12Params) -> float:
+    """Unified GT/oracle law: the 2-D anisotropic force projected onto the
+    signed radial magnitude (blueprint §2.5), so the scored scalar matches the
+    grid GT exactly. F = (Fx, Fy) = shifted_force((x, y)); return
+    sign(F·r̂)·|F|.
+    """
+    x, y = inputs["x"], inputs["y"]
+    r = math.sqrt(x * x + y * y)
+    if r == 0.0:
+        return 0.0
+    Fx, Fy = shifted_force((x, y), p)
+    rhat_x, rhat_y = x / r, y / r
+    dot = Fx * rhat_x + Fy * rhat_y
+    mag = math.sqrt(Fx * Fx + Fy * Fy)
+    return math.copysign(mag, dot) if dot != 0.0 else mag
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"x": "m", "y": "m"},
     "outputs": {"Fx": "kg*m*s**-2", "Fy": "kg*m*s**-2"},
     "params": {"k0": "kg*s**-2", "xi": "1", "phi": "rad", "m": "kg"},
 }
 
-__all__ = ["HookeGamma12Params", "shifted_force", "potential", "sampler",
-           "validator", "build", "shift", "DIM_SIGNATURE"]
+CELL = CellSpec(
+    domain="hooke", shift="gamma_1_2",
+    params_type=HookeGamma12Params, law=law,
+    sampler=sampler, validator=validator,
+    output="F", broken_symmetry="ROT",
+)
+register_cell(CELL)
+
+__all__ = ["HookeGamma12Params", "shifted_force", "law", "potential", "sampler",
+           "validator", "build", "shift", "DIM_SIGNATURE", "CELL"]

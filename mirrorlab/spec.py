@@ -163,10 +163,12 @@ class CellSpec:
     # The SAME callable backs both the grid GT and the oracle predictor, so
     # the formula exists exactly once.
     law: Callable[[Mapping[str, float], Any], float]
-    sampler: Callable[[int], Any]
-    validator: Callable[[Any], bool]
     output: str                       # scored observable name (per-cell)
     broken_symmetry: str              # e.g. "SCALE", "ROT", "T_TRANS"
+    # Shift cells provide their own sampler/validator; baseline cells are built
+    # by the registry factory and leave these None.
+    sampler: Optional[Callable[[int], Any]] = None
+    validator: Optional[Callable[[Any], bool]] = None
     grid: Optional[GridBuilder] = None  # per-cell grid builder (thin for now)
 
     @property
