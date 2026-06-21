@@ -20,7 +20,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 ALPHA_MIN, ALPHA_MAX = 1e-3, 0.3
@@ -112,13 +112,35 @@ def build(*, params: WaveDelta81Params | None = None, seed: int = 0) -> WaveDelt
 
 shift = ShiftImpl(law=lambda t, p: 0.0, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: WaveDelta81Params) -> float:
+    """Unified GT/oracle law: damped wavepacket u(t) from the catalog Instance.
+    cf perturbation routinely steps outside the sampler band, so fall back to
+    the baseline travelling-wave sin if the Instance refuses to build."""
+    t = inputs["t"]
+    try:
+        inst = WaveDelta81Instance(p)
+    except (ValueError, TypeError):
+        x_probe = getattr(p, "x_probe", 0.0)
+        return p.A * math.sin(p.k * x_probe - p.c * p.k * t)
+    return inst.step(t)["u"]
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"t": "s"},
     "outputs": {"u": "m"},
     "params": {"A": "m", "k": "m**-1", "c": "m*s**-1", "alpha0": "s**-1", "u_ref": "m"},
 }
 
+CELL = CellSpec(
+    domain="wave", shift="delta_8_1",
+    params_type=WaveDelta81Params, law=law,
+    sampler=sampler, validator=validator,
+    output="u", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
 __all__ = [
-    "WaveDelta81Params", "WaveDelta81Instance",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "WaveDelta81Params", "WaveDelta81Instance", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

@@ -26,7 +26,7 @@ from typing import Dict
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 R0_MIN, R0_MAX = 0.05, 0.20
@@ -98,13 +98,28 @@ def build(*, params: OpticsDelta91Params | None = None, seed: int = 0) -> Optics
 shift = ShiftImpl(law=lambda t, p: transmittance(p.theta_i, p),
                   sampler=sampler, validator=validator)
 
+
+def law(inputs, p: OpticsDelta91Params) -> float:
+    """Unified GT/oracle law: Beer-Lambert transmittance T(θ_i)=
+    (1−R0)·exp(−β/cosθ_i). θ_i (theta1) is the swept grid input."""
+    return transmittance(inputs["theta1"], p)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"theta_i": "1"},
     "outputs": {"T": "1"},
     "params": {"n1": "1", "n2": "1", "R0": "1", "beta": "1"},
 }
 
+CELL = CellSpec(
+    domain="optics", shift="delta_9_1",
+    params_type=OpticsDelta91Params, law=law,
+    sampler=sampler, validator=validator,
+    output="T", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
 __all__ = [
-    "OpticsDelta91Params", "OpticsDelta91Instance", "transmittance",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "OpticsDelta91Params", "OpticsDelta91Instance", "transmittance", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

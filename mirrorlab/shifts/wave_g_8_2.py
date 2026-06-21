@@ -18,7 +18,7 @@ from typing import Dict
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 BETA_MIN, BETA_MAX = 0.4, 0.8
@@ -106,13 +106,30 @@ def build(*, params: WaveGamma82Params | None = None, seed: int = 0) -> WaveGamm
 
 shift = ShiftImpl(law=lambda t, p: 0.0, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: WaveGamma82Params) -> float:
+    """Unified GT/oracle law: anisotropic-phase-speed wave
+    u = A·sin(k·x_probe − ω·t), ω = √(shifted_omega_squared(p))."""
+    omega = math.sqrt(max(shifted_omega_squared(p), 0.0))
+    arg = p.k * p.x_probe - omega * inputs["t"]
+    return p.A * math.sin(arg)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"x": "m", "t": "s"},
     "outputs": {"u": "m"},
     "params": {"A": "m", "k": "m**-1", "c": "m*s**-1", "beta": "1", "theta0": "1"},
 }
 
+CELL = CellSpec(
+    domain="wave", shift="gamma_8_2",
+    params_type=WaveGamma82Params, law=law,
+    sampler=sampler, validator=validator,
+    output="u", broken_symmetry="ROT",
+)
+register_cell(CELL)
+
 __all__ = [
-    "WaveGamma82Params", "WaveGamma82Instance", "shifted_omega_squared",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "WaveGamma82Params", "WaveGamma82Instance", "shifted_omega_squared", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

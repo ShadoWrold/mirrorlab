@@ -25,7 +25,7 @@ from typing import Dict
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 KAPPA_MIN, KAPPA_MAX = 3.0, 5.0
@@ -105,13 +105,32 @@ def build(*, params: OpticsGamma92Params | None = None, seed: int = 0) -> Optics
 
 shift = ShiftImpl(law=lambda t, p: shifted_sin_theta_t(p), sampler=sampler, validator=validator)
 
+
+def law(inputs, p: OpticsGamma92Params) -> float:
+    """Unified GT/oracle law: spatial-dispersion refraction angle
+    θ_t = asin((n1/n2)sinθ + κ·anti·sinθ·sin(β·ν·sinθ)), clamped at TIR.
+    θ (theta1) and ν (nu) are swept grid inputs."""
+    s = sin(inputs["theta1"])
+    anti = (p.n1 - p.n2) / (p.n1 + p.n2)
+    val = (p.n1 / p.n2) * s + p.kappa * anti * s * sin(BETA * inputs["nu"] * s)
+    return asin(max(-1.0, min(1.0, val)))
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"theta_i": "1", "nu": "1"},
     "outputs": {"theta_t": "1"},
     "params": {"n1": "1", "n2": "1", "kappa": "1"},
 }
 
+CELL = CellSpec(
+    domain="optics", shift="gamma_9_2",
+    params_type=OpticsGamma92Params, law=law,
+    sampler=sampler, validator=validator,
+    output="theta2", broken_symmetry="PAR",
+)
+register_cell(CELL)
+
 __all__ = [
-    "OpticsGamma92Params", "OpticsGamma92Instance", "shifted_sin_theta_t",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "BETA",
+    "OpticsGamma92Params", "OpticsGamma92Instance", "shifted_sin_theta_t", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "BETA", "CELL",
 ]

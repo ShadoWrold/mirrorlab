@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from math import cos, sin
 from typing import Dict
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 
 
 @dataclass(frozen=True)
@@ -47,3 +47,18 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "outputs": {"u": "m"},
     "params": {"A": "m", "k": "m**-1", "c": "m*s**-1", "phi": "1"},
 }
+
+
+def law(inputs, p: WaveParams) -> float:
+    """Unified GT/oracle law: travelling wave u(t)=A·sin(k·x_probe − c·k·t + φ)
+    at the fixed probe location."""
+    arg = p.k * p.x_probe - p.c * p.k * inputs["t"] + p.phi
+    return p.A * sin(arg)
+
+
+CELL = CellSpec(
+    domain="wave", shift="baseline",
+    params_type=WaveParams, law=law,
+    output="u", broken_symmetry="none",
+)
+register_cell(CELL)

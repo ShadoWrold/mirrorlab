@@ -18,7 +18,7 @@ from typing import Dict
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 GAMMA_MIN, GAMMA_MAX = 0.10, 0.2
@@ -99,13 +99,34 @@ def build(*, params: WaveGamma81Params | None = None, seed: int = 0) -> WaveGamm
 
 shift = ShiftImpl(law=lambda t, p: 0.0, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: WaveGamma81Params) -> float:
+    """Unified GT/oracle law: dispersive wave u = A·sin(k·x_probe − ω·t) with
+    ω(k)=ck√(1+γk). k is a swept OBSERVATION axis (use the grid's k, not p.k,
+    which the cf perturbs); γ/c come from params so cf flows through on (c)."""
+    from dataclasses import replace
+    k = inputs["k"]
+    w2 = shifted_omega_squared(replace(p, k=k))
+    omega = math.sqrt(max(w2, 0.0))
+    arg = k * p.x_probe - omega * inputs["t"]
+    return p.A * math.sin(arg)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"x": "m", "t": "s"},
     "outputs": {"u": "m"},
     "params": {"A": "m", "k": "m**-1", "c": "m*s**-1", "gamma": "m"},
 }
 
+CELL = CellSpec(
+    domain="wave", shift="gamma_8_1",
+    params_type=WaveGamma81Params, law=law,
+    sampler=sampler, validator=validator,
+    output="u", broken_symmetry="SCALE",
+)
+register_cell(CELL)
+
 __all__ = [
-    "WaveGamma81Params", "WaveGamma81Instance", "shifted_omega_squared",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "WaveGamma81Params", "WaveGamma81Instance", "shifted_omega_squared", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]
