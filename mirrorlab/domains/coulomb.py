@@ -18,12 +18,14 @@ K_E_DEFAULT = 8.9875517873681764e9
 
 @dataclass(frozen=True)
 class CoulombParams:
+    # k_e declared first (matching the law-coefficient ordering) but kw_only so
+    # its physics-constant default doesn't force it after the no-default fields.
+    k_e: float = field(default=K_E_DEFAULT, kw_only=True, metadata=P.law("k_e"))
     q1: float = field(metadata=P.law("q_1"))       # [C]
     q2: float = field(metadata=P.law("q_2"))       # [C]
     m: float = field(metadata=P.mass())        # reduced mass [kg]
     r0: float = field(metadata=P.ic())       # initial separation [m]
     v0: float = field(metadata=P.ic())       # initial radial velocity [m/s]
-    k_e: float = field(default=K_E_DEFAULT, metadata=P.law("k_e"))
 
 
 def baseline_force(r: float, params: CoulombParams) -> float:

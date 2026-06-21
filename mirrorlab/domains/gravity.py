@@ -20,11 +20,13 @@ G_DEFAULT = 6.67430e-11
 
 @dataclass(frozen=True)
 class GravityParams:
+    # G declared first (matching the law-coefficient ordering) but kw_only so
+    # its physics-constant default doesn't force it after the no-default fields.
+    G: float = field(default=G_DEFAULT, kw_only=True, metadata=P.law("G"))
     M: float = field(metadata=P.law("M"))        # central mass [kg]
     m: float = field(metadata=P.mass())        # test mass [kg]
     r0: float = field(metadata=P.ic())       # initial radius [m]
     v0: float = field(metadata=P.ic())       # initial radial velocity [m/s]
-    G: float = field(default=G_DEFAULT, metadata=P.law("G"))
 
 
 def baseline_force(r: float, params: GravityParams) -> float:
