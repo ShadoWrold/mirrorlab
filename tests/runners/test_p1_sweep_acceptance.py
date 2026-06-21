@@ -54,7 +54,6 @@ _P1_CELLS = [
 # bench bug:
 #   gravity/baseline, hooke/baseline, coulomb/baseline, thermal/baseline,
 #   decay/baseline   — stub IS the baseline, spread ~0 by construction
-#   gravity/γ-2-2    — scale-break (Lorentzian bump, α small)
 #   gravity/δ-2-1    — T-modulation (β small)
 #   hooke/δ-1-1      — drag term scales with x²·v, c is small for some seeds
 #   decay/δ-12-1     — branching only affects unobserved N_B channel; N_A
@@ -63,9 +62,10 @@ _P1_CELLS = [
 #   decay/γ-12-2     — parametric ε·cos(ωt) modulation; ε is small in
 #                      the catalog sampler and the integral over grid
 #                      times often averages near zero
+# (gravity/γ-2-2 WAS here — its Lorentzian bump was free-power-law-absorbable;
+#  it was replaced with a log-periodic DSI break and is now a real cliff.)
 _SOFT_CELLS = {
     ("gravity",  "baseline"),
-    ("gravity",  "gamma_2_2"),
     ("gravity",  "delta_2_1"),
     ("hooke",    "baseline"),
     ("hooke",    "delta_1_1"),

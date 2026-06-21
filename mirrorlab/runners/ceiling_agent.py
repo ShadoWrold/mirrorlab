@@ -257,18 +257,18 @@ def _gravity_pred(scenario: ScenarioInstance) -> PredictorFn:
         return pred
 
     if shift_id == "gamma_2_2":
-        # 1-D Lorentzian range bump. Reads via **kw; the t kwarg from
-        # other branches is harmlessly absorbed by **_.
+        # Log-periodic modulation F = -GMm/r^2 * (1 + alpha*cos(omega*ln(r/r0))).
         _G0 = float(_attr(p, ("G", "G0"), 6.6743e-11))
         _M0 = float(_attr(p, ("M",), 1.0))
         _m0 = float(_attr(p, ("m",), 1.0))
         _a0 = float(_attr(p, ("alpha",), 0.0))
+        _om0 = float(_attr(p, ("omega",), 5.0))
         _rs0 = float(_attr(p, ("r_scale",), 1.0e7)) or 1.0e7
 
         def pred(*, r,
-                 G=_G0, M=_M0, m=_m0, alpha=_a0, r_scale=_rs0, **_):
-            ratio = r / r_scale
-            return -G * M * m / (r * r) * (1.0 + alpha * ratio / (1.0 + ratio * ratio))
+                 G=_G0, M=_M0, m=_m0, alpha=_a0, omega=_om0, r_scale=_rs0, **_):
+            mod = 1.0 + alpha * math.cos(omega * math.log(r / r_scale))
+            return -G * M * m / (r * r) * mod
         return pred
 
     if shift_id == "delta_2_1":
@@ -1034,6 +1034,7 @@ def _gravity_gamma_2_2_params(scenario: ScenarioInstance) -> List[Dict[str, Any]
         {"name": "M", "value": float(getattr(p, "M"))},
         {"name": "m", "value": float(getattr(p, "m"))},
         {"name": "alpha", "value": float(getattr(p, "alpha"))},
+        {"name": "omega", "value": float(getattr(p, "omega"))},
         {"name": "r_scale", "value": float(getattr(p, "r_scale"))},
     ]
 

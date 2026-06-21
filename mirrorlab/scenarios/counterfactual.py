@@ -114,7 +114,7 @@ _LAW_PARAM_FIELDS: dict[type, tuple[str, ...]] = {
     HookeDelta11Params: ("k", "c", "L"),
     # Domain 2 — Gravity
     GravityGamma21Params: ("G0", "M", "xi"),
-    GravityGamma22Params: ("G", "M", "alpha", "r_scale"),
+    GravityGamma22Params: ("G", "M", "alpha", "omega", "r_scale"),
     GravityDelta21Params: ("G0", "M", "beta", "omega_G"),
     # Domain 3 — Damped HO
     DampedHOGamma31Params: ("omega0", "gamma", "kappa", "tau", "x_ref"),
@@ -206,7 +206,7 @@ _PREDICTOR_NAME_MAP: dict[type, dict[str, str]] = {
     HookeDelta11Params: {"k": "k", "c": "c", "L": "L"},
     # Domain 2 — Gravity
     GravityGamma21Params: {"G0": "G", "M": "M", "xi": "xi"},
-    GravityGamma22Params: {"G": "G", "M": "M", "alpha": "alpha", "r_scale": "r_scale"},
+    GravityGamma22Params: {"G": "G", "M": "M", "alpha": "alpha", "omega": "omega", "r_scale": "r_scale"},
     GravityDelta21Params: {"G0": "G", "M": "M", "beta": "beta", "omega_G": "omega_G"},
     # Domain 3 — Damped HO
     DampedHOGamma31Params: {

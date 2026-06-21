@@ -1,7 +1,15 @@
-"""γ-2-2 — Gravity Lorentzian range bump (SCALE/Bertrand break).
+"""γ-2-2 — Gravity log-periodic modulation (discrete-scale-invariance break).
 
-Catalog: F(r) = −G m₁ m₂ /r² · [1 + α (r/r₀)/(1 + (r/r₀)²)].
-Broken: SCALE (Bertrand closure). Retained: ROT (central), T-trans, T-rev.
+Catalog (ROUND-2 redesign): F(r) = −G M m /r² · [1 + α·cos(ω·ln(r/r₀))].
+Broken: SCALE (continuous scale invariance → discrete scale invariance, DSI).
+Retained: ROT (central), T-trans, T-rev.
+
+The earlier Lorentzian bump α·u/(1+u²) looked like a power-law distortion on
+log-r and was absorbed exactly by a free-exponent refit F=−c/rⁿ (stub/refit
+~0.6, unhardenable). The log-periodic modulation cos(ω·ln(r/r₀)) oscillates in
+ln(r) with NO finite power-law / polynomial closed form, so a free F=−c/rⁿ (or a
+finite log-polynomial) cannot absorb it. Log-periodicity is real physics —
+the signature of discrete scale invariance in DSI systems.
 """
 
 from __future__ import annotations
@@ -17,7 +25,8 @@ from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
 G_DEFAULT = 6.67430e-11
-ALPHA_MIN, ALPHA_MAX = 0.30, 0.8
+ALPHA_MIN, ALPHA_MAX = 0.30, 0.60
+OMEGA_MIN, OMEGA_MAX = 4.0, 7.0   # rad per e-fold of r
 
 
 @dataclass(frozen=True)
@@ -26,15 +35,15 @@ class GravityGamma22Params:
     M: float
     m: float
     alpha: float
-    r_scale: float  # r₀
+    omega: float    # log-periodic angular frequency [1]
+    r_scale: float  # r₀ (log-periodic phase reference)
     r0: float       # initial radius
     v0: float
 
 
 def shifted_force(r: float, p: GravityGamma22Params) -> float:
-    u = r / p.r_scale
-    bump = p.alpha * u / (1.0 + u * u)
-    return -p.G * p.M * p.m / (r * r) * (1.0 + bump)
+    mod = 1.0 + p.alpha * math.cos(p.omega * math.log(r / p.r_scale))
+    return -p.G * p.M * p.m / (r * r) * mod
 
 
 def sampler(seed: int) -> GravityGamma22Params:
@@ -42,9 +51,10 @@ def sampler(seed: int) -> GravityGamma22Params:
     G = G_DEFAULT * loguniform(rng, 0.5, 2.0)
     M = float(10 ** rng.uniform(20.0, 24.0))
     alpha = float(rng.uniform(ALPHA_MIN, ALPHA_MAX))
+    omega = float(rng.uniform(OMEGA_MIN, OMEGA_MAX))
     r0_radius = 1.0e7
     r_scale = r0_radius * loguniform(rng, 0.1, 10.0)
-    return GravityGamma22Params(G=G, M=M, m=1.0, alpha=alpha,
+    return GravityGamma22Params(G=G, M=M, m=1.0, alpha=alpha, omega=omega,
                                 r_scale=r_scale, r0=r0_radius, v0=0.0)
 
 
@@ -52,6 +62,8 @@ def validator(p) -> bool:
     if not isinstance(p, GravityGamma22Params):
         return False
     if not (ALPHA_MIN <= p.alpha <= ALPHA_MAX):
+        return False
+    if not (OMEGA_MIN <= p.omega <= OMEGA_MAX):
         return False
     if p.G <= 0 or p.M <= 0 or p.m <= 0:
         return False
@@ -113,7 +125,7 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"r": "m"},
     "outputs": {"F": "kg*m*s**-2"},
     "params": {"G": "m**3*kg**-1*s**-2", "M": "kg", "m": "kg",
-               "alpha": "1", "r_scale": "m"},
+               "alpha": "1", "omega": "1", "r_scale": "m"},
 }
 
 __all__ = ["GravityGamma22Params", "shifted_force", "sampler", "validator",
