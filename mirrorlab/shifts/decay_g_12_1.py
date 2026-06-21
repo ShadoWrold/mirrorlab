@@ -18,7 +18,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 LAM_MIN, LAM_MAX = 1e-6, 1e-1
@@ -105,13 +105,40 @@ def build(*, params: DecayGamma121Params | None = None, seed: int = 0) -> DecayG
 
 shift = ShiftImpl(law=lambda t, p: 0.0, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: DecayGamma121Params) -> float:
+    """Unified GT/oracle law: density-coupled decay dN/dt=−λN(1+α(N/N₀)^p),
+    integrated via the shared solver (bypasses the validator for cf params)."""
+    from mirrorlab.domains.decay import solve_to
+    lam = float(getattr(p, "lam", 0.1))
+    alpha = float(getattr(p, "alpha", 0.0))
+    p_exp = float(getattr(p, "p", 1.0))
+    N_scale = float(getattr(p, "N_scale", 1.0)) or 1.0
+    N_init = float(getattr(p, "N_init", 1.0e6))
+
+    def rhs(_t, y):
+        (N,) = y
+        Ns = max(N, 0.0)
+        return (-lam * Ns * (1.0 + alpha * (Ns / N_scale) ** p_exp),)
+
+    return solve_to(rhs, [N_init], inputs["t"])[0]
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"t": "s"},
     "outputs": {"N": "1"},
     "params": {"lam": "s**-1", "alpha": "1", "p": "1", "N_scale": "1"},
 }
 
+CELL = CellSpec(
+    domain="decay", shift="gamma_12_1",
+    params_type=DecayGamma121Params, law=law,
+    sampler=sampler, validator=validator,
+    output="N", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
 __all__ = [
-    "DecayGamma121Params", "DecayGamma121Instance",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "DecayGamma121Params", "DecayGamma121Instance", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

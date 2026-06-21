@@ -15,7 +15,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 N_MIN, N_MAX = 1.0, 3.0
@@ -115,13 +115,33 @@ def build(*, params: KineticsGamma112Params | None = None, seed: int = 0) -> Kin
 
 shift = ShiftImpl(law=lambda t, p: 0.0, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: KineticsGamma112Params) -> float:
+    """Unified GT/oracle law: saturating-rate decay C(t), with the analytic
+    n-th-order fallback for cf-perturbed params the Instance refuses."""
+    from mirrorlab.domains.kinetics import baseline_C
+    t = inputs["t"]
+    try:
+        return KineticsGamma112Instance(p).step(t)["C"]
+    except (ValueError, TypeError):
+        return baseline_C(t, p)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"t": "s"},
     "outputs": {"C": "mol*m**-3"},
     "params": {"n": "1", "m": "1", "C_sat": "mol*m**-3"},
 }
 
+CELL = CellSpec(
+    domain="kinetics", shift="gamma_11_2",
+    params_type=KineticsGamma112Params, law=law,
+    sampler=sampler, validator=validator,
+    output="C", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
 __all__ = [
-    "KineticsGamma112Params", "KineticsGamma112Instance",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "KineticsGamma112Params", "KineticsGamma112Instance", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

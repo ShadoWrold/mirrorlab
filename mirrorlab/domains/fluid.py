@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Dict
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 
 
 @dataclass(frozen=True)
@@ -54,3 +54,18 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "outputs": {"p2": "kg*m**-1*s**-2"},
     "params": {"rho": "kg*m**-3", "g": "m*s**-2"},
 }
+
+
+def law(inputs, p: FluidParams) -> float:
+    """Unified GT/oracle law: Bernoulli downstream pressure
+    p2 = p1 + ½ρ(v1²−v2²) + ρg(h1−h2). p1/v1/v2/h1/h2 are swept grid inputs."""
+    p1, v1, v2, h1, h2 = (inputs[k] for k in ("p1", "v1", "v2", "h1", "h2"))
+    return p1 + 0.5 * p.rho * (v1 * v1 - v2 * v2) + p.rho * p.g * (h1 - h2)
+
+
+CELL = CellSpec(
+    domain="fluid", shift="baseline",
+    params_type=FluidParams, law=law,
+    output="p2", broken_symmetry="none",
+)
+register_cell(CELL)

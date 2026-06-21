@@ -17,7 +17,7 @@ from typing import Dict
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 LAM0_MIN, LAM0_MAX = 1e-6, 1e-1
@@ -102,13 +102,38 @@ def build(*, params: DecayGamma122Params | None = None, seed: int = 0) -> DecayG
 shift = ShiftImpl(law=lambda t, p: p.lam0 * (1.0 + p.eps * math.cos(p.omega * t)),
                   sampler=sampler, validator=validator)
 
+
+def law(inputs, p: DecayGamma122Params) -> float:
+    """Unified GT/oracle law: time-modulated rate decay dN/dt=−λ(t)N with
+    λ(t)=λ₀(1+ε·cos(ωt)), integrated via the shared solver."""
+    from mirrorlab.domains.decay import solve_to
+    lam_b = float(getattr(p, "lam0", getattr(p, "lam", 0.1)))
+    eps = float(getattr(p, "eps", 0.0))
+    omega = float(getattr(p, "omega", 0.0))
+    N_init = float(getattr(p, "N_init", 1.0e6))
+
+    def rhs(_t, y):
+        (N,) = y
+        return (-lam_b * (1.0 + eps * math.cos(omega * _t)) * N,)
+
+    return solve_to(rhs, [N_init], inputs["t"])[0]
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"t": "s"},
     "outputs": {"N": "1"},
     "params": {"lam0": "s**-1", "eps": "1", "omega": "s**-1"},
 }
 
+CELL = CellSpec(
+    domain="decay", shift="gamma_12_2",
+    params_type=DecayGamma122Params, law=law,
+    sampler=sampler, validator=validator,
+    output="N", broken_symmetry="SCALE",
+)
+register_cell(CELL)
+
 __all__ = [
-    "DecayGamma122Params", "DecayGamma122Instance",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "DecayGamma122Params", "DecayGamma122Instance", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

@@ -17,7 +17,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 N_MIN, N_MAX = 0.8, 2.0
@@ -105,13 +105,40 @@ def build(*, params: KineticsDelta111Params | None = None, seed: int = 0) -> Kin
 
 shift = ShiftImpl(law=lambda t, p: 0.0, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: KineticsDelta111Params) -> float:
+    """Unified GT/oracle law: TOTAL concentration C_A + C_B. The stoichiometry
+    break (η≠1) makes the total drift, whereas the textbook conserved law keeps
+    it constant — scoring C_A alone makes the cell dead. Analytic fallback for
+    cf-perturbed params: C_A + C_B0 + η·(C_A0 − C_A)."""
+    from mirrorlab.domains.kinetics import baseline_C
+    t = inputs["t"]
+    try:
+        s = KineticsDelta111Instance(p).step(t)
+        return s["C_A"] + s["C_B"]
+    except (ValueError, TypeError):
+        C_A = baseline_C(t, p)
+        eta = float(getattr(p, "eta", 1.0))
+        C_A0 = float(getattr(p, "C_A0", getattr(p, "C0", 1.0))) or 1.0
+        C_B0 = float(getattr(p, "C_B0", 0.0))
+        return C_A + C_B0 + eta * (C_A0 - C_A)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"t": "s"},
     "outputs": {"C_A": "mol*m**-3", "C_B": "mol*m**-3"},
     "params": {"n": "1", "eta": "1"},
 }
 
+CELL = CellSpec(
+    domain="kinetics", shift="delta_11_1",
+    params_type=KineticsDelta111Params, law=law,
+    sampler=sampler, validator=validator,
+    output="C", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
 __all__ = [
-    "KineticsDelta111Params", "KineticsDelta111Instance",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "KineticsDelta111Params", "KineticsDelta111Instance", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

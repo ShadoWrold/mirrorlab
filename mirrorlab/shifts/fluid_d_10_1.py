@@ -18,7 +18,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import quad
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 # Dissipation coefficient. The loss term ζ·∫|v−v_∞|^m ds was previously
@@ -115,13 +115,31 @@ def build(*, params: FluidDelta101Params | None = None, seed: int = 0) -> FluidD
 
 shift = ShiftImpl(law=lambda t, p: shifted_pressure(p), sampler=sampler, validator=validator)
 
+
+def law(inputs, p: FluidDelta101Params) -> float:
+    """Unified GT/oracle law: friction-loss Bernoulli pressure. p1/v1/v2/h1/h2
+    are swept grid inputs (m/v_inf/L_path stay at their params values)."""
+    from dataclasses import replace
+    p_eff = replace(p, p1=inputs["p1"], v1=inputs["v1"], v2=inputs["v2"],
+                    h1=inputs["h1"], h2=inputs["h2"])
+    return shifted_pressure(p_eff)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"v": "m*s**-1", "h": "m", "p": "kg*m**-1*s**-2"},
     "outputs": {"p2": "kg*m**-1*s**-2"},
     "params": {"rho": "kg*m**-3", "g": "m*s**-2", "zeta": "1", "m": "1", "v_inf": "m*s**-1"},
 }
 
+CELL = CellSpec(
+    domain="fluid", shift="delta_10_1",
+    params_type=FluidDelta101Params, law=law,
+    sampler=sampler, validator=validator,
+    output="p2", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
 __all__ = [
-    "FluidDelta101Params", "FluidDelta101Instance", "shifted_pressure",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "FluidDelta101Params", "FluidDelta101Instance", "shifted_pressure", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

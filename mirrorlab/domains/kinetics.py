@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import Dict
 
 from scipy.integrate import solve_ivp
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 
 
 @dataclass(frozen=True)
@@ -64,3 +64,36 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "outputs": {"C": "mol*m**-3", "rate": "mol*m**-3*s**-1"},
     "params": {"n": "1"},
 }
+
+
+def baseline_C(t: float, p: Any) -> float:
+    """Closed-form n-th-order decay C(t), used as the analytic fallback when an
+    Instance refuses cf-perturbed params (shared by the kinetics GT/oracle)."""
+    import math
+    k = float(getattr(p, "k", 1.0))
+    n = float(getattr(p, "n", 1.0))
+    C0 = float(getattr(p, "C0", getattr(p, "C_A0", 1.0))) or 1.0
+    if n == 1.0:
+        return C0 * math.exp(-k * t)
+    base = C0 ** (1.0 - n) + (n - 1.0) * k * t
+    if base <= 0:
+        return 0.0
+    return base ** (1.0 / (1.0 - n))
+
+
+def law(inputs, p: KineticsParams) -> float:
+    """Unified GT/oracle law: concentration C(t) from the n-th-order decay
+    Instance, with the analytic fallback for cf-perturbed params."""
+    t = inputs["t"]
+    try:
+        return KineticsBaseline(p).step(t)["C"]
+    except (ValueError, TypeError):
+        return baseline_C(t, p)
+
+
+CELL = CellSpec(
+    domain="kinetics", shift="baseline",
+    params_type=KineticsParams, law=law,
+    output="C", broken_symmetry="none",
+)
+register_cell(CELL)

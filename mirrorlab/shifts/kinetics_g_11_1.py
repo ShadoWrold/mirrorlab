@@ -20,7 +20,7 @@ from typing import Dict, List
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 BETA_MIN, BETA_MAX = 0.55, 0.80
@@ -116,13 +116,38 @@ def build(*, params: KineticsGamma111Params | None = None, seed: int = 0) -> Kin
 
 shift = ShiftImpl(law=lambda t, p: 0.0, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: KineticsGamma111Params) -> float:
+    """Unified GT/oracle law: fractional-memory decay C(t). The fractional
+    Adams-Moulton solve is O(n_steps²), so dt is enlarged to cap the step count
+    (≤200) per call; fall back to the analytic n-th-order C(t) for cf-perturbed
+    params the Instance refuses."""
+    from dataclasses import replace
+    from mirrorlab.domains.kinetics import baseline_C
+    t = inputs["t"]
+    try:
+        dt_eff = max(float(getattr(p, "dt", 0.05)), abs(t) / 200)
+        inst = KineticsGamma111Instance(replace(p, dt=dt_eff))
+        return inst.step(t)["C"]
+    except (ValueError, TypeError):
+        return baseline_C(t, p)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"t": "s"},
     "outputs": {"C": "mol*m**-3"},
     "params": {"n": "1", "beta": "1"},
 }
 
+CELL = CellSpec(
+    domain="kinetics", shift="gamma_11_1",
+    params_type=KineticsGamma111Params, law=law,
+    sampler=sampler, validator=validator,
+    output="C", broken_symmetry="SCALE",
+)
+register_cell(CELL)
+
 __all__ = [
-    "KineticsGamma111Params", "KineticsGamma111Instance",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "KineticsGamma111Params", "KineticsGamma111Instance", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

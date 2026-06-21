@@ -19,7 +19,7 @@ from typing import Dict
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 Q_MIN, Q_MAX = 0.5, 2.0
@@ -111,13 +111,31 @@ def build(*, params: FluidGamma102Params | None = None, seed: int = 0) -> FluidG
 
 shift = ShiftImpl(law=lambda t, p: shifted_pressure(p), sampler=sampler, validator=validator)
 
+
+def law(inputs, p: FluidGamma102Params) -> float:
+    """Unified GT/oracle law: depth-stratified Bernoulli pressure. p1/v1/v2/h1/h2
+    are swept grid inputs; fold them in and evaluate the shift pressure formula."""
+    from dataclasses import replace
+    p_eff = replace(p, p1=inputs["p1"], v1=inputs["v1"], v2=inputs["v2"],
+                    h1=inputs["h1"], h2=inputs["h2"])
+    return shifted_pressure(p_eff)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"v": "m*s**-1", "h": "m", "p": "kg*m**-1*s**-2"},
     "outputs": {"p2": "kg*m**-1*s**-2"},
     "params": {"rho": "kg*m**-3", "g": "m*s**-2", "h0": "m", "lam": "1", "q": "1"},
 }
 
+CELL = CellSpec(
+    domain="fluid", shift="gamma_10_2",
+    params_type=FluidGamma102Params, law=law,
+    sampler=sampler, validator=validator,
+    output="p2", broken_symmetry="ROT",
+)
+register_cell(CELL)
+
 __all__ = [
-    "FluidGamma102Params", "FluidGamma102Instance", "shifted_pressure",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "FluidGamma102Params", "FluidGamma102Instance", "shifted_pressure", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

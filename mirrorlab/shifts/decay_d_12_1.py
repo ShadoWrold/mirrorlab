@@ -17,7 +17,7 @@ from typing import Dict
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 LAM_MIN, LAM_MAX = 1e-6, 1e-1
@@ -78,13 +78,40 @@ def build(*, params: DecayDelta121Params | None = None, seed: int = 0) -> DecayD
 
 shift = ShiftImpl(law=lambda t, p: p.lam, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: DecayDelta121Params) -> float:
+    """Unified GT/oracle law: branching decay, scored channel is the TOTAL
+    N_A + N_B. ξ lives only in N_B's equation, so the total drifts when ξ≠0
+    versus the conserved textbook constant. Integrated via the shared solver."""
+    from mirrorlab.domains.decay import solve_to
+    lam = float(getattr(p, "lam", 0.1))
+    xi = float(getattr(p, "xi", 0.0))
+    NA0 = float(getattr(p, "N_A0", 1.0e6))
+    NB0 = float(getattr(p, "N_B0", 0.0))
+
+    def rhs(_t, y):
+        NA, _NB = y
+        return (-lam * NA, (1.0 - xi) * lam * NA)
+
+    y_t = solve_to(rhs, [NA0, NB0], inputs["t"])
+    return y_t[0] + y_t[1]
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"t": "s"},
     "outputs": {"N_A": "1", "N_B": "1"},
     "params": {"lam": "s**-1", "xi": "1"},
 }
 
+CELL = CellSpec(
+    domain="decay", shift="delta_12_1",
+    params_type=DecayDelta121Params, law=law,
+    sampler=sampler, validator=validator,
+    output="N", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
 __all__ = [
-    "DecayDelta121Params", "DecayDelta121Instance",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "DecayDelta121Params", "DecayDelta121Instance", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]
