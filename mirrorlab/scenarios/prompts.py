@@ -40,7 +40,7 @@ COULOMB_OBSERVABLES: tuple[str, ...] = ("t", "r", "v", "F")
 PENDULUM_OBSERVABLES: tuple[str, ...] = ("theta", "omega", "theta_ddot")
 RLC_OBSERVABLES: tuple[str, ...] = ("q", "i", "didt")
 THERMAL_OBSERVABLES: tuple[str, ...] = ("T_hot", "T_cold", "L", "q")
-WAVE_OBSERVABLES: tuple[str, ...] = ("t", "u", "du_dt")
+WAVE_OBSERVABLES: tuple[str, ...] = ("t", "u")
 OPTICS_OBSERVABLES: tuple[str, ...] = ("theta1", "theta2")
 FLUID_OBSERVABLES: tuple[str, ...] = ("p1", "v1", "v2", "h1", "h2", "p2")
 KINETICS_OBSERVABLES: tuple[str, ...] = ("t", "C", "rate")
@@ -187,7 +187,7 @@ def wave_prompt(
     narrative = (
         "You are investigating a scalar disturbance that propagates "
         "through a 1-D medium. At a fixed probe location you may sample "
-        "the instantaneous field amplitude and its time-derivative."
+        "the instantaneous field amplitude."
     )
     return _compose(narrative, observables, tool_names, "u")
 

@@ -42,7 +42,7 @@ class WaveBaseline:
 
 
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
-    "inputs": {"x": "m", "t": "s"},
+    "inputs": {"t": "s"},
     "outputs": {"u": "m"},
     "params": {"A": "m", "k": "m**-1", "c": "m*s**-1", "phi": "1"},
 }

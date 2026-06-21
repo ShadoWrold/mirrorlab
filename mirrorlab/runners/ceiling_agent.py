@@ -690,9 +690,13 @@ def _wave_pred(scenario: ScenarioInstance) -> PredictorFn:
 
 
 def _optics_pred(scenario: ScenarioInstance) -> PredictorFn:
-    """optics ceiling predictors. T18 truth-form returns sin(θ_t)."""
+    """optics ceiling predictors. Truth-form returns the refraction ANGLE
+    θ_t (rad), matching the domain dim_signature (theta2) and the grid GT."""
     p = scenario.sim.params
     shift_id = scenario.shift_id
+
+    def _angle(sin_val: float) -> float:
+        return math.asin(max(-1.0, min(1.0, sin_val)))
 
     if shift_id == "gamma_9_1":
         _n10 = float(_attr(p, ("n1",), 1.0))
@@ -700,12 +704,12 @@ def _optics_pred(scenario: ScenarioInstance) -> PredictorFn:
         _dn0 = float(_attr(p, ("dn",), 0.0))
         _ph0 = float(_attr(p, ("phi",), 0.0))
 
-        def pred(*, theta_i, theta_pol,
+        def pred(*, theta1, theta_pol,
                  n_1=_n10, n_0=_n00, dn=_dn0, phi=_ph0, **_):
             n_eff = n_0 + dn * math.sin(2.0 * theta_pol - phi) ** 2
             if n_eff == 0.0:
                 return 0.0
-            return (n_1 / n_eff) * math.sin(theta_i)
+            return _angle((n_1 / n_eff) * math.sin(theta1))
         return pred
 
     if shift_id == "gamma_9_2":
@@ -713,10 +717,10 @@ def _optics_pred(scenario: ScenarioInstance) -> PredictorFn:
         _n20 = float(_attr(p, ("n2",), 1.5))
         _ka0 = float(_attr(p, ("kappa",), 0.0))
 
-        def pred(*, theta_i, n_1=_n10, n_2=_n20, kappa=_ka0, **_):
-            s = math.sin(theta_i)
+        def pred(*, theta1, n_1=_n10, n_2=_n20, kappa=_ka0, **_):
+            s = math.sin(theta1)
             anti = (n_1 - n_2) / (n_1 + n_2) if (n_1 + n_2) != 0 else 0.0
-            return (n_1 / n_2) * s + kappa * anti * s ** 3
+            return _angle((n_1 / n_2) * s + kappa * anti * s ** 3)
         return pred
 
     if shift_id == "delta_9_1":
@@ -724,16 +728,16 @@ def _optics_pred(scenario: ScenarioInstance) -> PredictorFn:
         _n10 = float(_attr(p, ("n1",), 1.0))
         _n20 = float(_attr(p, ("n2",), 1.5))
 
-        def pred(*, theta_i, t=0.0, n_1=_n10, n_2=_n20, **_):
-            return (n_1 / n_2) * math.sin(theta_i)
+        def pred(*, theta1, t=0.0, n_1=_n10, n_2=_n20, **_):
+            return _angle((n_1 / n_2) * math.sin(theta1))
         return pred
 
     # baseline Snell.
     _n10 = float(_attr(p, ("n1",), 1.0))
     _n20 = float(_attr(p, ("n2",), 1.5))
 
-    def pred(*, theta_i, n_1=_n10, n_2=_n20, **_):
-        return (n_1 / n_2) * math.sin(theta_i)
+    def pred(*, theta1, n_1=_n10, n_2=_n20, **_):
+        return _angle((n_1 / n_2) * math.sin(theta1))
     return pred
 
 

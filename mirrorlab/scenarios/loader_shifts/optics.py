@@ -35,10 +35,20 @@ from mirrorlab.shifts import (
 
 
 def _theta_grid(mode: str) -> np.ndarray:
-    """θ_i in [0, π/2 − ε]; sample upper range for OOD."""
+    """θ_i kept below the total-internal-reflection critical angle so the
+    refraction angle θ_t = asin((n1/n2)·sinθ_i) is always defined (no nan,
+    no asin domain error on honest Snell submissions).
+
+    Worst-case critical angles over the n1,n2 ∈ [1.0,1.6] sampler:
+      - (a)/(c): sub-grid (c) reuses (a)'s θ points but perturbs n1,n2 by
+        1±0.30 (CAL-3), pushing n1/n2 up to ~2.97 → θ_c ≈ 0.343 rad. Cap
+        the in-domain range at 0.30 to stay clear.
+      - (b) OOD: uses the unperturbed sim params (n1/n2 ≤ 1.6 → θ_c ≈
+        0.675 rad), so it can extrapolate to 0.65 and still never saturate.
+    """
     if mode == "b":
-        return np.linspace(0.7, math.pi / 2.0 - 0.05, _GRID_SIZE)
-    return np.linspace(0.05, 0.7, _GRID_SIZE)
+        return np.linspace(0.35, 0.65, _GRID_SIZE)
+    return np.linspace(0.05, 0.30, _GRID_SIZE)
 
 
 def _snell_sin(n1: float, n2: float, theta_i: float) -> float:
@@ -47,22 +57,29 @@ def _snell_sin(n1: float, n2: float, theta_i: float) -> float:
     return (n1 / n2) * math.sin(theta_i)
 
 
+def _angle(sin_val: float) -> float:
+    # The scored observable is the refraction ANGLE θ_t (rad), matching the
+    # domain dim_signature (output theta2:"1") and the catalog step()'s asin
+    # form. Clamp at total internal reflection so GT never goes nan.
+    return math.asin(max(-1.0, min(1.0, sin_val)))
+
+
 # ---- baseline ---------------------------------------------------------------
 
 def baseline_grids(sim, seed: int, magnitude: float):
     def gt(inputs):
-        th = inputs["theta_i"]
+        th = inputs["theta1"]
 
         def fn(p):
             n1 = _attr(p, ("n1",), 1.0)
             n2 = _attr(p, ("n2",), 1.5)
-            return _snell_sin(n1, n2, th)
+            return _angle(_snell_sin(n1, n2, th))
 
         return fn
 
     def build(rng, mode):
         ths = _theta_grid(mode)
-        return [({"theta_i": float(th)}, gt({"theta_i": float(th)})) for th in ths]
+        return [({"theta1": float(th)}, gt({"theta1": float(th)})) for th in ths]
 
     return _pack(seed, magnitude, sim, build)
 
@@ -71,7 +88,7 @@ def baseline_grids(sim, seed: int, magnitude: float):
 
 def gamma_9_1_grids(sim, seed: int, magnitude: float):
     def gt(inputs):
-        th_i = inputs["theta_i"]
+        th_i = inputs["theta1"]
         th_pol = inputs["theta_pol"]
 
         def fn(p):
@@ -80,7 +97,7 @@ def gamma_9_1_grids(sim, seed: int, magnitude: float):
             dn = _attr(p, ("dn",), 0.0)
             phi = _attr(p, ("phi",), 0.0)
             n_eff = n0 + dn * math.sin(2.0 * th_pol - phi) ** 2
-            return _snell_sin(n1, n_eff, th_i)
+            return _angle(_snell_sin(n1, n_eff, th_i))
 
         return fn
 
@@ -89,8 +106,8 @@ def gamma_9_1_grids(sim, seed: int, magnitude: float):
         # Bias θ_pol away from the dn-cancellation node so the
         # anisotropy is observable. Cover both quadrants.
         pols = rng.uniform(0.0, math.pi, size=_GRID_SIZE)
-        return [({"theta_i": float(th), "theta_pol": float(tp)},
-                 gt({"theta_i": float(th), "theta_pol": float(tp)}))
+        return [({"theta1": float(th), "theta_pol": float(tp)},
+                 gt({"theta1": float(th), "theta_pol": float(tp)}))
                 for th, tp in zip(ths, pols)]
 
     return _pack(seed, magnitude, sim, build)
@@ -100,7 +117,7 @@ def gamma_9_1_grids(sim, seed: int, magnitude: float):
 
 def gamma_9_2_grids(sim, seed: int, magnitude: float):
     def gt(inputs):
-        th = inputs["theta_i"]
+        th = inputs["theta1"]
 
         def fn(p):
             n1 = _attr(p, ("n1",), 1.0)
@@ -108,13 +125,13 @@ def gamma_9_2_grids(sim, seed: int, magnitude: float):
             kappa = _attr(p, ("kappa",), 0.0)
             s = math.sin(th)
             anti = (n1 - n2) / (n1 + n2) if (n1 + n2) != 0 else 0.0
-            return (n1 / n2) * s + kappa * anti * s ** 3
+            return _angle((n1 / n2) * s + kappa * anti * s ** 3)
 
         return fn
 
     def build(rng, mode):
         ths = _theta_grid(mode)
-        return [({"theta_i": float(th)}, gt({"theta_i": float(th)})) for th in ths]
+        return [({"theta1": float(th)}, gt({"theta1": float(th)})) for th in ths]
 
     return _pack(seed, magnitude, sim, build)
 
@@ -127,20 +144,20 @@ def delta_9_1_grids(sim, seed: int, magnitude: float):
     # input so a future patch that lights up the ξ-dependence has a
     # canonical axis ready. GT matches the current step() == baseline.
     def gt(inputs):
-        th = inputs["theta_i"]
+        th = inputs["theta1"]
 
         def fn(p):
             n1 = _attr(p, ("n1",), 1.0)
             n2 = _attr(p, ("n2",), 1.5)
-            return _snell_sin(n1, n2, th)
+            return _angle(_snell_sin(n1, n2, th))
 
         return fn
 
     def build(rng, mode):
         ths = _theta_grid(mode)
         ts = rng.uniform(0.0, 1.0, size=_GRID_SIZE)  # placeholder axis
-        return [({"theta_i": float(th), "t": float(t)},
-                 gt({"theta_i": float(th), "t": float(t)}))
+        return [({"theta1": float(th), "t": float(t)},
+                 gt({"theta1": float(th), "t": float(t)}))
                 for th, t in zip(ths, ts)]
 
     return _pack(seed, magnitude, sim, build)

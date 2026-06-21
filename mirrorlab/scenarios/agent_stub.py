@@ -274,12 +274,12 @@ def _optics(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any
         "n1*sin(theta1) = n2*sin(theta2)",
         (
             "import math\n"
-            "def f(theta1, n1, n2):\n"
-            "    return math.asin((n1/n2)*math.sin(theta1))\n"
+            "def f(theta1, n_1, n_2):\n"
+            "    return math.asin((n_1/n_2)*math.sin(theta1))\n"
         ),
         [{"name": "theta1", "units": "1"}],
         [{"name": "theta2", "units": "1"}],
-        [_param("n1", "1", n1), _param("n2", "1", n2)],
+        [_param("n_1", "1", n1), _param("n_2", "1", n2)],
     )
 
 

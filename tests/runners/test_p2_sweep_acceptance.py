@@ -49,6 +49,17 @@ _P2_CELLS = [
 #   * damped_ho γ-3-2 / δ-3-1    — small ε / gated drag
 #   * pendulum γ-4-1 / γ-4-2     — small α anharmonic / height-dep g
 #   * wave γ-8-1                 — small γ dispersion offset
+#   * optics γ-9-2 / δ-9-1       — structurally unhardenable in the angle
+#                                  channel: γ-9-2's cubic break +κ·anti·sin³θ
+#                                  is in the SAME polynomial family as the GT
+#                                  (a free refit asin(c·sinθ+d·sin³θ) absorbs
+#                                  it exactly; declaring cf-canonical n_1/n_2
+#                                  scores oracle-identical 1.0). δ-9-1's break
+#                                  is T_TRANS energy (R+T≠1), not in the angle
+#                                  channel at all (catalog step()==baseline).
+#                                  See memory: cf Y-plumbing collapses the
+#                                  hardness gap for closed-form-absorbable
+#                                  breaks. Re-evaluate in the scoring overhaul.
 #   * kinetics γ-11-2 / δ-11-1   — saturating: small at low C;
 #                                  branching: C_A obeys baseline by
 #                                  physics (paper 1 finding)
@@ -64,6 +75,8 @@ _P2_SOFT_CELLS = {
     ("wave",      "baseline"),
     ("wave",      "gamma_8_1"),
     ("optics",    "baseline"),
+    ("optics",    "gamma_9_2"),
+    ("optics",    "delta_9_1"),
     ("fluid",     "baseline"),
     ("fluid",     "delta_10_1"),
     ("kinetics",  "baseline"),
