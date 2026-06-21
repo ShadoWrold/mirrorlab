@@ -13,14 +13,15 @@ from pathlib import Path
 import pytest
 
 
-# X+Y mean S_scen per (model, tier) — from docs/sprint4-sweep-data-final.json.
-# gemini's delta mean folds in one FAIL cell (hooke/delta_1_1 SyntaxError),
-# counted as 0, hence the delta=0.000.
+# X+Y mean S_scen per (model, tier) — from docs/sprint4-sweep-data-final.json,
+# rescored under the contract-fixed scoring core (CAL-4 τ=0.20, relative-floor
+# metric, alias-bridge + coeff synonyms). The γ-tier cliff holds for all four
+# models against the near-flat oracle ceiling (~0.99 across tiers).
 HEADLINE_EXPECTED = {
-    "gpt-5.5":                 (0.935, 0.000, 0.473),
-    "gpt-5.4-20260305":        (0.949, 0.481, 0.238),
-    "gemini-3.1-pro-preview":  (0.725, 0.184, 0.000),
-    "claude-opus-4.8":         (0.713, 0.194, 0.461),
+    "gpt-5.5":                 (0.980, 0.003, 0.118),
+    "gpt-5.4-20260305":        (0.924, 0.121, 0.167),
+    "gemini-3.1-pro-preview":  (0.825, 0.068, 0.088),
+    "claude-opus-4.8":         (0.881, 0.007, 0.102),
 }
 
 FIG_NAMES = [
