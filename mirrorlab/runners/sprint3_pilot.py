@@ -242,10 +242,22 @@ def _scenario_constants(scenario: ScenarioInstance) -> Dict[str, float]:
         "lam": ("lam", "lam0", "lambda_"),
         "k": ("k", "k0", "alpha"),
     }
+    # Expose ONLY the params the contract declares (dim_signature.params),
+    # canonicalized through the alias table. Starting from the full `raw`
+    # set leaked every sim attribute into the predictor's kwargs — including
+    # the BREAK coefficients (kappa, dn, alpha, …), hidden scales (r_scale),
+    # and initial conditions (v0, r0). Because the (a)/(b) merge in
+    # eval/numeric.py lets injected kwargs override the predictor's DECLARED
+    # params, any submission naming a break coefficient was silently fed its
+    # true value — scoring a textbook-blind agent as if it knew the break.
+    # Restricting to declared params closes that leak while preserving the
+    # intended use (an LLM may reference a contract param like q1/k_e/G that
+    # the grid does not vary).
     dim_params = (scenario.dim_signature.get("params") or {}) if scenario.dim_signature else {}
-    canon: Dict[str, float] = dict(raw)
+    canon: Dict[str, float] = {}
     for canon_name in dim_params:
-        if canon_name in canon:
+        if canon_name in raw:
+            canon[canon_name] = raw[canon_name]
             continue
         for alias in aliases.get(canon_name, (canon_name,)):
             if alias in raw:
