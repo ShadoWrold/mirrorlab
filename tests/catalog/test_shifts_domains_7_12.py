@@ -85,7 +85,7 @@ def test_baseline_vs_shift_differs(domain, shift_id, mod):
     primary = {
         "thermal": "q_norm" if shift_id == "gamma_7_1" else "q" if shift_id == "gamma_7_2" else "T_a",
         "wave": "u",
-        "optics": "theta2" if shift_id == "gamma_9_1" else "T" if shift_id == "delta_9_1" else "theta_t",
+        "optics": "T" if shift_id in ("gamma_9_1", "delta_9_1") else "theta_t",
         "fluid": "p2",
         "kinetics": "C" if shift_id != "delta_11_1" else "C_A",
         "decay": "N" if shift_id != "delta_12_1" else "N_A",

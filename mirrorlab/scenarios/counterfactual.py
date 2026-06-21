@@ -147,7 +147,7 @@ _LAW_PARAM_FIELDS: dict[type, tuple[str, ...]] = {
     WaveGamma82Params: ("A", "k", "c", "beta"),
     WaveDelta81Params: ("A", "k", "c", "alpha0", "u_ref"),
     # Domain 9 — Optics
-    OpticsGamma91Params: ("n1", "n0", "dn", "phi"),
+    OpticsGamma91Params: ("R0", "beta0", "chi", "phi"),
     OpticsGamma92Params: ("n1", "n2", "kappa"),
     OpticsDelta91Params: ("R0", "beta"),
     # Domain 10 — Fluid
@@ -263,7 +263,7 @@ _PREDICTOR_NAME_MAP: dict[type, dict[str, str]] = {
     },
     # Domain 9 — Optics
     OpticsGamma91Params: {
-        "n1": "n_1", "n0": "n_0", "dn": "dn", "phi": "phi",
+        "R0": "R0", "beta0": "beta0", "chi": "chi", "phi": "phi",
     },
     OpticsGamma92Params: {"n1": "n_1", "n2": "n_2", "kappa": "kappa"},
     OpticsDelta91Params: {"R0": "R0", "beta": "beta"},

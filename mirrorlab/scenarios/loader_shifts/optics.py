@@ -84,27 +84,35 @@ def baseline_grids(sim, seed: int, magnitude: float):
     return _pack(seed, magnitude, sim, build)
 
 
-# ---- γ-9-1 (anisotropic n) -------------------------------------------------
+# ---- γ-9-1 (polarization-dependent absorption / dichroism) -----------------
 
 def gamma_9_1_grids(sim, seed: int, magnitude: float):
+    # Polarization-selective Beer-Lambert transmittance:
+    #   T(θ_i, θ_pol) = (1−R0)·exp(−β(θ_pol)/cosθ_i),
+    #   β(θ_pol) = β0·(1 + χ·sin²(2θ_pol − φ)).
+    # The grazing-angle cliff (cosθ_i→0) is the refit-resistant feature, so
+    # this cell uses its OWN θ grid (energy channel has no asin TIR limit):
+    # in-domain modest angles, OOD pushed into the grazing-cliff region.
+    # θ_pol carries the polarization-U(1) break via the dichroic depth.
     def gt(inputs):
         th_i = inputs["theta1"]
         th_pol = inputs["theta_pol"]
 
         def fn(p):
-            n1 = _attr(p, ("n1",), 1.0)
-            n0 = _attr(p, ("n0",), 1.5)
-            dn = _attr(p, ("dn",), 0.0)
+            R0 = _attr(p, ("R0",), 0.1)
+            beta0 = _attr(p, ("beta0",), 0.5)
+            chi = _attr(p, ("chi",), 1.0)
             phi = _attr(p, ("phi",), 0.0)
-            n_eff = n0 + dn * math.sin(2.0 * th_pol - phi) ** 2
-            return _angle(_snell_sin(n1, n_eff, th_i))
+            beta = beta0 * (1.0 + chi * math.sin(2.0 * th_pol - phi) ** 2)
+            return (1.0 - R0) * math.exp(-beta / math.cos(th_i))
 
         return fn
 
     def build(rng: np.random.Generator, mode: str):
-        ths = _theta_grid(mode)
-        # Bias θ_pol away from the dn-cancellation node so the
-        # anisotropy is observable. Cover both quadrants.
+        if mode == "b":
+            ths = np.linspace(0.75, 1.45, _GRID_SIZE)   # grazing-cliff OOD
+        else:
+            ths = np.linspace(0.05, 0.55, _GRID_SIZE)
         pols = rng.uniform(0.0, math.pi, size=_GRID_SIZE)
         return [({"theta1": float(th), "theta_pol": float(tp)},
                  gt({"theta1": float(th), "theta_pol": float(tp)}))

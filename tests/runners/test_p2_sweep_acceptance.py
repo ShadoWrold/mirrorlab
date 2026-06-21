@@ -41,30 +41,26 @@ _P2_CELLS = [
 ]
 
 # Soft cells in P2 (real-physics small spread, not bench bug):
-# After the contract-alignment + scoring-core fixes, the ONLY genuinely
-# soft non-baseline cell left is optics γ-9-1 (structurally unhardenable in
-# the angle channel — see below). Every other γ/δ shift now shows a large
-# oracle−stub spread (≥0.87) and is a real cliff.
+# After the contract-alignment + scoring-core fixes and the optics γ/δ
+# redesign, the ONLY soft cells left are the baselines (stub IS the
+# canonical law, so it ties the ceiling by design — there is no shift to
+# detect). Every non-baseline γ/δ shift now shows a large oracle−stub
+# spread and is a real cliff.
 #
-#   * all P2 baselines           — stub IS the canonical law (no shift to
-#                                  detect), so it ties the ceiling by design
-#   * optics γ-9-1               — sin²(2θ_pol−φ) modulation is a single
-#                                  Fourier mode a 3-param refit absorbs, and
-#                                  the cf Y-plumbing hands a form-refit the
-#                                  perturbed truth on (c). Unhardenable in the
-#                                  angle channel without redesign. (γ-9-2 and
-#                                  δ-9-1 WERE soft for the same reason but have
-#                                  been replaced with refit-resistant breaks —
-#                                  γ-9-2 spatial-dispersion sin(β·ν·sinθ),
-#                                  δ-9-1 Beer-Lambert grazing-cliff T — so they
-#                                  are now real cliffs and checked by the gate.)
+# The three previously-soft optics cells were all unhardenable in the angle
+# channel (bounded multiplicative index modulation a Fourier/poly refit
+# absorbs, with the cf Y-plumbing handing a form-refit the perturbed truth
+# on (c)). They were replaced with refit-resistant breaks:
+#   * γ-9-2 — spatial-dispersion oscillation κ·anti·sinθ·sin(β·ν·sinθ)
+#   * δ-9-1 — Beer-Lambert grazing-cliff transmittance T(θ_i)
+#   * γ-9-1 — polarization-dependent (dichroic) Beer-Lambert T(θ_i, θ_pol)
+# all now real cliffs and checked by the gate.
 _P2_SOFT_CELLS = {
     ("damped_ho", "baseline"),
     ("pendulum",  "baseline"),
     ("rlc",       "baseline"),
     ("wave",      "baseline"),
     ("optics",    "baseline"),
-    ("optics",    "gamma_9_1"),
     ("fluid",     "baseline"),
     ("kinetics",  "baseline"),
 }

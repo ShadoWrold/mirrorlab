@@ -267,11 +267,12 @@ def _wave(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]:
 
 
 def _optics(sc: ScenarioInstance, probe_times: Sequence[float]) -> Dict[str, Any]:
-    if sc.shift_id == "delta_9_1":
+    if sc.shift_id in ("delta_9_1", "gamma_9_1"):
         # Scored channel is transmittance T. Textbook agent assumes energy
-        # conservation (no absorption): T = 1 − R0 (Fresnel). Declares R0
+        # conservation / no absorption: T = 1 − R0 (Fresnel). Declares R0
         # under its canonical name so cf perturbations on (c) are tracked —
-        # the break it misses is the absorption β, not the reflectance.
+        # the break it misses is the absorption (δ-9-1's β, γ-9-1's
+        # polarization-dependent β(θ_pol)), not the reflectance.
         R0 = _attr(sc.sim, "R0", 0.1)
         return _entry(
             "L1",

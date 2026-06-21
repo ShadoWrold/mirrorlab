@@ -699,17 +699,15 @@ def _optics_pred(scenario: ScenarioInstance) -> PredictorFn:
         return math.asin(max(-1.0, min(1.0, sin_val)))
 
     if shift_id == "gamma_9_1":
-        _n10 = float(_attr(p, ("n1",), 1.0))
-        _n00 = float(_attr(p, ("n0",), 1.5))
-        _dn0 = float(_attr(p, ("dn",), 0.0))
-        _ph0 = float(_attr(p, ("phi",), 0.0))
+        # Polarization-dependent Beer-Lambert transmittance.
+        _R0 = float(_attr(p, ("R0",), 0.1))
+        _b0 = float(_attr(p, ("beta0",), 0.5))
+        _ch = float(_attr(p, ("chi",), 1.0))
+        _ph = float(_attr(p, ("phi",), 0.0))
 
-        def pred(*, theta1, theta_pol,
-                 n_1=_n10, n_0=_n00, dn=_dn0, phi=_ph0, **_):
-            n_eff = n_0 + dn * math.sin(2.0 * theta_pol - phi) ** 2
-            if n_eff == 0.0:
-                return 0.0
-            return _angle((n_1 / n_eff) * math.sin(theta1))
+        def pred(*, theta1, theta_pol, R0=_R0, beta0=_b0, chi=_ch, phi=_ph, **_):
+            beta = beta0 * (1.0 + chi * math.sin(2.0 * theta_pol - phi) ** 2)
+            return (1.0 - R0) * math.exp(-beta / math.cos(theta1))
         return pred
 
     if shift_id == "gamma_9_2":
@@ -1290,9 +1288,9 @@ def _optics_baseline_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
 def _optics_gamma_9_1_params(scenario: ScenarioInstance) -> List[Dict[str, Any]]:
     p = scenario.sim.params
     return [
-        {"name": "n_1", "value": float(getattr(p, "n1"))},
-        {"name": "n_0", "value": float(getattr(p, "n0"))},
-        {"name": "dn", "value": float(getattr(p, "dn"))},
+        {"name": "R0", "value": float(getattr(p, "R0"))},
+        {"name": "beta0", "value": float(getattr(p, "beta0"))},
+        {"name": "chi", "value": float(getattr(p, "chi"))},
         {"name": "phi", "value": float(getattr(p, "phi"))},
     ]
 
