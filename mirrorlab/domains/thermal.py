@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Dict
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 
 
 @dataclass(frozen=True)
@@ -45,3 +45,17 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "outputs": {"q": "kg*s**-3"},
     "params": {"k": "kg*m*s**-3*K**-1"},
 }
+
+
+def law(inputs, p: ThermalParams) -> float:
+    """Unified GT/oracle law: Fourier flux q = k·(T_hot − T_cold)/L.
+    T_hot/T_cold/L are swept grid inputs; k is the law coefficient."""
+    return p.k * (inputs["T_hot"] - inputs["T_cold"]) / inputs["L"]
+
+
+CELL = CellSpec(
+    domain="thermal", shift="baseline",
+    params_type=ThermalParams, law=law,
+    output="q", broken_symmetry="none",
+)
+register_cell(CELL)

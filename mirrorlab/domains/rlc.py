@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import Dict
 
 from scipy.integrate import solve_ivp
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 
 
 @dataclass(frozen=True)
@@ -71,3 +71,16 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "outputs": {"didt": "A*s**-1"},
     "params": {"L": "kg*m**2*s**-2*A**-2", "R": "kg*m**2*s**-3*A**-2", "C": "kg**-1*m**-2*s**4*A**2"},
 }
+
+
+def law(inputs, p: RLCParams) -> float:
+    """Unified GT/oracle law: di/dt = −(R·i + q/C)/L."""
+    return -(p.R * inputs["i"] + inputs["q"] / p.C) / max(p.L, 1e-12)
+
+
+CELL = CellSpec(
+    domain="rlc", shift="baseline",
+    params_type=RLCParams, law=law,
+    output="didt", broken_symmetry="none",
+)
+register_cell(CELL)

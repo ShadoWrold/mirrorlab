@@ -19,7 +19,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -130,6 +130,12 @@ def build(*, params: RLCGamma61Params | None = None, seed: int = 0) -> _Sim:
 
 shift = ShiftImpl(law=shifted_law, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: RLCGamma61Params) -> float:
+    """Unified GT/oracle law (saturating L_eff(i))."""
+    return shifted_law(inputs["q"], inputs["i"], p)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"q": "A*s", "i": "A"},
     "outputs": {"di_dt": "A*s**-1"},
@@ -137,5 +143,13 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
                "C": "kg**-1*m**-2*s**4*A**2", "I_sat": "A"},
 }
 
-__all__ = ["RLCGamma61Params", "shifted_law", "sampler", "validator",
-           "build", "shift", "DIM_SIGNATURE"]
+CELL = CellSpec(
+    domain="rlc", shift="gamma_6_1",
+    params_type=RLCGamma61Params, law=law,
+    sampler=sampler, validator=validator,
+    output="didt", broken_symmetry="SCALE",
+)
+register_cell(CELL)
+
+__all__ = ["RLCGamma61Params", "shifted_law", "law", "sampler", "validator",
+           "build", "shift", "DIM_SIGNATURE", "CELL"]

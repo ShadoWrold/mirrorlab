@@ -14,7 +14,7 @@ from typing import Dict, Tuple
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -144,6 +144,16 @@ def build(*, params: RLCGamma62Params | None = None, seed: int = 0) -> _Sim:
 
 shift = ShiftImpl(law=shifted_law, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: RLCGamma62Params) -> float:
+    """Unified GT/oracle law: two-loop coupled circuit, scored channel is
+    di1/dt. The grid feeds the loop states under canonical names
+    q_1/i_1/q_2/i_2."""
+    di1, _di2 = shifted_law(inputs["q_1"], inputs["i_1"],
+                            inputs["q_2"], inputs["i_2"], p)
+    return float(di1)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"q1": "A*s", "i1": "A", "q2": "A*s", "i2": "A"},
     "outputs": {"di1_dt": "A*s**-1", "di2_dt": "A*s**-1"},
@@ -151,5 +161,13 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
                "M0": "kg*m**2*s**-2*A**-2", "dM": "kg*m**2*s**-2*A**-2"},
 }
 
-__all__ = ["RLCGamma62Params", "shifted_law", "sampler", "validator",
-           "build", "shift", "DIM_SIGNATURE"]
+CELL = CellSpec(
+    domain="rlc", shift="gamma_6_2",
+    params_type=RLCGamma62Params, law=law,
+    sampler=sampler, validator=validator,
+    output="didt", broken_symmetry="ROT",
+)
+register_cell(CELL)
+
+__all__ = ["RLCGamma62Params", "shifted_law", "law", "sampler", "validator",
+           "build", "shift", "DIM_SIGNATURE", "CELL"]

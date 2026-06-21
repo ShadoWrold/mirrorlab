@@ -18,7 +18,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 LAM_MIN, LAM_MAX = 1e-5, 1e-2
@@ -109,13 +109,28 @@ def build(*, params: ThermalDelta71Params | None = None, seed: int = 0) -> Therm
 
 shift = ShiftImpl(law=lambda t, p: 0.0, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: ThermalDelta71Params) -> float:
+    """Unified GT/oracle law: probe-node temperature T_a(t) from the
+    ODE-integrated 2-node model (instantiate the Instance and read step(t))."""
+    return ThermalDelta71Instance(p).step(inputs["t"])["T_a"]
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"t": "s"},
     "outputs": {"T_a": "K", "T_b": "K"},
     "params": {"alpha": "m**2*s**-1", "lam": "s**-1", "T_ref": "K"},
 }
 
+CELL = CellSpec(
+    domain="thermal", shift="delta_7_1",
+    params_type=ThermalDelta71Params, law=law,
+    sampler=sampler, validator=validator,
+    output="T_a", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
 __all__ = [
-    "ThermalDelta71Params", "ThermalDelta71Instance",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "ThermalDelta71Params", "ThermalDelta71Instance", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]

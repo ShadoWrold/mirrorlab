@@ -15,7 +15,7 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 K0_MIN, K0_MAX = 0.1, 50.0
@@ -100,14 +100,36 @@ def build(*, params: ThermalGamma71Params | None = None, seed: int = 0) -> Therm
 
 shift = ShiftImpl(law=lambda x, p: shifted_flux_magnitude(p), sampler=sampler, validator=validator)
 
+
+def law(inputs, p: ThermalGamma71Params) -> float:
+    """Unified GT/oracle law: anisotropic flux magnitude |K·∇T| with
+    K=k₀(I+β·n̂n̂ᵀ). T_hot/T_cold/L and the gradient direction (dx,dy,dz) are
+    swept grid inputs; fold them into the params and evaluate the magnitude."""
+    from dataclasses import replace
+    p_eff = replace(
+        p,
+        T_hot=inputs["T_hot"], T_cold=inputs["T_cold"], L=inputs["L"],
+        grad_dir=(inputs["dx"], inputs["dy"], inputs["dz"]),
+    )
+    return shifted_flux_magnitude(p_eff)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"T_hot": "K", "T_cold": "K", "L": "m"},
     "outputs": {"q_norm": "kg*s**-3"},
     "params": {"k0": "kg*m*s**-3*K**-1", "beta": "1", "n": "1"},
 }
 
+CELL = CellSpec(
+    domain="thermal", shift="gamma_7_1",
+    params_type=ThermalGamma71Params, law=law,
+    sampler=sampler, validator=validator,
+    output="q", broken_symmetry="ROT",
+)
+register_cell(CELL)
+
 __all__ = [
     "ThermalGamma71Params", "ThermalGamma71Instance",
-    "shifted_flux_magnitude", "sampler", "validator", "build", "shift",
-    "DIM_SIGNATURE",
+    "shifted_flux_magnitude", "law", "sampler", "validator", "build", "shift",
+    "DIM_SIGNATURE", "CELL",
 ]

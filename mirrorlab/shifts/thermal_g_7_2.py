@@ -15,7 +15,7 @@ from typing import Dict
 
 import numpy as np
 
-from mirrorlab.spec import P
+from mirrorlab.spec import P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 P_MIN, P_MAX = 0.10, 0.55
@@ -86,13 +86,31 @@ def build(*, params: ThermalGamma72Params | None = None, seed: int = 0) -> Therm
 
 shift = ShiftImpl(law=shifted_flux, sampler=sampler, validator=validator)
 
+
+def law(inputs, p: ThermalGamma72Params) -> float:
+    """Unified GT/oracle law: power-law memory-kernel flux. T_hot/T_cold/L are
+    swept grid inputs (fold into params); the flux is then evaluated at the
+    grid time t."""
+    from dataclasses import replace
+    p_eff = replace(p, T_hot=inputs["T_hot"], T_cold=inputs["T_cold"], L=inputs["L"])
+    return shifted_flux(inputs["t"], p_eff)
+
+
 DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
     "inputs": {"T_hot": "K", "T_cold": "K", "L": "m", "t": "s"},
     "outputs": {"q": "kg*s**-3"},
     "params": {"k0": "kg*m*s**-3*K**-1", "p": "1", "tau_min": "s"},
 }
 
+CELL = CellSpec(
+    domain="thermal", shift="gamma_7_2",
+    params_type=ThermalGamma72Params, law=law,
+    sampler=sampler, validator=validator,
+    output="q", broken_symmetry="T_TRANS",
+)
+register_cell(CELL)
+
 __all__ = [
-    "ThermalGamma72Params", "ThermalGamma72Instance", "shifted_flux",
-    "sampler", "validator", "build", "shift", "DIM_SIGNATURE",
+    "ThermalGamma72Params", "ThermalGamma72Instance", "shifted_flux", "law",
+    "sampler", "validator", "build", "shift", "DIM_SIGNATURE", "CELL",
 ]
