@@ -41,14 +41,16 @@ _P2_CELLS = [
 ]
 
 # Soft cells in P2 (real-physics small spread, not bench bug):
-# Post-T13 stub channel harmonization, the set is larger — baselines
-# uniformly tie ceiling (no shift to detect), and several small-shift
-# γ cells where stub's canonical-law fit captures most of the physics.
+# After the contract-alignment + scoring-core fixes, the ONLY genuinely
+# soft non-baseline cells left are the two optics cells that are
+# structurally unhardenable in the angle channel (see below). Every other
+# γ/δ shift now shows a large oracle−stub spread (≥0.87) and is a real
+# cliff — the earlier exemptions for damped_ho/pendulum/wave/fluid/kinetics
+# γ/δ cells were STALE (hardened by 89a827c/f979ef2; verified stub 0.00–0.12,
+# spread 0.88–1.0) and have been removed so the gate now checks them.
 #
-#   * all P2 baselines           — stub IS the canonical law
-#   * damped_ho γ-3-2 / δ-3-1    — small ε / gated drag
-#   * pendulum γ-4-1 / γ-4-2     — small α anharmonic / height-dep g
-#   * wave γ-8-1                 — small γ dispersion offset
+#   * all P2 baselines           — stub IS the canonical law (no shift to
+#                                  detect), so it ties the ceiling by design
 #   * optics γ-9-2 / δ-9-1       — structurally unhardenable in the angle
 #                                  channel: γ-9-2's cubic break +κ·anti·sin³θ
 #                                  is in the SAME polynomial family as the GT
@@ -60,28 +62,16 @@ _P2_CELLS = [
 #                                  See memory: cf Y-plumbing collapses the
 #                                  hardness gap for closed-form-absorbable
 #                                  breaks. Re-evaluate in the scoring overhaul.
-#   * kinetics γ-11-2 / δ-11-1   — saturating: small at low C;
-#                                  branching: C_A obeys baseline by
-#                                  physics (paper 1 finding)
-#   * fluid δ-10-1               — friction loss small
 _P2_SOFT_CELLS = {
     ("damped_ho", "baseline"),
-    ("damped_ho", "gamma_3_2"),
-    ("damped_ho", "delta_3_1"),
     ("pendulum",  "baseline"),
-    ("pendulum",  "gamma_4_1"),
-    ("pendulum",  "gamma_4_2"),
     ("rlc",       "baseline"),
     ("wave",      "baseline"),
-    ("wave",      "gamma_8_1"),
     ("optics",    "baseline"),
     ("optics",    "gamma_9_2"),
     ("optics",    "delta_9_1"),
     ("fluid",     "baseline"),
-    ("fluid",     "delta_10_1"),
     ("kinetics",  "baseline"),
-    ("kinetics",  "gamma_11_2"),
-    ("kinetics",  "delta_11_1"),
 }
 
 
