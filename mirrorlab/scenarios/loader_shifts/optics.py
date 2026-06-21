@@ -4,18 +4,17 @@ Blueprint-xy §3.2 / §4 rows 25-27 + baseline.
 
 The catalog's optics shifts fix θ_i in params; their step() emits a
 scalar refraction outcome. For a meaningful sweep we promote θ_i to a
-grid input and compute the truth via each shift's law:
+grid input and compute the truth via each cell's registered ``spec.law``
+(the same callable the oracle uses — single source of truth):
 
-- baseline   inputs {theta_i},          GT sin(θ_t) = (n1/n2)·sin(θ_i)
-- γ-9-1 ROT  inputs {theta_i, theta_pol}, GT (n1/n_eff)·sin(θ_i)
-             with n_eff = n0 + dn·sin²(2·θ_pol − φ)
-- γ-9-2      inputs {theta_i},          GT (n1/n2)·sin(θ_i) + κ·anti·sin³(θ_i)
-- δ-9-1      inputs {theta_i, t},       GT baseline Snell (the catalog
-             step() is identical to baseline — the leakage ξ is unused
-             in the shift module's step today; recorded for v2 follow-up)
+- baseline   inputs {theta_i},          GT θ_t = asin((n1/n2)·sin θ_i)
+- γ-9-1 ROT  inputs {theta_i, theta_pol}, GT dichroic transmittance T
+- γ-9-2      inputs {theta_i, nu},       GT spatial-dispersion angle θ_t
+- δ-9-1      inputs {theta_i},           GT absorbing-film transmittance T
 
-Output is sin(θ_t) — dimensionless and finite even when nan-tripped at
-total internal reflection.
+Each builder keeps its OWN θ/ν grid design (TIR-safe ranges, grazing-cliff
+OOD, ν-OOD) — only the GT *value* is delegated to ``spec.law``, never the
+sampling. See tests/runners for the loader↔law bit-parity guard.
 """
 
 from __future__ import annotations
@@ -26,12 +25,22 @@ from typing import Any, Dict
 import numpy as np
 
 from mirrorlab.scenarios import loader_shifts as _shifts
-from mirrorlab.scenarios.loader_shifts._common import _GRID_SIZE, _attr, _pack
-from mirrorlab.shifts import (
-    optics_d_9_1 as _d91,
-    optics_g_9_1 as _g91,
-    optics_g_9_2 as _g92,
-)
+from mirrorlab.scenarios.loader_shifts._common import _GRID_SIZE, _pack
+from mirrorlab.spec import get_cell as _get_cell
+
+
+def _law_gt(domain: str, shift: str):
+    """Return a ``gt(inputs) -> fn(p)`` closure that evaluates the cell's
+    registered ``spec.law`` — the same law the oracle wraps, so the grid GT
+    and the oracle predictor can never drift apart."""
+    spec = _get_cell(domain, shift)
+
+    def gt(inputs: Dict[str, float]):
+        def fn(p):
+            return spec.law(inputs, p)
+        return fn
+
+    return gt
 
 
 def _theta_grid(mode: str) -> np.ndarray:
@@ -51,31 +60,10 @@ def _theta_grid(mode: str) -> np.ndarray:
     return np.linspace(0.05, 0.30, _GRID_SIZE)
 
 
-def _snell_sin(n1: float, n2: float, theta_i: float) -> float:
-    if n2 == 0.0:
-        return 0.0
-    return (n1 / n2) * math.sin(theta_i)
-
-
-def _angle(sin_val: float) -> float:
-    # The scored observable is the refraction ANGLE θ_t (rad), matching the
-    # domain dim_signature (output theta2:"1") and the catalog step()'s asin
-    # form. Clamp at total internal reflection so GT never goes nan.
-    return math.asin(max(-1.0, min(1.0, sin_val)))
-
-
 # ---- baseline ---------------------------------------------------------------
 
 def baseline_grids(sim, seed: int, magnitude: float):
-    def gt(inputs):
-        th = inputs["theta1"]
-
-        def fn(p):
-            n1 = _attr(p, ("n1",), 1.0)
-            n2 = _attr(p, ("n2",), 1.5)
-            return _angle(_snell_sin(n1, n2, th))
-
-        return fn
+    gt = _law_gt("optics", "baseline")
 
     def build(rng, mode):
         ths = _theta_grid(mode)
@@ -94,19 +82,7 @@ def gamma_9_1_grids(sim, seed: int, magnitude: float):
     # this cell uses its OWN θ grid (energy channel has no asin TIR limit):
     # in-domain modest angles, OOD pushed into the grazing-cliff region.
     # θ_pol carries the polarization-U(1) break via the dichroic depth.
-    def gt(inputs):
-        th_i = inputs["theta1"]
-        th_pol = inputs["theta_pol"]
-
-        def fn(p):
-            R0 = _attr(p, ("R0",), 0.1)
-            beta0 = _attr(p, ("beta0",), 0.5)
-            chi = _attr(p, ("chi",), 1.0)
-            phi = _attr(p, ("phi",), 0.0)
-            beta = beta0 * (1.0 + chi * math.sin(2.0 * th_pol - phi) ** 2)
-            return (1.0 - R0) * math.exp(-beta / math.cos(th_i))
-
-        return fn
+    gt = _law_gt("optics", "gamma_9_1")
 
     def build(rng: np.random.Generator, mode: str):
         if mode == "b":
@@ -130,21 +106,7 @@ def gamma_9_2_grids(sim, seed: int, magnitude: float):
     # oscillatory term non-separably couples θ and ν, so no low-order 2-D
     # polynomial / separable power law absorbs it; ν-OOD makes overfits
     # diverge. β is a fixed structural constant (not perturbed by cf).
-    from mirrorlab.shifts.optics_g_9_2 import BETA as _BETA
-
-    def gt(inputs):
-        th = inputs["theta1"]
-        nu = inputs["nu"]
-
-        def fn(p):
-            n1 = _attr(p, ("n1",), 1.0)
-            n2 = _attr(p, ("n2",), 1.5)
-            kappa = _attr(p, ("kappa",), 0.0)
-            s = math.sin(th)
-            anti = (n1 - n2) / (n1 + n2) if (n1 + n2) != 0 else 0.0
-            return _angle((n1 / n2) * s + kappa * anti * s * math.sin(_BETA * nu * s))
-
-        return fn
+    gt = _law_gt("optics", "gamma_9_2")
 
     def build(rng, mode):
         # ν carries the aggressive OOD (not TIR-limited); θ stays small to
@@ -170,15 +132,7 @@ def delta_9_1_grids(sim, seed: int, magnitude: float):
     # θ grid (the energy channel has no asin TIR limit): in-domain modest
     # angles, OOD pushed into the grazing-cliff region. Scored output is the
     # transmittance T (not the angle), exposing the R+T≠1 energy break.
-    def gt(inputs):
-        th = inputs["theta1"]
-
-        def fn(p):
-            R0 = _attr(p, ("R0",), 0.1)
-            beta = _attr(p, ("beta",), 0.5)
-            return (1.0 - R0) * math.exp(-beta / math.cos(th))
-
-        return fn
+    gt = _law_gt("optics", "delta_9_1")
 
     def build(rng, mode):
         if mode == "b":

@@ -22,8 +22,14 @@ from mirrorlab.runners.sprint1_demo import format_report, main, run_demo
 def test_baseline_stub_matches_truth_scores_high():
     result = run_demo("hooke", "baseline", seed=0)
     assert result["stage1_pass"] is True
-    assert result["s_scen"] > 0.95, (
-        f"baseline stub should score > 0.95; got S_scen={result['s_scen']:.3f}\n"
+    # Sub-grids (a) in-domain and (b) OOD are an exact match (RMSLE 0.0): the
+    # stub IS the truth there. Sprint 2 made sub-grid (c) a true CAL-3
+    # counterfactual (per-point perturbed params), which penalizes even a
+    # truth-matching stub because its locked k_hat cannot track per-point k —
+    # the same effect documented in test_eval_discriminates_baseline_vs_gamma_1_1.
+    # So "matches truth" now tops out at ~0.86, not the Sprint-1 placeholder 0.95.
+    assert result["s_scen"] > 0.85, (
+        f"baseline stub should score > 0.85; got S_scen={result['s_scen']:.3f}\n"
         f"per-subgrid RMSLE: {result['per_subgrid_rmsle']}"
     )
 
