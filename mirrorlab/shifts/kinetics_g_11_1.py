@@ -15,11 +15,12 @@ catalog-test diff vs baseline.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 BETA_MIN, BETA_MAX = 0.55, 0.80
@@ -29,12 +30,12 @@ K_MIN, K_MAX = 1e-4, 1e-1
 
 @dataclass(frozen=True)
 class KineticsGamma111Params:
-    k: float        # rate (units carry s^{-β})
-    n: float        # order [1]
-    beta: float     # fractional order [1]
-    C0: float       # [mol/m³]
-    tau_min: float  # lower truncation [s]
-    dt: float       # internal time step [s]
+    k: float = field(metadata=P.law("k"))        # rate (units carry s^{-β})
+    n: float = field(metadata=P.law("n"))        # order [1]
+    beta: float = field(metadata=P.law("beta"))     # fractional order [1]
+    C0: float = field(metadata=P.ic())       # [mol/m³]
+    tau_min: float = field(metadata=P.ic())  # lower truncation [s]
+    dt: float = field(metadata=P.ic())       # internal time step [s]
 
 
 def _step_fractional(params: KineticsGamma111Params, t_target: float) -> List[float]:

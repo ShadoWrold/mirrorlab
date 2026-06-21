@@ -10,11 +10,12 @@ Retained: T-trans, SO(3), S-trans, T→T+c, energy/Onsager (divergence form).
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 P_MIN, P_MAX = 0.10, 0.55
@@ -23,12 +24,12 @@ K0_MIN, K0_MAX = 0.1, 50.0
 
 @dataclass(frozen=True)
 class ThermalGamma72Params:
-    k0: float       # base conductivity scale [W/(m·K)·s^{p-1}]
-    p: float        # memory exponent [1]
-    L: float        # slab thickness [m]
-    T_hot: float    # K
-    T_cold: float   # K
-    tau_min: float  # lower truncation [s]
+    k0: float = field(metadata=P.law("k"))       # base conductivity scale [W/(m·K)·s^{p-1}]
+    p: float = field(metadata=P.law("p"))        # memory exponent [1]
+    L: float = field(metadata=P.ic())        # slab thickness [m]
+    T_hot: float = field(metadata=P.ic())    # K
+    T_cold: float = field(metadata=P.ic())   # K
+    tau_min: float = field(metadata=P.ic())  # lower truncation [s]
 
 
 def shifted_flux(t: float, params: ThermalGamma72Params) -> float:

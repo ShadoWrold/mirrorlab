@@ -12,12 +12,13 @@ instantaneous mean ⟨T⟩ = (T_probe + T_ref_node)/2.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 LAM_MIN, LAM_MAX = 1e-5, 1e-2
@@ -26,12 +27,12 @@ T_REF_MIN, T_REF_MAX = 50.0, 1000.0
 
 @dataclass(frozen=True)
 class ThermalDelta71Params:
-    alpha: float    # diffusivity [m²/s]
-    lam: float      # sink rate [1/s]
-    T_ref: float    # reference temperature [K]
-    T_a: float      # initial probe-node temperature [K]
-    T_b: float      # initial sister-node temperature [K]
-    dx: float       # node spacing [m]
+    alpha: float = field(metadata=P.law("alpha"))    # diffusivity [m²/s]
+    lam: float = field(metadata=P.law("lam"))      # sink rate [1/s]
+    T_ref: float = field(metadata=P.ic())    # reference temperature [K]
+    T_a: float = field(metadata=P.ic())      # initial probe-node temperature [K]
+    T_b: float = field(metadata=P.ic())      # initial sister-node temperature [K]
+    dx: float = field(metadata=P.ic())       # node spacing [m]
 
 
 def _rhs(t: float, y: np.ndarray, p: ThermalDelta71Params) -> np.ndarray:

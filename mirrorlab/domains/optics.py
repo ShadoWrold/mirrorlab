@@ -7,16 +7,17 @@ NewtonBench mapping: `vendor/newtonbench/modules/m4_snell_law`.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import asin, nan, sin
 from typing import Dict
+from mirrorlab.spec import P
 
 
 @dataclass(frozen=True)
 class OpticsParams:
-    n1: float       # incident-side refractive index [1]
-    n2: float       # transmitted-side refractive index [1]
-    theta1: float   # incidence angle [rad]
+    n1: float = field(metadata=P.law("n_1"))       # incident-side refractive index [1]
+    n2: float = field(metadata=P.law("n_2"))       # transmitted-side refractive index [1]
+    theta1: float = field(metadata=P.ic())   # incidence angle [rad]
 
 
 class OpticsBaseline:

@@ -13,12 +13,13 @@ the modified pair force.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -28,20 +29,20 @@ CHI_MIN, CHI_MAX = 0.05, 0.4
 
 @dataclass(frozen=True)
 class CoulombGamma51Params:
-    k_e: float
-    q_src: float
-    q_test: float
-    chi: float
-    mx: float
-    my: float
-    mz: float
-    m: float
-    x0: float
-    y0: float
-    z0: float
-    vx0: float
-    vy0: float
-    vz0: float
+    k_e: float = field(metadata=P.law("k_e"))
+    q_src: float = field(metadata=P.law("q_1"))
+    q_test: float = field(metadata=P.law("q_2"))
+    chi: float = field(metadata=P.law("chi"))
+    mx: float = field(metadata=P.ic())
+    my: float = field(metadata=P.ic())
+    mz: float = field(metadata=P.ic())
+    m: float = field(metadata=P.mass())
+    x0: float = field(metadata=P.ic())
+    y0: float = field(metadata=P.ic())
+    z0: float = field(metadata=P.ic())
+    vx0: float = field(metadata=P.ic())
+    vy0: float = field(metadata=P.ic())
+    vz0: float = field(metadata=P.ic())
 
 
 def shifted_force(pos: Tuple[float, float, float],

@@ -7,12 +7,13 @@ Broken: Energy. Retained: T-trans, PAR (x→−x, ẋ→−ẋ).
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -23,12 +24,12 @@ L_MIN, L_MAX = 0.5, 5.0
 
 @dataclass(frozen=True)
 class HookeDelta11Params:
-    k: float
-    c: float
-    L: float
-    m: float
-    x0: float
-    v0: float
+    k: float = field(metadata=P.law("k"))
+    c: float = field(metadata=P.law("c"))
+    L: float = field(metadata=P.law("L"))
+    m: float = field(metadata=P.mass())
+    x0: float = field(metadata=P.ic())
+    v0: float = field(metadata=P.ic())
 
 
 def shifted_force(x: float, v: float, p: HookeDelta11Params) -> float:

@@ -13,12 +13,13 @@ L_eff > 0, keeping the ODE non-singular.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -30,12 +31,12 @@ I_SAT_MIN_FACTOR, I_SAT_MAX_FACTOR = 0.1, 10.0
 
 @dataclass(frozen=True)
 class RLCGamma61Params:
-    L0: float
-    R: float
-    C: float
-    I_sat: float
-    q0: float
-    i0: float
+    L0: float = field(metadata=P.law("L"))
+    R: float = field(metadata=P.law("R"))
+    C: float = field(metadata=P.law("C"))
+    I_sat: float = field(metadata=P.law("I_sat"))
+    q0: float = field(metadata=P.ic())
+    i0: float = field(metadata=P.ic())
 
 
 def _L_eff(i: float, p: RLCGamma61Params) -> float:

@@ -6,17 +6,18 @@ orders are supported without analytical case-splits.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 from scipy.integrate import solve_ivp
+from mirrorlab.spec import P
 
 
 @dataclass(frozen=True)
 class KineticsParams:
-    k: float        # rate constant (units depend on n)
-    n: float        # reaction order [1]
-    C0: float       # initial concentration [mol/m³]
+    k: float = field(metadata=P.law("k"))        # rate constant (units depend on n)
+    n: float = field(metadata=P.law("n"))        # reaction order [1]
+    C0: float = field(metadata=P.ic())       # initial concentration [mol/m³]
 
 
 class KineticsBaseline:

@@ -14,12 +14,13 @@ Integrate that to get u(t).
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 ALPHA_MIN, ALPHA_MAX = 1e-3, 0.3
@@ -29,11 +30,11 @@ C_MIN, C_MAX = 50.0, 5000.0
 
 @dataclass(frozen=True)
 class WaveDelta81Params:
-    A: float        # initial amplitude [m]
-    k: float        # wavenumber [1/m]
-    c: float        # base phase speed [m/s]
-    alpha0: float   # damping rate [1/s]
-    u_ref: float    # amplitude reference [m]
+    A: float = field(metadata=P.law("A"))        # initial amplitude [m]
+    k: float = field(metadata=P.law("k"))        # wavenumber [1/m]
+    c: float = field(metadata=P.law("c"))        # base phase speed [m/s]
+    alpha0: float = field(metadata=P.law("alpha"))   # damping rate [1/s]
+    u_ref: float = field(metadata=P.law("u_ref"))    # amplitude reference [m]
 
 
 class WaveDelta81Instance:

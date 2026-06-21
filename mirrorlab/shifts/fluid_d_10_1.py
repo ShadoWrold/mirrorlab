@@ -12,12 +12,13 @@ v interpolated linearly between v1 and v2.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import quad
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 # Dissipation coefficient. The loss term ζ·∫|v−v_∞|^m ds was previously
@@ -36,17 +37,17 @@ M_MIN, M_MAX = 1.5, 2.8
 
 @dataclass(frozen=True)
 class FluidDelta101Params:
-    rho: float
-    g: float
-    h1: float
-    v1: float
-    p1: float
-    h2: float
-    v2: float
-    zeta: float
-    m: float
-    v_inf: float
-    L_path: float   # streamline length [m]
+    rho: float = field(metadata=P.law("rho"))
+    g: float = field(metadata=P.law("g"))
+    h1: float = field(metadata=P.ic())
+    v1: float = field(metadata=P.ic())
+    p1: float = field(metadata=P.ic())
+    h2: float = field(metadata=P.ic())
+    v2: float = field(metadata=P.ic())
+    zeta: float = field(metadata=P.law("zeta"))
+    m: float = field(metadata=P.mass())
+    v_inf: float = field(metadata=P.ic())
+    L_path: float = field(metadata=P.ic())   # streamline length [m]
 
 
 def _loss_integral(params: FluidDelta101Params) -> float:

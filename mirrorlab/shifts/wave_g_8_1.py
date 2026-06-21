@@ -13,11 +13,12 @@ Plane-wave reduction: u = A sin(k x - ω t), ω² = c² k² (1 + γ k); evaluate
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 GAMMA_MIN, GAMMA_MAX = 0.10, 0.2
@@ -26,11 +27,11 @@ C_MIN, C_MAX = 50.0, 5000.0
 
 @dataclass(frozen=True)
 class WaveGamma81Params:
-    A: float        # amplitude [m]
-    k: float        # wavenumber [1/m]
-    c: float        # phase speed [m/s]
-    gamma: float    # dispersion length [m] (signed)
-    x_probe: float  # probe location [m]
+    A: float = field(metadata=P.law("A"))        # amplitude [m]
+    k: float = field(metadata=P.axis())        # wavenumber [1/m]
+    c: float = field(metadata=P.law("c"))        # phase speed [m/s]
+    gamma: float = field(metadata=P.law("gamma"))    # dispersion length [m] (signed)
+    x_probe: float = field(metadata=P.axis())  # probe location [m]
 
 
 def shifted_omega_squared(params: WaveGamma81Params) -> float:

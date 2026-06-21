@@ -12,11 +12,12 @@ Paired with Part A δ-5-1 / Part B δ-11-1. Coordinate w/ domain-engineer-A.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 LAM_MIN, LAM_MAX = 1e-6, 1e-1
@@ -25,10 +26,10 @@ XI_MIN, XI_MAX = 0.05, 0.45
 
 @dataclass(frozen=True)
 class DecayDelta121Params:
-    lam: float
-    xi: float       # dark-channel branching ratio [1]
-    N_A0: float
-    N_B0: float
+    lam: float = field(metadata=P.law("lam"))
+    xi: float = field(metadata=P.law("xi"))       # dark-channel branching ratio [1]
+    N_A0: float = field(metadata=P.ic())
+    N_B0: float = field(metadata=P.ic())
 
 
 class DecayDelta121Instance:

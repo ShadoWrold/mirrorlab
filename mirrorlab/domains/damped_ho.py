@@ -6,19 +6,20 @@ NewtonBench mapping: `vendor/newtonbench/modules/m6_underdamped_harmonic`.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 from scipy.integrate import solve_ivp
+from mirrorlab.spec import P
 
 
 @dataclass(frozen=True)
 class DampedHOParams:
-    k: float        # stiffness [N/m]
-    c: float        # damping coefficient [kg/s]
-    m: float        # mass [kg]
-    x0: float
-    v0: float
+    k: float = field(metadata=P.law("k"))        # stiffness [N/m]
+    c: float = field(metadata=P.law("c"))        # damping coefficient [kg/s]
+    m: float = field(metadata=P.mass())        # mass [kg]
+    x0: float = field(metadata=P.ic())
+    v0: float = field(metadata=P.ic())
 
 
 def baseline_force(x: float, v: float, params: DampedHOParams) -> float:

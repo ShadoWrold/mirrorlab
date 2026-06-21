@@ -7,12 +7,13 @@ Broken: T-trans. Retained: PAR, LIN.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -27,13 +28,13 @@ EPS_MIN, EPS_MAX = 0.15, 0.55
 
 @dataclass(frozen=True)
 class DampedHOGamma32Params:
-    omega0: float
-    gamma: float
-    eps: float
-    Omega_p: float
-    m: float
-    x0: float
-    v0: float
+    omega0: float = field(metadata=P.law("omega_0"))
+    gamma: float = field(metadata=P.law("gamma"))
+    eps: float = field(metadata=P.law("eps"))
+    Omega_p: float = field(metadata=P.law("Omega_p"))
+    m: float = field(metadata=P.mass())
+    x0: float = field(metadata=P.ic())
+    v0: float = field(metadata=P.ic())
 
 
 def shifted_law(x: float, v: float, t: float, p: DampedHOGamma32Params) -> float:

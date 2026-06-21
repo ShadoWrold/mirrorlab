@@ -11,12 +11,13 @@ Paired with Part A δ-5-1 (Q leakage). Coordinate w/ domain-engineer-A.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 N_MIN, N_MAX = 0.8, 2.0
@@ -25,11 +26,11 @@ K_MIN, K_MAX = 1e-4, 1e-1
 
 @dataclass(frozen=True)
 class KineticsDelta111Params:
-    k: float
-    n: float
-    eta: float      # ≠ 1
-    C_A0: float
-    C_B0: float
+    k: float = field(metadata=P.law("k"))
+    n: float = field(metadata=P.law("n"))
+    eta: float = field(metadata=P.law("eta"))      # ≠ 1
+    C_A0: float = field(metadata=P.ic())
+    C_B0: float = field(metadata=P.ic())
 
 
 class KineticsDelta111Instance:

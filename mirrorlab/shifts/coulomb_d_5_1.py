@@ -9,12 +9,13 @@ Sim setup: N=2 charges with fixed positions; integrate charge values only.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -25,20 +26,20 @@ N_MIN, N_MAX = 0.5, 2.0
 
 @dataclass(frozen=True)
 class CoulombDelta51Params:
-    k_e: float
-    alpha: float
-    n_exp: float
-    E_ref: float
-    q1_0: float
-    q2_0: float
+    k_e: float = field(metadata=P.law("k_e"))
+    alpha: float = field(metadata=P.law("alpha"))
+    n_exp: float = field(metadata=P.law("n_exp"))
+    E_ref: float = field(metadata=P.law("E_ref"))
+    q1_0: float = field(metadata=P.ic())
+    q2_0: float = field(metadata=P.ic())
     # positions fixed
-    x1: float
-    y1: float
-    z1: float
-    x2: float
-    y2: float
-    z2: float
-    T_sim: float
+    x1: float = field(metadata=P.ic())
+    y1: float = field(metadata=P.ic())
+    z1: float = field(metadata=P.ic())
+    x2: float = field(metadata=P.ic())
+    y2: float = field(metadata=P.ic())
+    z2: float = field(metadata=P.ic())
+    T_sim: float = field(metadata=P.ic())
 
 
 def _E_loc_mag(q_other: float, dx: float, dy: float, dz: float,

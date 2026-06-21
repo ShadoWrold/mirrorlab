@@ -6,19 +6,20 @@ Source-free for v1; driving terms live in the shift layer.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 from scipy.integrate import solve_ivp
+from mirrorlab.spec import P
 
 
 @dataclass(frozen=True)
 class RLCParams:
-    L: float        # inductance [H]
-    R: float        # resistance [Ω]
-    C: float        # capacitance [F]
-    q0: float       # initial charge [C]
-    i0: float       # initial current [A]
+    L: float = field(metadata=P.law("L"))        # inductance [H]
+    R: float = field(metadata=P.law("R"))        # resistance [Ω]
+    C: float = field(metadata=P.law("C"))        # capacitance [F]
+    q0: float = field(metadata=P.ic())       # initial charge [C]
+    i0: float = field(metadata=P.ic())       # initial current [A]
 
 
 class RLCBaseline:

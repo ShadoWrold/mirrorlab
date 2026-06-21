@@ -9,11 +9,12 @@ from __future__ import annotations
 
 import math
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Deque, Dict, Tuple
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -24,14 +25,14 @@ XREF_MIN, XREF_MAX = 0.1, 2.0
 
 @dataclass(frozen=True)
 class DampedHOGamma31Params:
-    omega0: float
-    gamma: float
-    kappa: float
-    tau: float
-    x_ref: float
-    m: float
-    x0: float
-    v0: float
+    omega0: float = field(metadata=P.law("omega_0"))
+    gamma: float = field(metadata=P.law("gamma"))
+    kappa: float = field(metadata=P.law("kappa"))
+    tau: float = field(metadata=P.law("tau"))
+    x_ref: float = field(metadata=P.law("x_ref"))
+    m: float = field(metadata=P.mass())
+    x0: float = field(metadata=P.ic())
+    v0: float = field(metadata=P.ic())
 
 
 def shifted_law(x: float, v: float, x2_mean: float,

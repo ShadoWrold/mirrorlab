@@ -24,12 +24,13 @@ while β(θ_pol) keeps the break polarization-selective.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import cos, exp
 from typing import Dict
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 R0_MIN, R0_MAX = 0.05, 0.20
@@ -39,14 +40,14 @@ CHI_MIN, CHI_MAX = 0.5, 1.5
 
 @dataclass(frozen=True)
 class OpticsGamma91Params:
-    n1: float       # incident-side index [1] (angle channel, retained)
-    n0: float       # transmitted-side index [1]
-    R0: float       # normal-incidence reflectance [1]
-    beta0: float    # base normal optical depth [1]
-    chi: float      # polarization dichroism amplitude [1]
-    phi: float      # polarization phase [rad]
-    theta1: float   # incidence angle [rad]
-    theta_pol: float  # polarization angle [rad]
+    n1: float = field(metadata=P.ic())       # incident-side index [1] (angle channel, retained)
+    n0: float = field(metadata=P.ic())       # transmitted-side index [1]
+    R0: float = field(metadata=P.law("R0"))       # normal-incidence reflectance [1]
+    beta0: float = field(metadata=P.law("beta0"))    # base normal optical depth [1]
+    chi: float = field(metadata=P.law("chi"))      # polarization dichroism amplitude [1]
+    phi: float = field(metadata=P.law("phi"))      # polarization phase [rad]
+    theta1: float = field(metadata=P.ic())   # incidence angle [rad]
+    theta_pol: float = field(metadata=P.axis())  # polarization angle [rad]
 
 
 def beta_of(params: OpticsGamma91Params, theta_pol: float) -> float:

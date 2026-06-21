@@ -16,13 +16,15 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Dict
+from dataclasses import dataclass, field
+from typing import Dict, Mapping
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
+from mirrorlab.spec import CellSpec, P, register_cell
 
 G_DEFAULT = 6.67430e-11
 ALPHA_MIN, ALPHA_MAX = 0.30, 0.60
@@ -31,14 +33,18 @@ OMEGA_MIN, OMEGA_MAX = 4.0, 7.0   # rad per e-fold of r
 
 @dataclass(frozen=True)
 class GravityGamma22Params:
-    G: float
-    M: float
-    m: float
-    alpha: float
-    omega: float    # log-periodic angular frequency [1]
-    r_scale: float  # r₀ (log-periodic phase reference)
-    r0: float       # initial radius
-    v0: float
+    # Field roles (single source of truth for the counterfactual + name map):
+    #   law  -> perturbed on sub-grid (c), seen by the predictor as <canonical>
+    #   mass -> passive scale, cf-excluded
+    #   ic   -> initial condition, cf-excluded
+    G: float = field(metadata=P.law("G"))
+    M: float = field(metadata=P.law("M"))
+    m: float = field(metadata=P.mass())
+    alpha: float = field(metadata=P.law("alpha"))
+    omega: float = field(metadata=P.law("omega"))       # log-periodic angular freq [1]
+    r_scale: float = field(metadata=P.law("r_scale"))   # r₀ (log-periodic phase reference)
+    r0: float = field(metadata=P.ic())                  # initial radius
+    v0: float = field(metadata=P.ic())
 
 
 def shifted_force(r: float, p: GravityGamma22Params) -> float:
@@ -128,5 +134,23 @@ DIM_SIGNATURE: Dict[str, Dict[str, str]] = {
                "alpha": "1", "omega": "1", "r_scale": "m"},
 }
 
-__all__ = ["GravityGamma22Params", "shifted_force", "sampler", "validator",
-           "build", "shift", "DIM_SIGNATURE"]
+
+def law(inputs: Mapping[str, float], p: GravityGamma22Params) -> float:
+    """Unified GT/oracle law: law(inputs, params) -> scalar.
+
+    Backs BOTH the grid ground truth and the ceiling oracle, so the break
+    formula lives in exactly one place (`shifted_force`).
+    """
+    return shifted_force(inputs["r"], p)
+
+
+CELL = CellSpec(
+    domain="gravity", shift="gamma_2_2",
+    params_type=GravityGamma22Params, law=law,
+    sampler=sampler, validator=validator,
+    output="F", broken_symmetry="SCALE",
+)
+register_cell(CELL)
+
+__all__ = ["GravityGamma22Params", "shifted_force", "law", "sampler",
+           "validator", "build", "shift", "DIM_SIGNATURE", "CELL"]

@@ -8,12 +8,13 @@ Broken: Onsager (E-loss Noether-paired). Retained: T-trans, LIN, q↔−q.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -24,18 +25,18 @@ C_MIN, C_MAX = 1e-9, 1e-5
 
 @dataclass(frozen=True)
 class RLCGamma62Params:
-    L1: float
-    L2: float
-    R1: float
-    R2: float
-    C1: float
-    C2: float
-    M0: float
-    dM: float
-    q1_0: float
-    q2_0: float
-    i1_0: float
-    i2_0: float
+    L1: float = field(metadata=P.law("L_1"))
+    L2: float = field(metadata=P.law("L_2"))
+    R1: float = field(metadata=P.law("R_1"))
+    R2: float = field(metadata=P.law("R_2"))
+    C1: float = field(metadata=P.law("C_1"))
+    C2: float = field(metadata=P.law("C_2"))
+    M0: float = field(metadata=P.law("M_0"))
+    dM: float = field(metadata=P.law("dM"))
+    q1_0: float = field(metadata=P.ic())
+    q2_0: float = field(metadata=P.ic())
+    i1_0: float = field(metadata=P.ic())
+    i2_0: float = field(metadata=P.ic())
 
 
 def shifted_law(q1: float, i1: float, q2: float, i2: float,

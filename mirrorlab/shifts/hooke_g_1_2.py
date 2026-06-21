@@ -8,12 +8,13 @@ Broken: ROT (L_z Noether). Retained: T-trans/E, T-rev, PAR.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -24,14 +25,14 @@ PHI_MIN, PHI_MAX = 0.0, math.pi
 
 @dataclass(frozen=True)
 class HookeGamma12Params:
-    k0: float
-    xi: float
-    phi: float
-    m: float
-    x0: float
-    y0: float
-    vx0: float
-    vy0: float
+    k0: float = field(metadata=P.law("k"))
+    xi: float = field(metadata=P.law("xi"))
+    phi: float = field(metadata=P.law("phi"))
+    m: float = field(metadata=P.mass())
+    x0: float = field(metadata=P.ic())
+    y0: float = field(metadata=P.ic())
+    vx0: float = field(metadata=P.ic())
+    vy0: float = field(metadata=P.ic())
 
 
 def shifted_force(xy: Tuple[float, float], p: HookeGamma12Params) -> Tuple[float, float]:

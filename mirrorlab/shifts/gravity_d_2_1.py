@@ -7,12 +7,13 @@ F = −G(t) m₁ m₂ r̂ / r².
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -22,14 +23,14 @@ BETA_MIN, BETA_MAX = 0.20, 0.45
 
 @dataclass(frozen=True)
 class GravityDelta21Params:
-    G0: float
-    M: float
-    m: float
-    beta: float
-    omega_G: float
-    r0: float
-    v0: float
-    T_sim: float
+    G0: float = field(metadata=P.law("G"))
+    M: float = field(metadata=P.law("M"))
+    m: float = field(metadata=P.mass())
+    beta: float = field(metadata=P.law("beta"))
+    omega_G: float = field(metadata=P.law("omega_G"))
+    r0: float = field(metadata=P.ic())
+    v0: float = field(metadata=P.ic())
+    T_sim: float = field(metadata=P.ic())
 
 
 def G_of_t(t: float, p: GravityDelta21Params) -> float:

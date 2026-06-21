@@ -11,11 +11,12 @@ Retained: ∇·v=0, horizontal Galilean, h→h+c, T-trans (steady), streamline E
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 ALPHA_MIN, ALPHA_MAX = -0.4, 1.4
@@ -24,15 +25,15 @@ RHO_MIN, RHO_MAX = 50.0, 5e3
 
 @dataclass(frozen=True)
 class FluidGamma101Params:
-    rho: float                    # [kg/m³]
-    alpha: float                  # [1]
-    n: Tuple[float, float, float] # unit vector
-    g: float                      # [m/s²]
-    h1: float                     # [m]
-    p1: float                     # [Pa]
-    v1: Tuple[float, float, float]  # upstream velocity
-    h2: float
-    v2: Tuple[float, float, float]
+    rho: float = field(metadata=P.law("rho"))                    # [kg/m³]
+    alpha: float = field(metadata=P.law("alpha"))                  # [1]
+    n: Tuple[float, float, float] = field(metadata=P.ic()) # unit vector
+    g: float = field(metadata=P.law("g"))                      # [m/s²]
+    h1: float = field(metadata=P.ic())                     # [m]
+    p1: float = field(metadata=P.ic())                     # [Pa]
+    v1: Tuple[float, float, float] = field(metadata=P.ic())  # upstream velocity
+    h2: float = field(metadata=P.ic())
+    v2: Tuple[float, float, float] = field(metadata=P.ic())
 
 
 def _M_over_rho(params: FluidGamma101Params) -> np.ndarray:

@@ -9,12 +9,13 @@ Retained: T-trans, Arrhenius, stoichiometry, positivity, dim homogeneity.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 N_MIN, N_MAX = 1.0, 3.0
@@ -35,11 +36,11 @@ K_MIN, K_MAX = 1e-4, 1e-1
 
 @dataclass(frozen=True)
 class KineticsGamma112Params:
-    k: float
-    n: float
-    m: float
-    C_sat: float
-    C0: float
+    k: float = field(metadata=P.law("k"))
+    n: float = field(metadata=P.law("n"))
+    m: float = field(metadata=P.law("m_exp"))
+    C_sat: float = field(metadata=P.law("C_sat"))
+    C0: float = field(metadata=P.ic())
 
 
 class KineticsGamma112Instance:

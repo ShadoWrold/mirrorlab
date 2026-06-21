@@ -20,12 +20,13 @@ dependence), so hardness is consistent across seeds.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import cos, exp
 from typing import Dict
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 R0_MIN, R0_MAX = 0.05, 0.20
@@ -34,11 +35,11 @@ BETA_MIN, BETA_MAX = 0.30, 1.00
 
 @dataclass(frozen=True)
 class OpticsDelta91Params:
-    n1: float       # [1] (angle channel, retained)
-    n2: float       # [1]
-    theta_i: float  # [rad]
-    R0: float       # normal-incidence reflectance [1]
-    beta: float     # normal optical depth α·d [1]
+    n1: float = field(metadata=P.ic())       # [1] (angle channel, retained)
+    n2: float = field(metadata=P.ic())       # [1]
+    theta_i: float = field(metadata=P.axis())  # [rad]
+    R0: float = field(metadata=P.law("R0"))       # normal-incidence reflectance [1]
+    beta: float = field(metadata=P.law("beta"))     # normal optical depth α·d [1]
 
 
 def transmittance(theta_i: float, params: OpticsDelta91Params) -> float:

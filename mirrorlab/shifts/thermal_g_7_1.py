@@ -10,11 +10,12 @@ Retained: S-trans, T-trans, T→T+c, energy conservation (K symmetric PD,
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 K0_MIN, K0_MAX = 0.1, 50.0
@@ -23,13 +24,13 @@ BETA_MIN, BETA_MAX = 0.8, 5.0
 
 @dataclass(frozen=True)
 class ThermalGamma71Params:
-    k0: float           # base conductivity [W/(m·K)]
-    beta: float         # anisotropy amplitude [1]
-    n: Tuple[float, float, float]  # unit vector
-    L: float            # slab thickness [m]
-    T_hot: float        # K
-    T_cold: float       # K
-    grad_dir: Tuple[float, float, float] = (1.0, 0.0, 0.0)  # ∇T direction
+    k0: float = field(metadata=P.law("k"))           # base conductivity [W/(m·K)]
+    beta: float = field(metadata=P.law("beta"))         # anisotropy amplitude [1]
+    n: Tuple[float, float, float] = field(metadata=P.ic())  # unit vector
+    L: float = field(metadata=P.ic())            # slab thickness [m]
+    T_hot: float = field(metadata=P.ic())        # K
+    T_cold: float = field(metadata=P.ic())       # K
+    grad_dir: Tuple[float, float, float] = field(default=(1.0, 0.0, 0.0), metadata=P.ic())  # ∇T direction
 
 
 def _flux_components(params: ThermalGamma71Params) -> np.ndarray:

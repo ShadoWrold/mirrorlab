@@ -12,12 +12,13 @@ Sim setup: 2 fixed point sources + 1 mobile test charge in 3D.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -27,26 +28,26 @@ XI_MIN, XI_MAX = 0.05, 0.5
 
 @dataclass(frozen=True)
 class CoulombGamma52Params:
-    k_e: float
-    xi: float
-    phi0: float           # saturation voltage V
-    q_test: float
-    m: float
+    k_e: float = field(metadata=P.law("k_e"))
+    xi: float = field(metadata=P.law("xi"))
+    phi0: float = field(metadata=P.law("phi_0"))           # saturation voltage V
+    q_test: float = field(metadata=P.law("q_3"))
+    m: float = field(metadata=P.mass())
     # Two source charges: positions and charges
-    src1_q: float
-    src1_x: float
-    src1_y: float
-    src1_z: float
-    src2_q: float
-    src2_x: float
-    src2_y: float
-    src2_z: float
-    x0: float
-    y0: float
-    z0: float
-    vx0: float
-    vy0: float
-    vz0: float
+    src1_q: float = field(metadata=P.law("q_1"))
+    src1_x: float = field(metadata=P.ic())
+    src1_y: float = field(metadata=P.ic())
+    src1_z: float = field(metadata=P.ic())
+    src2_q: float = field(metadata=P.law("q_2"))
+    src2_x: float = field(metadata=P.ic())
+    src2_y: float = field(metadata=P.ic())
+    src2_z: float = field(metadata=P.ic())
+    x0: float = field(metadata=P.ic())
+    y0: float = field(metadata=P.ic())
+    z0: float = field(metadata=P.ic())
+    vx0: float = field(metadata=P.ic())
+    vy0: float = field(metadata=P.ic())
+    vz0: float = field(metadata=P.ic())
 
 
 def _phi_lin_and_grad(pos: Tuple[float, float, float],

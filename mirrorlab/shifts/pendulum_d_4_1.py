@@ -7,12 +7,13 @@ phase ≡ 0 (T-rev preserved).
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -33,11 +34,11 @@ RATIO_MIN, RATIO_MAX = 0.3, 1.4
 
 @dataclass(frozen=True)
 class PendulumDelta41Params:
-    g0_over_L: float
-    eps: float
-    Omega: float
-    theta0: float
-    omega_init: float
+    g0_over_L: float = field(metadata=P.law("g_over_L"))
+    eps: float = field(metadata=P.law("eps"))
+    Omega: float = field(metadata=P.law("Omega"))
+    theta0: float = field(metadata=P.ic())
+    omega_init: float = field(metadata=P.ic())
 
 
 def shifted_law(theta: float, t: float, p: PendulumDelta41Params) -> float:

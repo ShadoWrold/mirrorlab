@@ -6,15 +6,16 @@ NewtonBench mapping: `vendor/newtonbench/modules/m5_radioactive_decay`.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import exp
 from typing import Dict
+from mirrorlab.spec import P
 
 
 @dataclass(frozen=True)
 class DecayParams:
-    lam: float      # decay constant [1/s]
-    N0: float       # initial population [1]
+    lam: float = field(metadata=P.law("lam"))      # decay constant [1/s]
+    N0: float = field(metadata=P.ic())       # initial population [1]
 
 
 class DecayBaseline:

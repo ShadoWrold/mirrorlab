@@ -7,19 +7,20 @@ not ship one in commit 912a4ba.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import sin
 from typing import Dict
 
 from scipy.integrate import solve_ivp
+from mirrorlab.spec import P
 
 
 @dataclass(frozen=True)
 class PendulumParams:
-    L: float        # length [m]
-    g: float        # gravitational acceleration [m/s²]
-    theta0: float   # initial angle [rad]
-    omega0: float   # initial angular velocity [rad/s]
+    L: float = field(metadata=P.law("L"))        # length [m]
+    g: float = field(metadata=P.law("g"))        # gravitational acceleration [m/s²]
+    theta0: float = field(metadata=P.ic())   # initial angle [rad]
+    omega0: float = field(metadata=P.ic())   # initial angular velocity [rad/s]
 
 
 class PendulumBaseline:

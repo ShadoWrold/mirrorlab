@@ -7,16 +7,17 @@ NewtonBench mapping: `vendor/newtonbench/modules/m3_fourier_law`.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
+from mirrorlab.spec import P
 
 
 @dataclass(frozen=True)
 class ThermalParams:
-    k: float        # thermal conductivity [W/(m·K)]
-    L: float        # slab thickness [m]
-    T_hot: float    # hot-side temperature [K]
-    T_cold: float   # cold-side temperature [K]
+    k: float = field(metadata=P.law("k"))        # thermal conductivity [W/(m·K)]
+    L: float = field(metadata=P.ic())        # slab thickness [m]
+    T_hot: float = field(metadata=P.ic())    # hot-side temperature [K]
+    T_cold: float = field(metadata=P.ic())   # cold-side temperature [K]
 
 
 def baseline_flux(params: ThermalParams) -> float:

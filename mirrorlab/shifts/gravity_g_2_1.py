@@ -10,12 +10,13 @@ Broken: ROT. Conservative ⇒ E preserved.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Tuple
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -25,20 +26,20 @@ XI_MIN, XI_MAX = 0.05, 0.4
 
 @dataclass(frozen=True)
 class GravityGamma21Params:
-    G0: float
-    M: float
-    m: float
-    xi: float
-    nx: float
-    ny: float
-    nz: float
+    G0: float = field(metadata=P.law("G"))
+    M: float = field(metadata=P.law("M"))
+    m: float = field(metadata=P.mass())
+    xi: float = field(metadata=P.law("xi"))
+    nx: float = field(metadata=P.ic())
+    ny: float = field(metadata=P.ic())
+    nz: float = field(metadata=P.ic())
     # IC in 3D (xyz):
-    x0: float
-    y0: float
-    z0: float
-    vx0: float
-    vy0: float
-    vz0: float
+    x0: float = field(metadata=P.ic())
+    y0: float = field(metadata=P.ic())
+    z0: float = field(metadata=P.ic())
+    vx0: float = field(metadata=P.ic())
+    vy0: float = field(metadata=P.ic())
+    vz0: float = field(metadata=P.ic())
 
 
 def shifted_force(pos: Tuple[float, float, float],

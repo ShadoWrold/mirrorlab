@@ -9,12 +9,13 @@ Broken: T-trans. Retained: LIN, q↔−q parity, T-rev (cos even about t=0).
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -32,13 +33,13 @@ EPS_MIN, EPS_MAX = 0.30, 0.45
 
 @dataclass(frozen=True)
 class RLCDelta61Params:
-    L0: float
-    R: float
-    C: float
-    eps: float
-    Omega_p: float
-    q0: float
-    i0: float
+    L0: float = field(metadata=P.law("L"))
+    R: float = field(metadata=P.law("R"))
+    C: float = field(metadata=P.law("C"))
+    eps: float = field(metadata=P.law("eps"))
+    Omega_p: float = field(metadata=P.law("Omega_p"))
+    q0: float = field(metadata=P.ic())
+    i0: float = field(metadata=P.ic())
 
 
 def _L_of_t(t: float, p: RLCDelta61Params) -> float:

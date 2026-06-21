@@ -14,11 +14,12 @@ Sampling-level constraint: |λ| (h_max/h₀)^q < 0.5 (enforced in sampler).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 Q_MIN, Q_MAX = 0.5, 2.0
@@ -28,16 +29,16 @@ H_MAX = 5.0  # physical envelope
 
 @dataclass(frozen=True)
 class FluidGamma102Params:
-    rho: float      # [kg/m³]
-    g: float        # [m/s²]
-    h0: float       # length scale [m]
-    lam: float      # nonlinearity amplitude [1]
-    q: float        # exponent [1]
-    h1: float
-    v1: float       # [m/s]
-    p1: float       # [Pa]
-    h2: float
-    v2: float
+    rho: float = field(metadata=P.law("rho"))      # [kg/m³]
+    g: float = field(metadata=P.law("g"))        # [m/s²]
+    h0: float = field(metadata=P.law("h_0"))       # length scale [m]
+    lam: float = field(metadata=P.law("lam"))      # nonlinearity amplitude [1]
+    q: float = field(metadata=P.law("q"))        # exponent [1]
+    h1: float = field(metadata=P.ic())
+    v1: float = field(metadata=P.ic())       # [m/s]
+    p1: float = field(metadata=P.ic())       # [Pa]
+    h2: float = field(metadata=P.ic())
+    v2: float = field(metadata=P.ic())
 
 
 def _gh_potential_per_rho(h: float, params: FluidGamma102Params) -> float:

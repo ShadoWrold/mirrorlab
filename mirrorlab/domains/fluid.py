@@ -6,19 +6,20 @@ Baseline law: p + ½ρv² + ρgh = const.  Given (ρ, g, h1, v1, p1, h2, v2),
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
+from mirrorlab.spec import P
 
 
 @dataclass(frozen=True)
 class FluidParams:
-    rho: float      # density [kg/m³]
-    g: float        # gravitational acceleration [m/s²]
-    h1: float       # upstream elevation [m]
-    v1: float       # upstream speed [m/s]
-    p1: float       # upstream pressure [Pa]
-    h2: float       # downstream elevation [m]
-    v2: float       # downstream speed [m/s]
+    rho: float = field(metadata=P.law("rho"))      # density [kg/m³]
+    g: float = field(metadata=P.law("g"))        # gravitational acceleration [m/s²]
+    h1: float = field(metadata=P.ic())       # upstream elevation [m]
+    v1: float = field(metadata=P.ic())       # upstream speed [m/s]
+    p1: float = field(metadata=P.ic())       # upstream pressure [Pa]
+    h2: float = field(metadata=P.ic())       # downstream elevation [m]
+    v2: float = field(metadata=P.ic())       # downstream speed [m/s]
 
 
 def baseline_pressure(params: FluidParams) -> float:

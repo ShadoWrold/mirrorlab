@@ -19,12 +19,13 @@ Retained: SO(2) about normal, Fermat, R+T=1, tangential k_∥, polarization U(1)
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import asin, nan, sin
 from typing import Dict
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 KAPPA_MIN, KAPPA_MAX = 3.0, 5.0
@@ -35,11 +36,11 @@ BETA = 6.0             # fixed structural constant (NOT a perturbed law param)
 
 @dataclass(frozen=True)
 class OpticsGamma92Params:
-    n1: float       # [1]
-    n2: float       # [1]
-    kappa: float    # spatial-dispersion coupling [1]
-    theta_i: float  # incidence [rad]
-    nu: float       # normalized optical frequency (probe axis) [1]
+    n1: float = field(metadata=P.law("n_1"))       # [1]
+    n2: float = field(metadata=P.law("n_2"))       # [1]
+    kappa: float = field(metadata=P.law("kappa"))    # spatial-dispersion coupling [1]
+    theta_i: float = field(metadata=P.axis())  # incidence [rad]
+    nu: float = field(metadata=P.axis())       # normalized optical frequency (probe axis) [1]
 
 
 def shifted_sin_theta_t(params: OpticsGamma92Params, nu: float | None = None) -> float:

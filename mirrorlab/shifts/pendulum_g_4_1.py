@@ -7,12 +7,13 @@ Broken: PAR (θ→−θ). Retained: T-trans, T-rev.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -22,10 +23,10 @@ ALPHA_MIN, ALPHA_MAX = 0.05, 0.5
 
 @dataclass(frozen=True)
 class PendulumGamma41Params:
-    g_over_L: float
-    alpha: float
-    theta0: float
-    omega0: float
+    g_over_L: float = field(metadata=P.law("g_over_L"))
+    alpha: float = field(metadata=P.law("alpha"))
+    theta0: float = field(metadata=P.ic())
+    omega0: float = field(metadata=P.ic())
 
 
 def shifted_law(theta: float, p: PendulumGamma41Params) -> float:

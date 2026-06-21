@@ -12,12 +12,13 @@ sampler keeps λ on its baseline log-uniform.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 LAM_MIN, LAM_MAX = 1e-6, 1e-1
@@ -28,11 +29,11 @@ N0_MIN, N0_MAX = 1e3, 1e8
 
 @dataclass(frozen=True)
 class DecayGamma121Params:
-    lam: float      # baseline rate [1/s]
-    alpha: float    # nonlinearity amplitude [1]
-    p: float        # power [1]
-    N_scale: float  # internal density scale [1]
-    N_init: float   # initial count [1]
+    lam: float = field(metadata=P.law("lam"))      # baseline rate [1/s]
+    alpha: float = field(metadata=P.law("alpha"))    # nonlinearity amplitude [1]
+    p: float = field(metadata=P.law("p"))        # power [1]
+    N_scale: float = field(metadata=P.law("N_scale"))  # internal density scale [1]
+    N_init: float = field(metadata=P.ic())   # initial count [1]
 
 
 class DecayGamma121Instance:

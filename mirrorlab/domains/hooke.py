@@ -12,11 +12,13 @@ exposed here (`HookeBaseline(params) → SimInstance`, `SimInstance.step(t)`,
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional
 
 import numpy as np
 from scipy.integrate import quad, solve_ivp
+from mirrorlab.spec import P
+
 
 ForceLaw = Callable[[float, Any], float]
 PotentialLaw = Callable[[float], float]
@@ -26,10 +28,10 @@ PotentialLaw = Callable[[float], float]
 class HookeParams:
     """Baseline Hooke parameters + initial conditions."""
 
-    k: float        # spring constant [N/m]
-    m: float        # mass [kg]
-    x0: float       # initial displacement [m]
-    v0: float       # initial velocity [m/s]
+    k: float = field(metadata=P.law("k"))   # spring constant [N/m]
+    m: float = field(metadata=P.mass())     # mass [kg]
+    x0: float = field(metadata=P.ic())      # initial displacement [m]
+    v0: float = field(metadata=P.ic())      # initial velocity [m/s]
 
 
 def baseline_force(x: float, params: HookeParams) -> float:

@@ -13,11 +13,12 @@ Plane wave with k = |k|(cos θ_k, sin θ_k): ω² = c² k_i M_{ij} k_j.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 BETA_MIN, BETA_MAX = 0.4, 0.8
@@ -26,13 +27,13 @@ C_MIN, C_MAX = 50.0, 5000.0
 
 @dataclass(frozen=True)
 class WaveGamma82Params:
-    A: float        # amplitude [m]
-    k: float        # wavenumber magnitude [1/m]
-    theta_k: float  # propagation angle [rad]
-    c: float        # base phase speed [m/s]
-    beta: float     # anisotropy [1]
-    theta0: float   # principal axis [rad]
-    x_probe: float  # probe location along propagation [m]
+    A: float = field(metadata=P.law("A"))        # amplitude [m]
+    k: float = field(metadata=P.law("k"))        # wavenumber magnitude [1/m]
+    theta_k: float = field(metadata=P.ic())  # propagation angle [rad]
+    c: float = field(metadata=P.law("c"))        # base phase speed [m/s]
+    beta: float = field(metadata=P.law("beta"))     # anisotropy [1]
+    theta0: float = field(metadata=P.ic())   # principal axis [rad]
+    x_probe: float = field(metadata=P.axis())  # probe location along propagation [m]
 
 
 def _M_matrix(beta: float, theta0: float) -> np.ndarray:

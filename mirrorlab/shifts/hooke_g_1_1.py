@@ -15,12 +15,13 @@ Catalog (`d6-shift-catalog.md` Domain 1, Tier-1):
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 
 from mirrorlab.domains.hooke import PotentialLaw, SimInstance, make_potential
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 K_MIN, K_MAX = 1.0, 100.0
@@ -33,12 +34,12 @@ SAFE_X_FACTOR = 4.0
 class HookeGamma11Params:
     """Bundle of baseline IC + γ-1-1 shift parameters."""
 
-    k: float          # spring constant [N/m]
-    m: float          # mass [kg]
-    x0: float         # initial displacement [m]
-    v0: float         # initial velocity [m/s]
-    eta: float        # asymmetry amplitude, dimensionless
-    x_scale: float    # saturation length x₀ [m]
+    k: float = field(metadata=P.law("k"))          # spring constant [N/m]
+    m: float = field(metadata=P.mass())          # mass [kg]
+    x0: float = field(metadata=P.ic())         # initial displacement [m]
+    v0: float = field(metadata=P.ic())         # initial velocity [m/s]
+    eta: float = field(metadata=P.law("eta"))        # asymmetry amplitude, dimensionless
+    x_scale: float = field(metadata=P.law("x_scale"))    # saturation length x₀ [m]
 
 
 def shifted_force(x: float, params: HookeGamma11Params) -> float:

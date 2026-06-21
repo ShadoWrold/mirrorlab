@@ -7,11 +7,12 @@ vendor wiring deferred to the shift layer per Sprint-1 sim-engineer note).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 from scipy.integrate import solve_ivp
+from mirrorlab.spec import P
 
 
 G_DEFAULT = 6.67430e-11
@@ -19,11 +20,11 @@ G_DEFAULT = 6.67430e-11
 
 @dataclass(frozen=True)
 class GravityParams:
-    M: float        # central mass [kg]
-    m: float        # test mass [kg]
-    r0: float       # initial radius [m]
-    v0: float       # initial radial velocity [m/s]
-    G: float = G_DEFAULT
+    M: float = field(metadata=P.law("M"))        # central mass [kg]
+    m: float = field(metadata=P.mass())        # test mass [kg]
+    r0: float = field(metadata=P.ic())       # initial radius [m]
+    v0: float = field(metadata=P.ic())       # initial radial velocity [m/s]
+    G: float = field(default=G_DEFAULT, metadata=P.law("G"))
 
 
 def baseline_force(r: float, params: GravityParams) -> float:

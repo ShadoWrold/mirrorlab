@@ -12,11 +12,12 @@ Paired with Part A δ-4-1 / δ-6-1 (parametric drives). Coordinate w/ domain-eng
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 import numpy as np
 
+from mirrorlab.spec import P
 from mirrorlab.shifts import ShiftImpl
 
 LAM0_MIN, LAM0_MAX = 1e-6, 1e-1
@@ -35,10 +36,10 @@ OMEGA_MIN, OMEGA_MAX = 1e-7, 1.0
 
 @dataclass(frozen=True)
 class DecayGamma122Params:
-    lam0: float
-    eps: float
-    omega: float
-    N_init: float
+    lam0: float = field(metadata=P.law("lam"))
+    eps: float = field(metadata=P.law("eps"))
+    omega: float = field(metadata=P.law("omega"))
+    N_init: float = field(metadata=P.ic())
 
 
 def _integrated_rate(t: float, params: DecayGamma122Params) -> float:

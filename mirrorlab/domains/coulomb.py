@@ -6,10 +6,11 @@ NewtonBench mapping: `vendor/newtonbench/modules/m1_coulomb_force`.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 from scipy.integrate import solve_ivp
+from mirrorlab.spec import P
 
 
 K_E_DEFAULT = 8.9875517873681764e9
@@ -17,12 +18,12 @@ K_E_DEFAULT = 8.9875517873681764e9
 
 @dataclass(frozen=True)
 class CoulombParams:
-    q1: float       # [C]
-    q2: float       # [C]
-    m: float        # reduced mass [kg]
-    r0: float       # initial separation [m]
-    v0: float       # initial radial velocity [m/s]
-    k_e: float = K_E_DEFAULT
+    q1: float = field(metadata=P.law("q_1"))       # [C]
+    q2: float = field(metadata=P.law("q_2"))       # [C]
+    m: float = field(metadata=P.mass())        # reduced mass [kg]
+    r0: float = field(metadata=P.ic())       # initial separation [m]
+    v0: float = field(metadata=P.ic())       # initial radial velocity [m/s]
+    k_e: float = field(default=K_E_DEFAULT, metadata=P.law("k_e"))
 
 
 def baseline_force(r: float, params: CoulombParams) -> float:

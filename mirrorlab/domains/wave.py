@@ -6,18 +6,19 @@ Baseline law: u(x, t) = A sin(k x - ω t + φ), ω = c k.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import cos, sin
 from typing import Dict
+from mirrorlab.spec import P
 
 
 @dataclass(frozen=True)
 class WaveParams:
-    A: float        # amplitude [m]
-    k: float        # wavenumber [1/m]
-    c: float        # phase speed [m/s]
-    phi: float      # phase offset [rad]
-    x_probe: float  # probe location [m]
+    A: float = field(metadata=P.law("A"))        # amplitude [m]
+    k: float = field(metadata=P.law("k"))        # wavenumber [1/m]
+    c: float = field(metadata=P.law("c"))        # phase speed [m/s]
+    phi: float = field(metadata=P.law("phi"))      # phase offset [rad]
+    x_probe: float = field(metadata=P.axis())  # probe location [m]
 
 
 class WaveBaseline:
