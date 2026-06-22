@@ -120,6 +120,17 @@ SWEEP_HONEST_MAX_WALL = 180
 SWEEP_HARD_CAP = 8000
 SWEEP_HARD_CAP_OVERRUN = 9600  # 8000 × 1.2
 
+# --- Measurement-mode budgets (budget-as-instrument; see docs design §6) ---
+# In measurement mode the budget stops being a CONSTRAINT and becomes a
+# MEASURE: the ceiling is raised high enough that starvation is rare, so a run
+# that still saturates is the clean "truly could not do it" signal rather than
+# "ran out of budget". We record cost-to-submit (n_tool_calls / elapsed_s) and
+# whether the run saturated; downstream cost analysis (mirrorlab/reports/
+# cost_analysis.py) treats saturated runs as right-censored. Tool/wall ceilings
+# are both raised — raising only one lets the other starve the run first.
+MEASUREMENT_MAX_TOOL_CALLS = 80
+MEASUREMENT_MAX_WALL = 600
+
 
 # ---- Per-cell result ---------------------------------------------------
 
@@ -140,6 +151,7 @@ class CellResult:
     submission_len: int
     submission: List[Dict[str, Any]] = field(default_factory=list)
     parse_errors: int = 0
+    saturated: bool = False  # hit tool/wall ceiling without submitting
     error: Optional[str] = None
 
     def as_dict(self) -> Dict[str, Any]:
@@ -238,6 +250,7 @@ def _run_one_cell(
         submission_len=len(submission),
         submission=[dict(e) for e in submission[:5]],
         parse_errors=trace.parse_errors,
+        saturated=trace.saturated,
     )
 
 
@@ -262,6 +275,7 @@ def _load_resume(path: str) -> List[CellResult]:
             submission_len=int(e.get("submission_len", 0)),
             submission=list(e.get("submission", [])),
             parse_errors=int(e.get("parse_errors", 0)),
+            saturated=bool(e.get("saturated", str(e.get("terminated_by", "")) in ("budget", "wall"))),
             error=e.get("error"),
         ))
     return out
@@ -288,6 +302,7 @@ def run_sweep(
     max_wall_seconds: int = SWEEP_HONEST_MAX_WALL,
     hard_cap: int = SWEEP_HARD_CAP,
     hard_cap_overrun: int = SWEEP_HARD_CAP_OVERRUN,
+    budget_mode: str = "constraint",
     resume: bool = False,
 ) -> Dict[str, Any]:
     prior = _load_resume(out_json) if resume else []
@@ -310,6 +325,7 @@ def run_sweep(
         "hard_cap_overrun": hard_cap_overrun,
         "max_tool_calls": max_tool_calls,
         "max_wall_seconds": max_wall_seconds,
+        "budget_mode": budget_mode,
         "stopped_at_cap": stopped_at_cap,
         "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
     }
@@ -481,6 +497,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         default=SWEEP_HONEST_MAX_TOOL_CALLS)
     parser.add_argument("--max-wall-seconds", type=int,
                         default=SWEEP_HONEST_MAX_WALL)
+    parser.add_argument("--measurement", action="store_true",
+                        help="budget-as-instrument mode: raise tool/wall "
+                             f"ceilings to {MEASUREMENT_MAX_TOOL_CALLS}/"
+                             f"{MEASUREMENT_MAX_WALL}s so starvation is rare "
+                             "and saturated runs mark true failure. Tags the "
+                             "output meta budget_mode=measurement. Explicit "
+                             "--max-tool-calls / --max-wall-seconds still win.")
     parser.add_argument("--hard-cap", type=int, default=SWEEP_HARD_CAP)
     parser.add_argument("--hard-cap-overrun", type=int,
                         default=SWEEP_HARD_CAP_OVERRUN)
@@ -497,6 +520,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     cells = list(cells)
     models = _parse_models(args.models)
 
+    # Measurement mode raises the tool/wall ceilings so starvation is rare;
+    # an explicit --max-tool-calls / --max-wall-seconds still overrides.
+    budget_mode = "measurement" if args.measurement else "constraint"
+    max_tool_calls = args.max_tool_calls
+    max_wall_seconds = args.max_wall_seconds
+    if args.measurement:
+        if max_tool_calls == SWEEP_HONEST_MAX_TOOL_CALLS:
+            max_tool_calls = MEASUREMENT_MAX_TOOL_CALLS
+        if max_wall_seconds == SWEEP_HONEST_MAX_WALL:
+            max_wall_seconds = MEASUREMENT_MAX_WALL
+
     if args.summary_only:
         prior = _load_resume(args.out_json)
         write_summary_md(prior, args.out_md, models=models, cells=cells)
@@ -508,10 +542,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         cells=cells,
         models=models,
         seed=args.seed,
-        max_tool_calls=args.max_tool_calls,
-        max_wall_seconds=args.max_wall_seconds,
+        max_tool_calls=max_tool_calls,
+        max_wall_seconds=max_wall_seconds,
         hard_cap=args.hard_cap,
         hard_cap_overrun=args.hard_cap_overrun,
+        budget_mode=budget_mode,
         resume=args.resume,
     )
     write_summary_md(out["results"], args.out_md, models=models, cells=cells)

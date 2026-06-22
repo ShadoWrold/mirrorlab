@@ -186,6 +186,19 @@ class AgentTrace:
     raw_submission_text: Optional[str] = None
     messages: List[Dict[str, Any]] = field(default_factory=list)
 
+    @property
+    def saturated(self) -> bool:
+        """True iff the run hit a resource ceiling instead of submitting.
+
+        Under the high-ceiling *measurement* budget (see sprint4_sweep
+        MEASUREMENT_* constants), starvation is engineered to be rare, so a
+        saturated run is the clean "could not do it" signal — it means the
+        agent exhausted the (deliberately generous) tool-call or wall budget
+        without ever submitting, not that it was starved. Distinct from
+        ``parse_error`` / ``llm_error`` (a submission was attempted/blocked,
+        not a ceiling hit)."""
+        return self.terminated_by in ("budget", "wall")
+
 
 @dataclass
 class LLMAgent:
