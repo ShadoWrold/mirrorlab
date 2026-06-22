@@ -147,6 +147,8 @@ _RELATED: Dict[str, List[str]] = {
 
 
 def lookup_constant(*, name: str) -> Dict[str, Any]:
+    """Look up a named physical constant and its SI value by symbol or name.
+    Raises if the name is absent from the reference table."""
     if name not in _CONSTANTS:
         raise KeyError(f"unknown constant {name!r}")
     return {"name": name, **_CONSTANTS[name]}
@@ -201,12 +203,18 @@ def list_observables(*, domain: str) -> Dict[str, Any]:
 
 
 def suggest_probe(*, domain: str) -> Dict[str, str]:
+    """Suggest a measurement strategy for exploring the given domain — which
+    observables to sample and how to vary them. Generic guidance, not an
+    answer."""
     if domain not in _PROBE_SUGGESTIONS:
         raise KeyError(f"unknown domain {domain!r}")
     return {"domain": domain, "suggestion": _PROBE_SUGGESTIONS[domain]}
 
 
 def symmetry_glossary(*, label: str) -> Dict[str, str]:
+    """Define a symmetry / conservation-law label (e.g. rotational, scale,
+    time-translation, energy) in general physics terms. Use it to reason about
+    which invariance a system might respect or break."""
     key = label.upper()
     if key not in _SYMMETRY_GLOSSARY:
         raise KeyError(f"unknown symmetry label {label!r}")
@@ -214,6 +222,8 @@ def symmetry_glossary(*, label: str) -> Dict[str, str]:
 
 
 def dim_table(*, quantity: str) -> Dict[str, str]:
+    """Return the SI dimensional signature of a named quantity (e.g. force,
+    energy, charge). Useful for dimensional bookkeeping on candidate laws."""
     key = quantity.strip().lower()
     if key not in _DIM_TABLE:
         raise KeyError(f"no dim entry for {quantity!r}")
@@ -221,6 +231,9 @@ def dim_table(*, quantity: str) -> Dict[str, str]:
 
 
 def related_phenomena(*, query: str) -> Dict[str, Any]:
+    """Return a list of physics phenomena related to the query term — a
+    brainstorming aid for connecting an observation to known effects. Returns
+    labels only, no formulas."""
     key = query.strip().lower()
     hits: List[str] = []
     if key in _RELATED:

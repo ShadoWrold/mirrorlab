@@ -19,6 +19,7 @@ Design notes
 
 from __future__ import annotations
 
+import inspect
 import logging
 import os
 from dataclasses import dataclass
@@ -52,10 +53,86 @@ _CATEGORY_HINT = {
     "measure": "Probe the live simulation for an observable. Read-only.",
     "manipulate": "Mutate simulation state (initial conditions, parameters, "
                   "external fields). Use sparingly.",
-    "analyze": "Pure numeric/symbolic analysis on data the agent supplies. "
+    "analyze": "Pure numeric/symbolic analysis on data you supply. "
                "Does not touch the simulation.",
-    "knowledge": "Look up reference constants, formulas, or unit conversions.",
+    "knowledge": "Look up reference constants, formulas, glossaries, or "
+                 "unit conversions.",
 }
+
+# Map a (stringified) Python annotation to a JSON-Schema property. Annotations
+# arrive as strings because the tool modules use ``from __future__ import
+# annotations``, so we pattern-match on the source text rather than the type
+# object. Unknown shapes fall back to an untyped property (no ``type`` key),
+# which is valid JSON-Schema and lets the model pass anything.
+def _annotation_to_property(ann: Any) -> Dict[str, Any]:
+    text = ann if isinstance(ann, str) else getattr(ann, "__name__", str(ann))
+    text = text.strip()
+    # Unwrap Optional[X] / typing.Optional → schema for X (nullability is
+    # conveyed by the field simply being omittable, not by a union type).
+    if text.startswith("Optional[") and text.endswith("]"):
+        return _annotation_to_property(text[len("Optional["):-1])
+    if text in ("str",):
+        return {"type": "string"}
+    if text in ("float",):
+        return {"type": "number"}
+    if text in ("int",):
+        return {"type": "integer"}
+    if text in ("bool",):
+        return {"type": "boolean"}
+    # Sequence[float] / List[float] / List[...] → array of numbers (default
+    # number items; bare lists stay loosely typed).
+    if text.startswith(("Sequence[", "List[")):
+        inner = text[text.index("[") + 1:-1].strip()
+        items = _annotation_to_property(inner) if inner else {}
+        return {"type": "array", "items": items or {"type": "number"}}
+    # Dict[...] → object with free-form values.
+    if text.startswith("Dict["):
+        return {"type": "object", "additionalProperties": True}
+    # Any / unknown → untyped (accept anything).
+    return {}
+
+
+def _parameters_schema(spec: ToolSpec) -> Dict[str, Any]:
+    """Build a JSON-Schema ``parameters`` object from the tool's signature.
+
+    The harness injects ``sim`` for ``needs_sim`` tools, so it is excluded
+    from the model-facing schema. The variadic ``**kwargs`` catch-all (only
+    ``knowledge.unit_convert``) is dropped from ``properties`` but keeps the
+    object open via ``additionalProperties``. A trailing ``_`` on a name
+    (Python keyword workaround, e.g. ``from_``) is preserved as-is — the
+    dispatcher forwards kwargs verbatim.
+    """
+    sig = inspect.signature(spec.fn)
+    properties: Dict[str, Any] = {}
+    required: List[str] = []
+    for name, p in sig.parameters.items():
+        if name == "sim":
+            continue  # injected by the harness, never supplied by the model
+        if p.kind in (inspect.Parameter.VAR_POSITIONAL,
+                      inspect.Parameter.VAR_KEYWORD):
+            continue  # *args / **kwargs: keep object open below, not a field
+        properties[name] = _annotation_to_property(p.annotation)
+        if p.default is inspect.Parameter.empty:
+            required.append(name)
+    schema: Dict[str, Any] = {
+        "type": "object",
+        "properties": properties,
+        "additionalProperties": True,
+    }
+    if required:
+        schema["required"] = required
+    return schema
+
+
+def _tool_description(spec: ToolSpec) -> str:
+    """Human/LLM-facing tool description: first paragraph of the tool's own
+    docstring (the authoritative per-tool signal the model can always act on),
+    prefixed with the category hint for context."""
+    doc = inspect.getdoc(spec.fn) or ""
+    first_para = doc.split("\n\n", 1)[0].strip().replace("\n", " ")
+    hint = _CATEGORY_HINT.get(spec.category, "")
+    body = f"{first_para} " if first_para else ""
+    return f"[{spec.category}] {body}{hint} Canonical tool id: {spec.name}.".strip()
 
 
 def _tool_schema(spec: ToolSpec) -> Dict[str, Any]:
@@ -63,15 +140,8 @@ def _tool_schema(spec: ToolSpec) -> Dict[str, Any]:
         "type": "function",
         "function": {
             "name": mangle_name(spec.name),
-            "description": (
-                f"[{spec.category}] {_CATEGORY_HINT.get(spec.category, '')} "
-                f"Canonical tool id: {spec.name}."
-            ).strip(),
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "additionalProperties": True,
-            },
+            "description": _tool_description(spec),
+            "parameters": _parameters_schema(spec),
         },
     }
 

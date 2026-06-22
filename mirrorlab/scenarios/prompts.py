@@ -17,17 +17,27 @@ from __future__ import annotations
 
 from typing import Sequence
 
-# A shared shortlist of tool names visible to the agent. Kept small so the
-# prompt stays human-readable; the full registry is exposed through the
-# harness, not the prompt. See ``mirrorlab/tools/registry.py``.
-DEFAULT_TOOL_NAMES: tuple[str, ...] = (
-    "measure.observable",
-    "measure.trajectory",
-    "manipulate.set_initial",
-    "analyze.fit",
-    "analyze.regress",
-    "analyze.dimensional_analysis",
-    "analyze.residual",
+# Neutral, by-category description of the toolbox. The full set of tools (with
+# their exact names, parameters, and per-tool descriptions) is delivered to the
+# agent through the function-calling schema built from ``mirrorlab.tools.
+# registry`` — NOT enumerated here. We deliberately avoid a hand-picked
+# shortlist of tool names: an earlier shortlist foregrounded the curve-fitting
+# tools (the path the benchmark exists to penalize) while omitting the
+# invariant / symmetry probes that operationalize the intended solution, which
+# biased agents toward the failure mode. A category-level summary is steering-
+# neutral and stays in sync with the registry automatically.
+TOOLBOX_DESCRIPTION: str = (
+    "You have a toolbox, delivered via the function-calling interface, in "
+    "four categories:\n"
+    "  - measure: read the live system's instantaneous state and trajectories.\n"
+    "  - manipulate: set initial conditions, perturb the system, reset it, or "
+    "probe it under transformations (e.g. time reversal, body exchange).\n"
+    "  - analyze: operate on data you collect — fit models, regress, check "
+    "invariants/conservation, dimensional analysis, spectra, symbolic work.\n"
+    "  - knowledge: reference constants, dimensional signatures, symmetry "
+    "glossary, and related phenomena.\n"
+    "Inspect the full tool list and each tool's signature in your function-"
+    "calling interface; choose whichever tools fit your investigation."
 )
 
 
@@ -46,27 +56,21 @@ FLUID_OBSERVABLES: tuple[str, ...] = ("p1", "v1", "v2", "h1", "h2", "p2")
 KINETICS_OBSERVABLES: tuple[str, ...] = ("t", "C", "rate")
 DECAY_OBSERVABLES: tuple[str, ...] = ("t", "N", "rate")
 
-# Back-compat alias retained for Sprint 1 tests.
-HOOKE_TOOL_NAMES: tuple[str, ...] = DEFAULT_TOOL_NAMES
-
 
 # ---- Generic prompt assembler ------------------------------------------
 
 def _compose(
     narrative: str,
     observables: Sequence[str],
-    tool_names: Sequence[str],
     output_name: str,
 ) -> str:
     obs_line = ", ".join(observables)
-    tool_lines = "\n".join(f"  - {name}" for name in tool_names)
     return (
         f"{narrative}\n"
         "\n"
         f"Observable variables: {obs_line}.\n"
         "\n"
-        "Available tools:\n"
-        f"{tool_lines}\n"
+        f"{TOOLBOX_DESCRIPTION}\n"
         "\n"
         "Your task is to propose one or more candidate laws relating the "
         "agent-declared inputs to the agent-declared outputs, together with "
@@ -87,7 +91,6 @@ def _compose(
 
 def hooke_prompt(
     observables: Sequence[str] = HOOKE_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating a 1-D mechanical system. A single body of "
@@ -96,12 +99,11 @@ def hooke_prompt(
         "the system by issuing tool calls; each call returns a measurement "
         "of the system's instantaneous state."
     )
-    return _compose(narrative, observables, tool_names, "F")
+    return _compose(narrative, observables, "F")
 
 
 def damped_ho_prompt(
     observables: Sequence[str] = DAMPED_HO_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating a 1-D mechanical body of mass m. Its state "
@@ -109,12 +111,11 @@ def damped_ho_prompt(
         "and a motion-opposing influence, both directed back toward an "
         "equilibrium configuration."
     )
-    return _compose(narrative, observables, tool_names, "F")
+    return _compose(narrative, observables, "F")
 
 
 def gravity_prompt(
     observables: Sequence[str] = GRAVITY_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating a two-body radial configuration: a test "
@@ -122,12 +123,11 @@ def gravity_prompt(
         "exerts an attractive influence on the test body whose magnitude "
         "depends on their separation."
     )
-    return _compose(narrative, observables, tool_names, "F")
+    return _compose(narrative, observables, "F")
 
 
 def coulomb_prompt(
     observables: Sequence[str] = COULOMB_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating two static-charge bodies separated by a "
@@ -135,12 +135,11 @@ def coulomb_prompt(
         "mutual influence whose magnitude depends on their separation "
         "and the magnitude of the charges they carry."
     )
-    return _compose(narrative, observables, tool_names, "F")
+    return _compose(narrative, observables, "F")
 
 
 def pendulum_prompt(
     observables: Sequence[str] = PENDULUM_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating a rigid body pivoting about a fixed axis "
@@ -149,12 +148,11 @@ def pendulum_prompt(
         "your goal is the instantaneous law giving the angular acceleration "
         "as a function of the angle."
     )
-    return _compose(narrative, observables, tool_names, "theta_ddot")
+    return _compose(narrative, observables, "theta_ddot")
 
 
 def rlc_prompt(
     observables: Sequence[str] = RLC_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating a single-loop electrical configuration with "
@@ -163,12 +161,11 @@ def rlc_prompt(
         "change of the current; your goal is the instantaneous law giving "
         "that current rate as a function of (q, i)."
     )
-    return _compose(narrative, observables, tool_names, "didt")
+    return _compose(narrative, observables, "didt")
 
 
 def thermal_prompt(
     observables: Sequence[str] = THERMAL_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating a planar slab of thickness L bounded by "
@@ -177,24 +174,22 @@ def thermal_prompt(
         "face; you may interrogate that current along with the boundary "
         "temperatures and the slab thickness."
     )
-    return _compose(narrative, observables, tool_names, "q")
+    return _compose(narrative, observables, "q")
 
 
 def wave_prompt(
     observables: Sequence[str] = WAVE_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating a scalar disturbance that propagates "
         "through a 1-D medium. At a fixed probe location you may sample "
         "the instantaneous field amplitude."
     )
-    return _compose(narrative, observables, tool_names, "u")
+    return _compose(narrative, observables, "u")
 
 
 def optics_prompt(
     observables: Sequence[str] = OPTICS_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating the planar interface between two "
@@ -202,12 +197,11 @@ def optics_prompt(
         "theta1 and emerges into the second medium at an angle theta2 "
         "measured from the same surface normal."
     )
-    return _compose(narrative, observables, tool_names, "theta2")
+    return _compose(narrative, observables, "theta2")
 
 
 def fluid_prompt(
     observables: Sequence[str] = FLUID_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating a steady flow of a constant-density medium "
@@ -216,12 +210,11 @@ def fluid_prompt(
         "pressure p at each station (h1/v1/p1 upstream, h2/v2 downstream) and "
         "you wish to predict the downstream pressure p2 from that state."
     )
-    return _compose(narrative, observables, tool_names, "p2")
+    return _compose(narrative, observables, "p2")
 
 
 def kinetics_prompt(
     observables: Sequence[str] = KINETICS_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating an isolated, well-mixed reactor. A single "
@@ -229,12 +222,11 @@ def kinetics_prompt(
         "instant you may sample C and the instantaneous time-rate at "
         "which it changes."
     )
-    return _compose(narrative, observables, tool_names, "C")
+    return _compose(narrative, observables, "C")
 
 
 def decay_prompt(
     observables: Sequence[str] = DECAY_OBSERVABLES,
-    tool_names: Sequence[str] = DEFAULT_TOOL_NAMES,
 ) -> str:
     narrative = (
         "You are investigating an isolated population of identical "
@@ -242,13 +234,12 @@ def decay_prompt(
         "removes it from the population. You may sample the population "
         "count N and its instantaneous time-rate."
     )
-    return _compose(narrative, observables, tool_names, "N")
+    return _compose(narrative, observables, "N")
 
 
 __all__ = [
-    "DEFAULT_TOOL_NAMES",
+    "TOOLBOX_DESCRIPTION",
     "HOOKE_OBSERVABLES",
-    "HOOKE_TOOL_NAMES",
     "DAMPED_HO_OBSERVABLES",
     "GRAVITY_OBSERVABLES",
     "COULOMB_OBSERVABLES",
