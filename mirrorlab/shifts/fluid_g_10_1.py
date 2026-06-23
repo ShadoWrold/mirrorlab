@@ -126,7 +126,7 @@ CELL = CellSpec(
     domain="fluid", shift="gamma_10_1",
     params_type=FluidGamma101Params, law=law,
     sampler=sampler, validator=validator,
-    output="p2", broken_symmetry="SCALE",
+    output="p2", break_type="ROT",
 )
 register_cell(CELL)
 

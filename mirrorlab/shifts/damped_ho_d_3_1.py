@@ -127,7 +127,7 @@ CELL = CellSpec(
     domain="damped_ho", shift="delta_3_1",
     params_type=DampedHODelta31Params, law=law,
     sampler=sampler, validator=validator,
-    output="a", broken_symmetry="TR",
+    output="a", break_type="TR",
 )
 register_cell(CELL)
 

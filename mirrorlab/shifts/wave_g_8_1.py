@@ -122,7 +122,7 @@ CELL = CellSpec(
     domain="wave", shift="gamma_8_1",
     params_type=WaveGamma81Params, law=law,
     sampler=sampler, validator=validator,
-    output="u", broken_symmetry="SCALE",
+    output="u", break_type="PAR",
 )
 register_cell(CELL)
 

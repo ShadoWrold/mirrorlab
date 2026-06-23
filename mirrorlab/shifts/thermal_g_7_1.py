@@ -15,7 +15,7 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-from mirrorlab.spec import P, CellSpec, register_cell
+from mirrorlab.spec import ProbeSpec, P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 K0_MIN, K0_MAX = 0.1, 50.0
@@ -124,7 +124,8 @@ CELL = CellSpec(
     domain="thermal", shift="gamma_7_1",
     params_type=ThermalGamma71Params, law=law,
     sampler=sampler, validator=validator,
-    output="q", broken_symmetry="ROT",
+    output="q", break_type="ROT",
+    probe_spec=ProbeSpec(kind="rotation", axes=('dx', 'dy', 'dz')),
 )
 register_cell(CELL)
 

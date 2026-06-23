@@ -115,7 +115,7 @@ CELL = CellSpec(
     domain="optics", shift="delta_9_1",
     params_type=OpticsDelta91Params, law=law,
     sampler=sampler, validator=validator,
-    output="T", broken_symmetry="T_TRANS",
+    output="T", break_type="CONS_E",
 )
 register_cell(CELL)
 

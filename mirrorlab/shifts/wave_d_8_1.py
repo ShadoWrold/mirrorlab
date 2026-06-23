@@ -136,7 +136,7 @@ CELL = CellSpec(
     domain="wave", shift="delta_8_1",
     params_type=WaveDelta81Params, law=law,
     sampler=sampler, validator=validator,
-    output="u", broken_symmetry="T_TRANS",
+    output="u", break_type="TR",
 )
 register_cell(CELL)
 

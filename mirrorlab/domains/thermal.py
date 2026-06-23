@@ -56,6 +56,6 @@ def law(inputs, p: ThermalParams) -> float:
 CELL = CellSpec(
     domain="thermal", shift="baseline",
     params_type=ThermalParams, law=law,
-    output="q", broken_symmetry="none",
+    output="q", break_type="none",
 )
 register_cell(CELL)

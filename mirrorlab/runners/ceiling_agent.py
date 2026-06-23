@@ -50,12 +50,12 @@ from mirrorlab.spec import (
 )
 
 
-def broken_symmetry_for(domain_id: str, shift_id: str) -> str:
+def break_type_for(domain_id: str, shift_id: str) -> str:
     """Return the canonical broken-symmetry label (``"none"`` for baselines)."""
     if shift_id == "baseline":
         return "none"
     if _has_cell(domain_id, shift_id):
-        return _get_cell(domain_id, shift_id).broken_symmetry
+        return _get_cell(domain_id, shift_id).break_type
     return "none"
 
 
@@ -87,7 +87,7 @@ def build_submission(scenario: ScenarioInstance) -> Submission:
         "outputs": outputs,
         "params": _declared_params(spec, base),
         "claim_broken_symmetry": (
-            "none" if scenario.shift_id == "baseline" else spec.broken_symmetry
+            "none" if scenario.shift_id == "baseline" else spec.break_type
         ),
     }
     return [entry]
@@ -103,5 +103,5 @@ class CeilingAgent:
 __all__ = [
     "CeilingAgent",
     "build_submission",
-    "broken_symmetry_for",
+    "break_type_for",
 ]

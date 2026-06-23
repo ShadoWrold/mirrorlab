@@ -56,6 +56,6 @@ def law(inputs, p: OpticsParams) -> float:
 CELL = CellSpec(
     domain="optics", shift="baseline",
     params_type=OpticsParams, law=law,
-    output="theta2", broken_symmetry="none",
+    output="theta2", break_type="none",
 )
 register_cell(CELL)

@@ -132,7 +132,7 @@ CELL = CellSpec(
     domain="optics", shift="gamma_9_1",
     params_type=OpticsGamma91Params, law=law,
     sampler=sampler, validator=validator,
-    output="T", broken_symmetry="ROT",
+    output="T", break_type="U1",
 )
 register_cell(CELL)
 

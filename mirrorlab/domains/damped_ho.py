@@ -80,6 +80,6 @@ def law(inputs, p: DampedHOParams) -> float:
 CELL = CellSpec(
     domain="damped_ho", shift="baseline",
     params_type=DampedHOParams, law=law,
-    output="F", broken_symmetry="none",
+    output="F", break_type="none",
 )
 register_cell(CELL)

@@ -178,7 +178,7 @@ CELL = CellSpec(
     domain="gravity", shift="gamma_2_1",
     params_type=GravityGamma21Params, law=law,
     sampler=sampler, validator=validator,
-    output="F", broken_symmetry="ROT",
+    output="F", break_type="ROT",
 )
 register_cell(CELL)
 

@@ -24,7 +24,7 @@ from scipy.integrate import solve_ivp
 
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
-from mirrorlab.spec import CellSpec, P, register_cell
+from mirrorlab.spec import ProbeSpec, CellSpec, P, register_cell
 
 G_DEFAULT = 6.67430e-11
 ALPHA_MIN, ALPHA_MAX = 0.30, 0.60
@@ -148,7 +148,8 @@ CELL = CellSpec(
     domain="gravity", shift="gamma_2_2",
     params_type=GravityGamma22Params, law=law,
     sampler=sampler, validator=validator,
-    output="F", broken_symmetry="SCALE",
+    output="F", break_type="SCALE",
+    probe_spec=ProbeSpec(kind="scale", axes=('r',)),
 )
 register_cell(CELL)
 

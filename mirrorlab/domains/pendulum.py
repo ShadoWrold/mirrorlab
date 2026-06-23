@@ -83,6 +83,6 @@ def law(inputs, p: PendulumParams) -> float:
 CELL = CellSpec(
     domain="pendulum", shift="baseline",
     params_type=PendulumParams, law=law,
-    output="theta_ddot", broken_symmetry="none",
+    output="theta_ddot", break_type="none",
 )
 register_cell(CELL)

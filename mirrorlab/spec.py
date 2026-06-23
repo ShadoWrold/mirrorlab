@@ -144,17 +144,75 @@ GridBuilder = Callable[[Any, int, float], tuple]
 
 
 @dataclass(frozen=True)
-class CellSpec:
-    """Everything one benchmark cell needs, declared once.
+class ProbeSpec:
+    """Which structural probe a broken cell uses, and on which input axes.
 
-    Consumers DERIVE from this instead of holding parallel tables:
-      * registry.make        -> sampler/validator/build
-      * loader grid GT       -> law(inputs, params)
-      * ceiling oracle        -> law(inputs, params_with_cf_overrides)
-      * cf perturbation set   -> law_fields(params_type)
-      * predictor name map    -> predictor_name_map(params_type)
-      * declared params       -> law fields under canonical names
+    The structural-correctness probes (mirrorlab/eval/structural.py) need to
+    know WHICH input variable carries the broken symmetry — parity on `theta`
+    vs `x`, scale on `r` vs `t`, rotation in the (x,y) vs (dx,dy) plane. That
+    is per-cell physics knowledge, so it lives in the CellSpec single source
+    rather than being guessed by the probe.
+
+    kind  : probe selector — "parity" / "time_reversal" / "scale" /
+            "rotation" / "time_translation".
+    axes  : the input-variable name(s) the probe transforms. One name for
+            scalar probes (parity/scale/time_reversal/time_translation), a
+            2- or 3-tuple for rotation (the plane/space it rotates in).
+    note  : optional human note (e.g. why a particular axis was chosen).
+
+    A broken cell with no applicable probe simply leaves CellSpec.probe_spec
+    as None — structural_score then reports applicable=False (honest coverage).
     """
+
+    kind: str
+    axes: Tuple[str, ...]
+    note: str = ""
+
+
+# --------------------------------------------------------------------------
+# Break-type vocabulary (post-mislabel-audit taxonomy)
+# --------------------------------------------------------------------------
+#
+# `break_type` is the single scored label (matched against the model's
+# `claim_broken_symmetry` for the §6.3 bonus, and used to select a structural
+# probe). It outgrew "symmetry" — it now also carries LINEARITY and
+# CONSERVATION breaks — so the field is `break_type`, with a derived,
+# non-scored `break_class` for probe-family routing and analysis grouping.
+# Conservation labels share a `CONS_` prefix so analysis can lump-or-split by
+# prefix; the existing 5 symmetry tokens are byte-identical to pre-audit.
+
+BREAK_CLASS_OF: Dict[str, str] = {
+    "PAR": "SYMMETRY",
+    "TR": "SYMMETRY",
+    "ROT": "SYMMETRY",
+    "SCALE": "SYMMETRY",
+    "T_TRANS": "SYMMETRY",
+    "S_TRANS": "SYMMETRY",      # spatial translation
+    "U1": "SYMMETRY",           # U(1) gauge / polarization phase
+    "CONS_N": "CONSERVATION",   # particle / number
+    "CONS_M": "CONSERVATION",   # mass / stoichiometry
+    "CONS_E": "CONSERVATION",   # energy
+    "LIN": "LINEARITY",         # superposition broken
+    "none": "NONE",
+}
+
+VALID_BREAK_TYPES: frozenset = frozenset(BREAK_CLASS_OF)
+
+
+def break_class_of(break_type: str) -> str:
+    """Map a ``break_type`` token to its family (SYMMETRY / CONSERVATION /
+    LINEARITY / NONE). Unknown tokens raise — a typo'd label should fail loudly
+    rather than silently mis-route a probe or mis-score a claim."""
+    try:
+        return BREAK_CLASS_OF[break_type]
+    except KeyError:
+        raise ValueError(
+            f"unknown break_type {break_type!r}; valid: {sorted(VALID_BREAK_TYPES)}"
+        )
+
+
+@dataclass(frozen=True)
+class CellSpec:
 
     domain: str
     shift: str
@@ -164,16 +222,23 @@ class CellSpec:
     # the formula exists exactly once.
     law: Callable[[Mapping[str, float], Any], float]
     output: str                       # scored observable name (per-cell)
-    broken_symmetry: str              # e.g. "SCALE", "ROT", "T_TRANS"
+    break_type: str              # scored break label; see VALID_BREAK_TYPES
     # Shift cells provide their own sampler/validator; baseline cells are built
     # by the registry factory and leave these None.
     sampler: Optional[Callable[[int], Any]] = None
     validator: Optional[Callable[[Any], bool]] = None
     grid: Optional[GridBuilder] = None  # per-cell grid builder (thin for now)
+    probe_spec: Optional[ProbeSpec] = None  # structural-probe axis declaration
 
     @property
     def key(self) -> Tuple[str, str]:
         return (self.domain, self.shift)
+
+    @property
+    def break_class(self) -> str:
+        """Derived family (SYMMETRY / CONSERVATION / LINEARITY / NONE) — for
+        probe-family routing and analysis grouping; never scored."""
+        return break_class_of(self.break_type)
 
 
 CELL_REGISTRY: Dict[Tuple[str, str], CellSpec] = {}
@@ -241,7 +306,8 @@ def declared_params(spec: "CellSpec", base_params: Any) -> list:
 
 
 __all__ = [
-    "P", "CellSpec", "GridBuilder",
+    "P", "CellSpec", "GridBuilder", "ProbeSpec",
+    "BREAK_CLASS_OF", "VALID_BREAK_TYPES", "break_class_of",
     "CELL_REGISTRY", "register_cell", "get_cell", "has_cell",
     "field_role", "field_canonical", "law_fields", "predictor_name_map",
     "is_fully_tagged", "make_oracle_predictor", "declared_params",

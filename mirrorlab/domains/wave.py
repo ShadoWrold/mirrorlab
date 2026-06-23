@@ -59,6 +59,6 @@ def law(inputs, p: WaveParams) -> float:
 CELL = CellSpec(
     domain="wave", shift="baseline",
     params_type=WaveParams, law=law,
-    output="u", broken_symmetry="none",
+    output="u", break_type="none",
 )
 register_cell(CELL)

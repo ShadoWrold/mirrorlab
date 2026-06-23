@@ -66,6 +66,6 @@ def law(inputs, p: FluidParams) -> float:
 CELL = CellSpec(
     domain="fluid", shift="baseline",
     params_type=FluidParams, law=law,
-    output="p2", broken_symmetry="none",
+    output="p2", break_type="none",
 )
 register_cell(CELL)

@@ -134,7 +134,7 @@ CELL = CellSpec(
     domain="kinetics", shift="delta_11_1",
     params_type=KineticsDelta111Params, law=law,
     sampler=sampler, validator=validator,
-    output="C", broken_symmetry="T_TRANS",
+    output="C", break_type="CONS_M",
 )
 register_cell(CELL)
 

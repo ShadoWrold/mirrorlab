@@ -159,6 +159,6 @@ CELL = CellSpec(
     domain="hooke", shift="gamma_1_1",
     params_type=HookeGamma11Params, law=law,
     sampler=sampler, validator=validator,
-    output="F", broken_symmetry="PAR",
+    output="F", break_type="PAR",
 )
 register_cell(CELL)

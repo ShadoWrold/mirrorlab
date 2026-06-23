@@ -13,7 +13,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P, CellSpec, register_cell
+from mirrorlab.spec import ProbeSpec, P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -115,7 +115,8 @@ CELL = CellSpec(
     domain="pendulum", shift="gamma_4_1",
     params_type=PendulumGamma41Params, law=law,
     sampler=sampler, validator=validator,
-    output="theta_ddot", broken_symmetry="PAR",
+    output="theta_ddot", break_type="PAR",
+    probe_spec=ProbeSpec(kind="parity", axes=('theta',)),
 )
 register_cell(CELL)
 

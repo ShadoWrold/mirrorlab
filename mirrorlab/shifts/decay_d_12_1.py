@@ -107,7 +107,7 @@ CELL = CellSpec(
     domain="decay", shift="delta_12_1",
     params_type=DecayDelta121Params, law=law,
     sampler=sampler, validator=validator,
-    output="N", broken_symmetry="T_TRANS",
+    output="N", break_type="CONS_N",
 )
 register_cell(CELL)
 

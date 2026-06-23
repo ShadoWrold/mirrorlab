@@ -25,7 +25,7 @@ from typing import Dict
 
 import numpy as np
 
-from mirrorlab.spec import P, CellSpec, register_cell
+from mirrorlab.spec import ProbeSpec, P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 KAPPA_MIN, KAPPA_MAX = 3.0, 5.0
@@ -126,7 +126,8 @@ CELL = CellSpec(
     domain="optics", shift="gamma_9_2",
     params_type=OpticsGamma92Params, law=law,
     sampler=sampler, validator=validator,
-    output="theta2", broken_symmetry="PAR",
+    output="theta2", break_type="PAR",
+    probe_spec=ProbeSpec(kind="parity", axes=('theta1',)),
 )
 register_cell(CELL)
 

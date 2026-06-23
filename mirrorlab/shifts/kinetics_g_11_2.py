@@ -15,7 +15,7 @@ from typing import Dict
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P, CellSpec, register_cell
+from mirrorlab.spec import ProbeSpec, P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 
 N_MIN, N_MAX = 1.0, 3.0
@@ -137,7 +137,8 @@ CELL = CellSpec(
     domain="kinetics", shift="gamma_11_2",
     params_type=KineticsGamma112Params, law=law,
     sampler=sampler, validator=validator,
-    output="C", broken_symmetry="T_TRANS",
+    output="C", break_type="SCALE",
+    probe_spec=ProbeSpec(kind="scale", axes=('t',)),
 )
 register_cell(CELL)
 

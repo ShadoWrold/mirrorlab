@@ -88,6 +88,6 @@ def law(inputs, p: CoulombParams) -> float:
 CELL = CellSpec(
     domain="coulomb", shift="baseline",
     params_type=CoulombParams, law=law,
-    output="F", broken_symmetry="none",
+    output="F", break_type="none",
 )
 register_cell(CELL)

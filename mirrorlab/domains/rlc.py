@@ -81,6 +81,6 @@ def law(inputs, p: RLCParams) -> float:
 CELL = CellSpec(
     domain="rlc", shift="baseline",
     params_type=RLCParams, law=law,
-    output="didt", broken_symmetry="none",
+    output="didt", break_type="none",
 )
 register_cell(CELL)

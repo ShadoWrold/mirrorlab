@@ -69,6 +69,6 @@ def law(inputs, p: DecayParams) -> float:
 CELL = CellSpec(
     domain="decay", shift="baseline",
     params_type=DecayParams, law=law,
-    output="N", broken_symmetry="none",
+    output="N", break_type="none",
 )
 register_cell(CELL)

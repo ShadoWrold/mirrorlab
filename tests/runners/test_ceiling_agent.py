@@ -7,7 +7,7 @@ import pytest
 from mirrorlab.eval.dimensional import parse_dim
 from mirrorlab.runners.ceiling_agent import (
     CeilingAgent,
-    broken_symmetry_for,
+    break_type_for,
     build_submission,
 )
 from mirrorlab.runners.ceiling_sweep import all_pairs
@@ -68,7 +68,7 @@ def test_all_pairs_produce_valid_submission():
                 pred(**inputs)  # must not raise
 
 
-def test_broken_symmetry_baseline_is_none():
-    assert broken_symmetry_for("hooke", "baseline") == "none"
-    assert broken_symmetry_for("hooke", "gamma_1_1") == "PAR"
-    assert broken_symmetry_for("gravity", "delta_2_1") == "T_TRANS"
+def test_break_type_baseline_is_none():
+    assert break_type_for("hooke", "baseline") == "none"
+    assert break_type_for("hooke", "gamma_1_1") == "PAR"
+    assert break_type_for("gravity", "delta_2_1") == "T_TRANS"

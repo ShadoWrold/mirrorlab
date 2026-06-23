@@ -165,7 +165,7 @@ CELL = CellSpec(
     domain="rlc", shift="gamma_6_2",
     params_type=RLCGamma62Params, law=law,
     sampler=sampler, validator=validator,
-    output="didt", broken_symmetry="ROT",
+    output="didt", break_type="TR",
 )
 register_cell(CELL)
 

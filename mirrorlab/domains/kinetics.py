@@ -94,6 +94,6 @@ def law(inputs, p: KineticsParams) -> float:
 CELL = CellSpec(
     domain="kinetics", shift="baseline",
     params_type=KineticsParams, law=law,
-    output="C", broken_symmetry="none",
+    output="C", break_type="none",
 )
 register_cell(CELL)

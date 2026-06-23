@@ -143,7 +143,7 @@ CELL = CellSpec(
     domain="kinetics", shift="gamma_11_1",
     params_type=KineticsGamma111Params, law=law,
     sampler=sampler, validator=validator,
-    output="C", broken_symmetry="SCALE",
+    output="C", break_type="SCALE",
 )
 register_cell(CELL)
 

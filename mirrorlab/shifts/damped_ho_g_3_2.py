@@ -140,7 +140,7 @@ CELL = CellSpec(
     domain="damped_ho", shift="gamma_3_2",
     params_type=DampedHOGamma32Params, law=law,
     sampler=sampler, validator=validator,
-    output="a", broken_symmetry="T_TRANS",
+    output="a", break_type="T_TRANS",
 )
 register_cell(CELL)
 

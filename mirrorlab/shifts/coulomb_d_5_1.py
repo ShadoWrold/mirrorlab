@@ -157,7 +157,7 @@ CELL = CellSpec(
     domain="coulomb", shift="delta_5_1",
     params_type=CoulombDelta51Params, law=law,
     sampler=sampler, validator=validator,
-    output="F", broken_symmetry="T_TRANS",
+    output="F", break_type="TR",
 )
 register_cell(CELL)
 

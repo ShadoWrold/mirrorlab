@@ -175,7 +175,7 @@ CELL = CellSpec(
     domain="coulomb", shift="gamma_5_1",
     params_type=CoulombGamma51Params, law=law,
     sampler=sampler, validator=validator,
-    output="F", broken_symmetry="ROT",
+    output="F", break_type="ROT",
 )
 register_cell(CELL)
 

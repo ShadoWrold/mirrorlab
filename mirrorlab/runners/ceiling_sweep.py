@@ -21,7 +21,7 @@ import sys
 import time
 from typing import Any, Dict, List
 
-from mirrorlab.runners.ceiling_agent import CeilingAgent, broken_symmetry_for
+from mirrorlab.runners.ceiling_agent import CeilingAgent, break_type_for
 from mirrorlab.runners.sprint3_pilot import score_against_scenario
 from mirrorlab.scenarios.loader import load as load_scenario
 
@@ -51,7 +51,7 @@ def run_sweep(seed: int = 0) -> Dict[str, Any]:
     pairs = all_pairs()
     t0 = time.monotonic()
     for domain_id, shift_id in pairs:
-        sym = broken_symmetry_for(domain_id, shift_id)
+        sym = break_type_for(domain_id, shift_id)
         try:
             scenario = load_scenario(domain_id, shift_id, seed=seed)
             submission = agent.run(scenario)

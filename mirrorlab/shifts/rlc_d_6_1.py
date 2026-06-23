@@ -172,7 +172,7 @@ CELL = CellSpec(
     domain="rlc", shift="delta_6_1",
     params_type=RLCDelta61Params, law=law,
     sampler=sampler, validator=validator,
-    output="didt", broken_symmetry="T_TRANS",
+    output="didt", break_type="T_TRANS",
 )
 register_cell(CELL)
 

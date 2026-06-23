@@ -134,7 +134,7 @@ CELL = CellSpec(
     domain="gravity", shift="delta_2_1",
     params_type=GravityDelta21Params, law=law,
     sampler=sampler, validator=validator,
-    output="F", broken_symmetry="T_TRANS",
+    output="F", break_type="T_TRANS",
 )
 register_cell(CELL)
 

@@ -89,6 +89,6 @@ def law(inputs, p: GravityParams) -> float:
 CELL = CellSpec(
     domain="gravity", shift="baseline",
     params_type=GravityParams, law=law,
-    output="F", broken_symmetry="none",
+    output="F", break_type="none",
 )
 register_cell(CELL)

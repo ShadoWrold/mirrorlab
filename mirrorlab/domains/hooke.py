@@ -171,6 +171,6 @@ def law(inputs, p: HookeParams) -> float:
 CELL = CellSpec(
     domain="hooke", shift="baseline",
     params_type=HookeParams, law=law,
-    output="F", broken_symmetry="none",
+    output="F", break_type="none",
 )
 register_cell(CELL)

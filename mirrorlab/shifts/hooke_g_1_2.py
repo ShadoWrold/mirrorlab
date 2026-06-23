@@ -14,7 +14,7 @@ from typing import Dict, Tuple
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from mirrorlab.spec import P, CellSpec, register_cell
+from mirrorlab.spec import ProbeSpec, P, CellSpec, register_cell
 from mirrorlab.shifts import ShiftImpl
 from mirrorlab.shifts._util import loguniform
 
@@ -163,7 +163,8 @@ CELL = CellSpec(
     domain="hooke", shift="gamma_1_2",
     params_type=HookeGamma12Params, law=law,
     sampler=sampler, validator=validator,
-    output="F", broken_symmetry="ROT",
+    output="F", break_type="ROT",
+    probe_spec=ProbeSpec(kind="rotation", axes=('x', 'y')),
 )
 register_cell(CELL)
 

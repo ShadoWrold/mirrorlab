@@ -134,7 +134,7 @@ CELL = CellSpec(
     domain="decay", shift="gamma_12_1",
     params_type=DecayGamma121Params, law=law,
     sampler=sampler, validator=validator,
-    output="N", broken_symmetry="T_TRANS",
+    output="N", break_type="LIN",
 )
 register_cell(CELL)
 

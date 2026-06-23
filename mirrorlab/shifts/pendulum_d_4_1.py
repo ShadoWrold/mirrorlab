@@ -134,7 +134,7 @@ CELL = CellSpec(
     domain="pendulum", shift="delta_4_1",
     params_type=PendulumDelta41Params, law=law,
     sampler=sampler, validator=validator,
-    output="theta_ddot", broken_symmetry="T_TRANS",
+    output="theta_ddot", break_type="T_TRANS",
 )
 register_cell(CELL)
 

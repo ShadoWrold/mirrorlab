@@ -126,7 +126,7 @@ CELL = CellSpec(
     domain="thermal", shift="delta_7_1",
     params_type=ThermalDelta71Params, law=law,
     sampler=sampler, validator=validator,
-    output="T_a", broken_symmetry="T_TRANS",
+    output="T_a", break_type="TR",
 )
 register_cell(CELL)
 

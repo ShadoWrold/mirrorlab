@@ -28,7 +28,7 @@ import sys
 import time
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
-from mirrorlab.runners.ceiling_agent import broken_symmetry_for
+from mirrorlab.runners.ceiling_agent import break_type_for
 from mirrorlab.runners.sprint3_pilot import score_against_scenario
 from mirrorlab.scenarios.loader import load as load_scenario
 
@@ -48,7 +48,7 @@ def rescore_entry(entry: Mapping[str, Any]) -> Optional[float]:
     except Exception as exc:  # noqa: BLE001
         log.warning("rescore: load_scenario(%s/%s) failed: %s", domain_id, shift_id, exc)
         return None
-    gt_sym = broken_symmetry_for(domain_id, shift_id) if shift_id != "baseline" else "none"
+    gt_sym = break_type_for(domain_id, shift_id) if shift_id != "baseline" else "none"
     try:
         return float(score_against_scenario(scenario, submission, gt_symmetry=gt_sym))
     except Exception as exc:  # noqa: BLE001

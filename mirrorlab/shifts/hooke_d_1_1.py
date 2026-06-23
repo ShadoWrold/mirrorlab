@@ -126,7 +126,7 @@ CELL = CellSpec(
     domain="hooke", shift="delta_1_1",
     params_type=HookeDelta11Params, law=law,
     sampler=sampler, validator=validator,
-    output="F", broken_symmetry="TR",
+    output="F", break_type="TR",
 )
 register_cell(CELL)
 
