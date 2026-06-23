@@ -32,6 +32,36 @@ Scope (Phase 1)
 - A cell whose broken symmetry has no matching probe (e.g. T_TRANS on a
   charge-pair input with no spatial/velocity axis) reports ``applicable=False``
   rather than fabricating a metric. Coverage is reported honestly.
+
+Why CONSERVATION breaks (CONS_*) carry no probe — by design, not omission
+-------------------------------------------------------------------------
+The structural axis works because a symmetry break is ORTHOGONAL to the
+scored numbers: a predictor can match f pointwise yet violate the symmetry
+under an input transform (parity x↦−x, time-reversal v↦−v, …), and the probe
+asks the question numeric scoring does not. A conservation break is not
+orthogonal — the three CONS_* cells (decay δ-12-1 N_A+N_B, kinetics δ-11-1
+C_A+C_B, optics δ-9-1 T) deliberately fold the (non-)conserved quantity INTO
+the scored scalar itself (their own docstrings: "scoring C_A alone makes the
+cell dead"). So "right numbers, wrong conservation" cannot occur: any
+predictor that fits the scored total has, by construction, already learned
+the leak coefficient (empirically, a 3-param a+b·exp(−ct) fit to decay's
+total reaches 3e-14 pointwise error AND recovers b = ξ·N_A0 exactly). There
+is no residual the numeric stage hasn't already seen.
+
+Two probe designs were tried and rejected empirically (2026-06-23):
+  * conservation residual d/dt(total) — identical for cheat and oracle once
+    the total is fit; zero orthogonal signal.
+  * asymptotic-plateau extrapolation (does the predictor's t→∞ limit fall
+    short of the initial total?) — a strong cheat already extrapolates to the
+    correct short-fall plateau (842085, exact), while a naive
+    conserved-total cheat that the plateau probe COULD catch is already caught
+    by numeric scoring (1.9% in-domain error). The probe's discrimination
+    fully overlaps numeric's — no independent value.
+Genuinely probing conservation structure would require a MULTI-CHANNEL scoring
+contract (predictor emits N_A and N_B separately so the probe can check the
+A↦B transfer balance). That changes the submission schema / agent prompt /
+numeric core and collides with the frozen ``claim_broken_symmetry`` contract —
+out of scope. CONS_* therefore leave ``probe_spec=None`` and report N/A.
 """
 
 from __future__ import annotations
