@@ -74,11 +74,19 @@ class Run:
     cost_wall: float
     terminated_by: str
     saturated: bool
+    s_single: Optional[float] = None
+
+    @property
+    def _solve_score(self) -> Optional[float]:
+        """Score used for the solve decision. Prefer the single-submission
+        score (exhaustion-proof primary metric); fall back to s_scen / best-of-k
+        for sweeps that predate the dual metric."""
+        return self.s_single if self.s_single is not None else self.s_scen
 
     @property
     def solved(self) -> bool:
-        return bool(self.ok and self.s_scen is not None
-                    and self.s_scen >= SOLVE_THRESHOLD)
+        s = self._solve_score
+        return bool(self.ok and s is not None and s >= SOLVE_THRESHOLD)
 
     @property
     def cell(self) -> Tuple[str, str]:
@@ -115,6 +123,7 @@ def load_runs(path: str) -> Tuple[List[Run], Dict[str, Any]]:
             cost_wall=float(e.get("elapsed_s", 0.0)),
             terminated_by=str(e.get("terminated_by", "unknown")),
             saturated=_derive_saturated(e),
+            s_single=(None if e.get("s_single") is None else float(e["s_single"])),
         ))
     return runs, meta
 

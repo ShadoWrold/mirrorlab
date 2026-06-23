@@ -139,3 +139,72 @@ def test_bonus_case_insensitive_and_baseline_none():
 
 def test_empty_submission_scores_zero():
     assert score_submission([], target_dim=DIM_FORCE, test_grids={"a": []}) == 0.0
+
+
+# ---- Post-debate hardening: bonus binds to best entry; dual metric ---------
+
+def test_bonus_free_rider_closed():
+    """A correct symmetry claim on a NON-best entry must NOT earn the bonus.
+
+    The old "any entry" rule let a multi-submission farm +b by listing a
+    throwaway entry with the right label. Now the bonus binds to the
+    best-scoring entry only.
+    """
+    sim = make("hooke", "gamma_1_1", seed=3)
+    grids = _grids(sim, x_window=sim.params.x_scale * 0.5)
+    # Best entry = the good fit (no claim). A junk entry carries the correct
+    # "PAR" label but scores ~0, so it must not unlock the bonus.
+    good = _entry(sim.params.k)                       # best, no claim
+    junk = _entry(sim.params.k * 100, claim="PAR")    # wrong fit, right label
+    base = score_submission(
+        [good], target_dim=DIM_FORCE, test_grids=grids, gt_symmetry="PAR",
+    )
+    farmed = score_submission(
+        [good, junk], target_dim=DIM_FORCE, test_grids=grids, gt_symmetry="PAR",
+    )
+    # No free bonus: farmed = base × shotgun(2 entries) and nothing added.
+    assert farmed < base                       # only the shotgun penalty bites
+    assert math.isclose(farmed, base * (1 - RHO_DEFAULT), rel_tol=1e-6)
+
+
+def test_bonus_awarded_when_best_entry_claims_correctly():
+    """The bonus still fires when it's the BEST entry naming the symmetry."""
+    sim = make("hooke", "gamma_1_1", seed=3)
+    grids = _grids(sim, x_window=sim.params.x_scale * 0.5)
+    good_no_claim = score_submission(
+        [_entry(sim.params.k)],
+        target_dim=DIM_FORCE, test_grids=grids, gt_symmetry="PAR",
+    )
+    good_claim = score_submission(
+        [_entry(sim.params.k, claim="PAR")],
+        target_dim=DIM_FORCE, test_grids=grids, gt_symmetry="PAR",
+    )
+    assert math.isclose(good_claim - good_no_claim, BONUS_DEFAULT, rel_tol=1e-9)
+
+
+def test_dual_metric_single_vs_best_of_k():
+    """score_submission_detail exposes both views; single ignores extra entries
+    and the shotgun penalty, best_of_k matches the legacy float."""
+    from mirrorlab.eval.scoring import score_submission_detail
+
+    sim = make("hooke", "baseline", seed=1)
+    grids = _grids(sim)
+    # First entry is the good fit; four junk entries follow.
+    submission = [_entry(sim.params.k, law_id="good")]
+    submission += [_entry(sim.params.k * 100, law_id=f"junk{i}") for i in range(4)]
+    detail = score_submission_detail(
+        submission, target_dim=DIM_FORCE, test_grids=grids,
+    )
+    legacy = score_submission(submission, target_dim=DIM_FORCE, test_grids=grids)
+
+    # best_of_k matches the legacy float API.
+    assert math.isclose(detail.best_of_k, legacy, rel_tol=1e-9)
+    assert detail.n_entries == 5
+    # single-submission scores entry[0] alone — no shotgun penalty — so it is
+    # strictly higher than best_of_k (which paid the 5-entry penalty).
+    assert detail.single_submission > detail.best_of_k
+    assert detail.single_submission > 0.95
+    # best_of_k = single × shotgun(5) here since entry[0] is also the best.
+    assert math.isclose(detail.best_of_k,
+                        detail.single_submission * 0.80, rel_tol=1e-6)
+

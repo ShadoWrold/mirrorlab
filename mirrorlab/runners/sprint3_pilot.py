@@ -47,7 +47,7 @@ from mirrorlab.attacker.runner import (
     AttackReport,
     _aggregate,
 )
-from mirrorlab.eval.scoring import score_submission
+from mirrorlab.eval.scoring import ScoreDetail, score_submission, score_submission_detail
 from mirrorlab.runners.llm_agent import AgentTrace, LLMAgent
 from mirrorlab.runners.openai_client import (
     DEFAULT_API_KEY_ENV,
@@ -324,6 +324,35 @@ def score_against_scenario(
             gt_symmetry=gt_symmetry,
             canonical_inputs=canonical,
         )
+    )
+
+
+def score_against_scenario_detail(
+    scenario: ScenarioInstance,
+    submission: List[Mapping[str, Any]],
+    *,
+    gt_symmetry: Optional[str] = None,
+) -> ScoreDetail:
+    """Both scoring views (single-submission + best-of-k) for one scenario.
+
+    Mirrors ``score_against_scenario`` but returns the dual-metric
+    ``ScoreDetail`` so sweeps can record the exhaustion-proof single-submission
+    score alongside the legacy best-of-k. Returns an all-zero detail when the
+    scenario has no target dim or empty grids.
+    """
+    target = _target_dim(scenario)
+    if target is None:
+        return ScoreDetail(best_of_k=0.0, single_submission=0.0, n_entries=0)
+    packed = pack_grids(scenario)
+    if not packed:
+        return ScoreDetail(best_of_k=0.0, single_submission=0.0, n_entries=0)
+    canonical = list((scenario.dim_signature.get("inputs") or {}).keys())
+    return score_submission_detail(
+        submission,
+        target_dim=target,
+        test_grids=packed,
+        gt_symmetry=gt_symmetry,
+        canonical_inputs=canonical,
     )
 
 

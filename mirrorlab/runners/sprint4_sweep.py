@@ -47,7 +47,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from mirrorlab.runners.llm_agent import AgentTrace, LLMAgent
-from mirrorlab.runners.sprint3_pilot import score_against_scenario
+from mirrorlab.runners.sprint3_pilot import score_against_scenario_detail
 from mirrorlab.scenarios.loader import load as load_scenario
 
 log = logging.getLogger(__name__)
@@ -152,12 +152,15 @@ class CellResult:
     submission: List[Dict[str, Any]] = field(default_factory=list)
     parse_errors: int = 0
     saturated: bool = False  # hit tool/wall ceiling without submitting
+    s_single: Optional[float] = None  # single-submission score (primary metric)
     error: Optional[str] = None
 
     def as_dict(self) -> Dict[str, Any]:
         d = asdict(self)
         if self.s_scen is not None:
             d["s_scen"] = round(float(self.s_scen), 6)
+        if self.s_single is not None:
+            d["s_single"] = round(float(self.s_single), 6)
         d["elapsed_s"] = round(float(self.elapsed_s), 4)
         return d
 
@@ -225,7 +228,7 @@ def _run_one_cell(
         )
 
     try:
-        s_scen = score_against_scenario(scenario, submission)
+        detail = score_against_scenario_detail(scenario, submission)
     except Exception as exc:  # noqa: BLE001
         return CellResult(
             model=spec.model, provider=spec.provider,
@@ -243,7 +246,7 @@ def _run_one_cell(
     return CellResult(
         model=spec.model, provider=spec.provider,
         domain_id=domain_id, shift_id=shift_id, tier=tier, seed=seed,
-        ok=True, s_scen=float(s_scen),
+        ok=True, s_scen=float(detail.best_of_k),
         n_tool_calls=trace.tool_calls, n_llm_turns=trace.llm_turns,
         elapsed_s=time.monotonic() - t0,
         terminated_by=trace.terminated_by,
@@ -251,6 +254,7 @@ def _run_one_cell(
         submission=[dict(e) for e in submission[:5]],
         parse_errors=trace.parse_errors,
         saturated=trace.saturated,
+        s_single=float(detail.single_submission),
     )
 
 
@@ -276,6 +280,7 @@ def _load_resume(path: str) -> List[CellResult]:
             submission=list(e.get("submission", [])),
             parse_errors=int(e.get("parse_errors", 0)),
             saturated=bool(e.get("saturated", str(e.get("terminated_by", "")) in ("budget", "wall"))),
+            s_single=(None if e.get("s_single") is None else float(e["s_single"])),
             error=e.get("error"),
         ))
     return out
