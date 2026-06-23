@@ -255,6 +255,7 @@ def _run_one_cell(
         parse_errors=trace.parse_errors,
         saturated=trace.saturated,
         s_single=float(detail.single_submission),
+        error=trace.error_detail,
     )
 
 

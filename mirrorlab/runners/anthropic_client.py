@@ -56,6 +56,10 @@ class _TC:
 class _Msg:
     content: str = ""
     tool_calls: List[_TC] = field(default_factory=list)
+    # Anthropic stop_reason, propagated so the agent loop can tell a genuine
+    # "no action" turn apart from a thinking-block that got cut off at
+    # max_tokens (which yields content="" + tool_calls=[] but is NOT terminal).
+    stop_reason: Optional[str] = None
 
 
 # ---- Schema / message conversion --------------------------------------
@@ -156,7 +160,11 @@ def anthropic_response_to_openai_message(payload: Mapping[str, Any]) -> _Msg:
                 ),
             ))
         # thinking / redacted_thinking blocks: ignore for now
-    return _Msg(content="".join(text_chunks), tool_calls=tool_calls)
+    return _Msg(
+        content="".join(text_chunks),
+        tool_calls=tool_calls,
+        stop_reason=payload.get("stop_reason"),
+    )
 
 
 # ---- Client wrapper ----------------------------------------------------
@@ -169,7 +177,12 @@ class AnthropicClient:
     base_url: str = DEFAULT_BASE_URL
     api_key: str = DEFAULT_API_KEY
     timeout: float = 60.0
-    max_tokens: int = 4096
+    # Claude on :4141 runs with extended thinking ON by default; thinking
+    # tokens count against max_tokens. At 4096 a long final-answer turn gets
+    # truncated mid-thinking (stop_reason=max_tokens) before any text/tool_use
+    # block is emitted, which the harness then mis-reads as an empty turn. 16k
+    # leaves ample room for thinking + the answer. See [[llm_api_endpoint]].
+    max_tokens: int = 16000
     anthropic_version: str = ANTHROPIC_VERSION
 
     @classmethod

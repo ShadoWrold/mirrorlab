@@ -126,6 +126,20 @@ def test_response_conversion_ignores_thinking_blocks():
     assert msg.content == "the answer"
 
 
+def test_response_conversion_propagates_stop_reason():
+    # A turn cut off mid-thinking: only a thinking block, no text/tool_use,
+    # stop_reason=max_tokens. The converted message must carry stop_reason so
+    # the agent loop can tell this apart from a genuine empty turn.
+    payload = {
+        "content": [{"type": "thinking", "thinking": "long reasoning..."}],
+        "stop_reason": "max_tokens",
+    }
+    msg = anthropic_response_to_openai_message(payload)
+    assert msg.content == ""
+    assert msg.tool_calls == []
+    assert msg.stop_reason == "max_tokens"
+
+
 # ---- Client.chat round-trip with patched _post -------------------------
 
 def test_chat_sends_anthropic_shaped_body_and_parses_tool_use():

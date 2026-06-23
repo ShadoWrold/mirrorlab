@@ -56,6 +56,7 @@ class FakeToolCall:
 class FakeMsg:
     content: str = ""
     tool_calls: List[FakeToolCall] = field(default_factory=list)
+    stop_reason: str = None
 
 
 def _tc(call_id: str, name: str, args: Mapping[str, Any]) -> FakeToolCall:
@@ -239,6 +240,63 @@ def test_default_budgets_match_cal7():
     agent = LLMAgent(llm_call=lambda m, t: FakeMsg())
     assert agent.max_tool_calls == 30
     assert agent.max_wall_seconds == 60
+
+
+# ---- Truncated-thinking handling (Claude :4141 max_tokens cut-off) ------
+
+def test_truncated_thinking_turn_recovers_and_submits():
+    """A turn cut off mid-thinking (no text, no tool_use, stop_reason=
+    max_tokens) must NOT be read as a failed submission. The loop nudges and a
+    later real submit succeeds."""
+    scenario = load_scenario("hooke", "baseline", seed=0)
+    responses = [
+        FakeMsg(content="", stop_reason="max_tokens"),          # truncated
+        FakeMsg(tool_calls=[_tc("c1", SUBMIT_TOOL,
+                                {"submission": VALID_SUBMISSION})]),
+    ]
+    agent = LLMAgent(llm_call=_scripted(responses), fallback_to_stub=False)
+    sub, trace = agent.run_with_trace(scenario)
+    assert trace.terminated_by == "submit"
+    assert trace.parse_errors == 0          # truncation is NOT a parse error
+    assert len(sub) == 1
+
+
+def test_repeated_truncation_is_diagnosable_not_parse_error():
+    """If every turn truncates mid-thinking, the run ends in a diagnosable
+    max_tokens_truncated state, not a fabricated parse_error."""
+    scenario = load_scenario("hooke", "baseline", seed=0)
+    looper = lambda messages, tools: FakeMsg(content="", stop_reason="max_tokens")
+    agent = LLMAgent(llm_call=looper, fallback_to_stub=False)
+    sub, trace = agent.run_with_trace(scenario)
+    assert trace.terminated_by == "max_tokens_truncated"
+    assert trace.error_detail and "max_tokens" in trace.error_detail
+    assert sub == []
+
+
+def test_budget_soft_landing_forces_submit_before_cliff():
+    """Within the safety margin of the tool-call ceiling, the loop injects a
+    one-shot 'submit now' nudge. A model that then submits should land a
+    submission rather than burning the whole budget to a fallback."""
+    scenario = load_scenario("hooke", "baseline", seed=0)
+    state = {"forced_seen": False}
+
+    def llm_call(messages, tools):
+        # If the soft-landing nudge has been injected, submit.
+        if any(m.get("role") == "user" and "almost out of budget"
+               in str(m.get("content", "")) for m in messages):
+            state["forced_seen"] = True
+            return FakeMsg(tool_calls=[_tc("sub", SUBMIT_TOOL,
+                                           {"submission": VALID_SUBMISSION})])
+        return FakeMsg(tool_calls=[_tc(f"c{len(messages)}",
+                                       mangle_name("measure.observable"),
+                                       {"name": "x", "t": 0.1})])
+
+    agent = LLMAgent(llm_call=llm_call, max_tool_calls=5,
+                     max_wall_seconds=60, fallback_to_stub=False)
+    sub, trace = agent.run_with_trace(scenario)
+    assert state["forced_seen"]            # nudge fired before the cliff
+    assert trace.terminated_by == "submit"
+    assert len(sub) == 1
 
 
 # ---- Prompt-vs-runtime budget invariant -------------------------------

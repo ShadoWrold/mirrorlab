@@ -51,6 +51,9 @@ log = logging.getLogger(__name__)
 # Bounded retry for transient proxy/network drops on the per-turn LLM call.
 _LLM_MAX_RETRIES = 3
 _LLM_RETRY_BASE_S = 0.5
+# How many times to nudge past a max_tokens-truncated thinking turn before
+# giving up with terminated_by="max_tokens_truncated".
+_MAX_TRUNCATION_RETRIES = 2
 
 Submission = List[Dict[str, Any]]
 
@@ -115,6 +118,17 @@ def _msg_content(msg: Any) -> str:
     return str(getattr(msg, "content", "") or "")
 
 
+def _msg_stop_reason(msg: Any) -> Optional[str]:
+    """Anthropic ``stop_reason`` if the client exposed it, else None.
+
+    Only the AnthropicClient sets this; OpenAI messages have no such field, so
+    callers must treat None as "unknown" (the legacy path), never as a signal.
+    """
+    if isinstance(msg, Mapping):
+        return msg.get("stop_reason")
+    return getattr(msg, "stop_reason", None)
+
+
 def _tool_call_name(tc: Any) -> str:
     fn = tc["function"] if isinstance(tc, Mapping) else getattr(tc, "function", tc)
     return fn["name"] if isinstance(fn, Mapping) else getattr(fn, "name", "")
@@ -132,10 +146,22 @@ def _tool_call_id(tc: Any) -> str:
 
 
 def _assistant_message_payload(msg: Any) -> Dict[str, Any]:
-    """Normalize a model message to the dict shape OpenAI expects on echo-back."""
+    """Normalize a model message to the dict shape the proxy expects on echo-back.
+
+    Anthropic-format proxies (the claude/gemini upstreams on :4141) reject a
+    message whose text content block is empty ("messages: text content blocks
+    must be non-empty", HTTP 400). The OpenAI surface tolerates ``content=""``;
+    Anthropic does not. Claude frequently returns a pure tool-call turn with no
+    text, so we must NOT echo back ``content: ""``: when the turn carries tool
+    calls we omit ``content`` entirely (the tool_calls are the payload); when it
+    has neither text nor tool calls (degenerate) we fall back to a single space
+    so the block is non-empty.
+    """
     content = _msg_content(msg)
     tool_calls = _extract_tool_calls(msg)
-    payload: Dict[str, Any] = {"role": "assistant", "content": content}
+    payload: Dict[str, Any] = {"role": "assistant"}
+    if content:
+        payload["content"] = content
     if tool_calls:
         payload["tool_calls"] = [
             {
@@ -148,6 +174,8 @@ def _assistant_message_payload(msg: Any) -> Dict[str, Any]:
             }
             for tc in tool_calls
         ]
+    elif not content:
+        payload["content"] = "(no text)"  # neither text nor tool calls: keep block non-whitespace
     return payload
 
 
@@ -185,6 +213,10 @@ class AgentTrace:
     parse_errors: int = 0
     raw_submission_text: Optional[str] = None
     messages: List[Dict[str, Any]] = field(default_factory=list)
+    # Populated on terminated_by=="llm_error": the underlying proxy/network
+    # exception text, so infra failures (e.g. an intermittently-down upstream)
+    # are diagnosable from the sweep JSON post-hoc instead of only the live log.
+    error_detail: Optional[str] = None
 
     @property
     def saturated(self) -> bool:
@@ -269,6 +301,8 @@ class LLMAgent:
         ]
         deadline = time.monotonic() + float(self.max_wall_seconds)
         parse_retries = 0
+        truncation_retries = 0
+        submit_forced = False
 
         while True:
             # Wall-clock budget check.
@@ -310,6 +344,7 @@ class LLMAgent:
                 log.error("LLM call failed (turn %d) after %d attempts: %s",
                           trace.llm_turns, _LLM_MAX_RETRIES + 1, last_exc)
                 trace.terminated_by = "llm_error"
+                trace.error_detail = f"{type(last_exc).__name__}: {last_exc}"[:500]
                 trace.elapsed_s = self._elapsed(deadline)
                 return self._finalize(scenario, trace, partial_text=None), trace
             trace.llm_turns += 1
@@ -321,6 +356,39 @@ class LLMAgent:
             # bare-JSON submission out of the content as a courtesy.
             if not tool_calls:
                 text = _msg_content(msg)
+
+                # Truncated thinking turn: Claude on :4141 runs with extended
+                # thinking, and if a turn is cut off at max_tokens mid-thinking
+                # it returns NO text and NO tool_use (a pure thinking block that
+                # the client drops) — content="" + stop_reason="max_tokens".
+                # That is NOT a terminal "no answer" turn; treat it as a
+                # transient truncation: nudge Claude to act within the token
+                # budget and retry, distinct from a parse_error. The assistant
+                # turn is NOT echoed back (an empty assistant block is invalid
+                # to the proxy and carries no information).
+                if (not text and _msg_stop_reason(msg) == "max_tokens"
+                        and truncation_retries < _MAX_TRUNCATION_RETRIES):
+                    truncation_retries += 1
+                    messages.append({
+                        "role": "user",
+                        "content": (
+                            "Your previous turn was cut off before any action. "
+                            "Keep your reasoning brief and, in this turn, either "
+                            "call a tool or call `submit_answer` now."
+                        ),
+                    })
+                    continue
+                if not text and _msg_stop_reason(msg) == "max_tokens":
+                    # Exhausted truncation retries → diagnosable terminal state,
+                    # not a fabricated parse_error.
+                    trace.terminated_by = "max_tokens_truncated"
+                    trace.error_detail = (
+                        "repeated max_tokens truncation mid-thinking; raise "
+                        "AnthropicClient.max_tokens"
+                    )
+                    trace.elapsed_s = self._elapsed(deadline)
+                    return self._finalize(scenario, trace, partial_text=None), trace
+
                 parsed = _try_parse_submission(text)
                 if parsed is not None:
                     trace.terminated_by = "submit"
@@ -399,6 +467,30 @@ class LLMAgent:
             if terminated:
                 trace.elapsed_s = self._elapsed(deadline)
                 return self._finalize(scenario, trace, partial_text=None), trace
+
+            # Budget soft-landing: some models (Claude with extended thinking)
+            # keep probing and never converge to a submission, burning the
+            # whole budget. Fire a one-shot forceful "submit now" once EITHER
+            # ceiling is near — the tool-call count OR the wall clock. Claude's
+            # thinking turns are slow, so it tends to hit the wall (e.g. 44
+            # tool calls in 600s) long before the tool-call ceiling; keying the
+            # nudge only on tool count missed that. This is harness-level (not
+            # in the shared system prompt) so it does not bias models that
+            # already submit on their own.
+            wall_left = deadline - time.monotonic()
+            near_tool_cap = trace.tool_calls >= max(1, self.max_tool_calls - 3)
+            near_wall = wall_left <= max(30.0, 0.15 * float(self.max_wall_seconds))
+            if not submit_forced and (near_tool_cap or near_wall):
+                submit_forced = True
+                messages.append({
+                    "role": "user",
+                    "content": (
+                        "You are almost out of budget. Stop probing now and "
+                        "call `submit_answer` this turn with your best "
+                        "candidate law(s). Do not make any more measurement or "
+                        "analysis calls."
+                    ),
+                })
 
     def _elapsed(self, deadline: float) -> float:
         return float(self.max_wall_seconds) - max(0.0, deadline - time.monotonic())
