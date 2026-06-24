@@ -51,11 +51,17 @@ class ScoreDetail:
                          submission-strategy contamination; the primary metric
                          for single-law cells.
     n_entries          : number of entries actually scored (post-cap).
+    captured_fraction  : the structural-probe captured_fraction of the
+                         bonus-bearing entry (Phase 2). None when no spec was
+                         supplied or the cell has no applicable probe (the
+                         bonus then falls back to the string-match rule). It is
+                         recorded for observability even when it gates the bonus.
     """
 
     best_of_k: float
     single_submission: float
     n_entries: int
+    captured_fraction: Optional[float] = None
 
 
 def _entry_score(
@@ -74,6 +80,30 @@ def _claim_matches(e: Mapping[str, Any], gt_symmetry: Optional[str]) -> bool:
         return False
     claim = e.get("claim_broken_symmetry")
     return claim is not None and str(claim).strip().upper() == gt_symmetry.strip().upper()
+
+
+def _entry_captured_fraction(
+    entry: Mapping[str, Any], spec: Any, base_params: Any, test_grids: TestGrids
+) -> Optional[float]:
+    """Structural captured_fraction of one entry's predictor (Phase 2).
+
+    Materializes the entry's predictor and runs the cell's structural probe to
+    measure how much of the true broken-symmetry structure it actually
+    reproduces. Returns None when the cell has no applicable probe (so the
+    caller falls back to the string-match bonus) or when the predictor cannot
+    be materialized. Any failure is non-fatal — structure is an ADDITIVE bonus
+    on top of the numeric score, never a reason to error a submission.
+    """
+    try:
+        from mirrorlab.eval.numeric import _entry_predictor
+        from mirrorlab.eval.structural import structural_score
+        predictor = _entry_predictor(entry)
+        result = structural_score(predictor, spec, base_params, test_grids=test_grids)
+        if not result.applicable:
+            return None
+        return result.captured_fraction
+    except Exception:
+        return None
 
 
 def score_submission(
@@ -122,12 +152,24 @@ def score_submission_detail(
     rho: float = RHO_DEFAULT,
     bonus: float = BONUS_DEFAULT,
     canonical_inputs: Optional[Sequence[str]] = None,
+    spec: Any = None,
+    base_params: Any = None,
 ) -> ScoreDetail:
     """Return both the best-of-k and single-submission scores (see ScoreDetail).
 
     Single-submission scores only the first declared entry: no max over a set,
     no shotgun penalty, and that entry's own symmetry claim drives the bonus.
     Best-of-k is the spec §7 score with the best-entry bonus binding.
+
+    Phase 2 structural bonus: when ``spec`` + ``base_params`` are supplied and
+    the cell has an applicable structural probe, a correct symmetry claim earns
+    ``bonus · captured_fraction`` instead of the flat ``bonus``. This keeps the
+    claim as the precondition (you must still NAME the broken symmetry) but now
+    VERIFIES it — a predictor that names the right label yet collapses to the
+    unbroken structure (captured_fraction≈0) earns ≈0 bonus, closing the
+    "claim the label, drop the physics" free-rider. Cells with no probe (or no
+    spec passed) fall back to the flat string-match bonus, so the change is
+    backward-compatible.
     """
     if not submission_set:
         return ScoreDetail(best_of_k=0.0, single_submission=0.0, n_entries=0)
@@ -140,21 +182,34 @@ def score_submission_detail(
     best_idx = max(range(n), key=lambda i: scored[i])
     best = scored[best_idx]
 
+    use_structural = spec is not None and base_params is not None
+    captured_recorded: Optional[float] = None
+
+    def _bonus_for(entry: Mapping[str, Any]) -> float:
+        """Bonus earned by ``entry``: 0 unless its claim matches; then either
+        the flat bonus (no probe) or ``bonus · captured_fraction`` (probe)."""
+        nonlocal captured_recorded
+        if not _claim_matches(entry, gt_symmetry):
+            return 0.0
+        if use_structural:
+            cf = _entry_captured_fraction(entry, spec, base_params, test_grids)
+            if cf is not None:
+                captured_recorded = cf
+                return bonus * max(0.0, min(1.0, cf))
+        return bonus
+
     # --- best-of-k: shotgun penalty + bonus bound to the best entry ----------
     penalty = 1.0 - rho * (n - 1)
-    best_of_k = best * max(penalty, 0.0)
-    if _claim_matches(entries[best_idx], gt_symmetry):
-        best_of_k += bonus
+    best_of_k = best * max(penalty, 0.0) + _bonus_for(entries[best_idx])
 
     # --- single-submission: first declared entry alone, no penalty -----------
-    single = scored[0]
-    if _claim_matches(entries[0], gt_symmetry):
-        single += bonus
+    single = scored[0] + _bonus_for(entries[0])
 
     return ScoreDetail(
         best_of_k=float(best_of_k),
         single_submission=float(single),
         n_entries=n,
+        captured_fraction=captured_recorded,
     )
 
 

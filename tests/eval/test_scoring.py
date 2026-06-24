@@ -208,3 +208,94 @@ def test_dual_metric_single_vs_best_of_k():
     assert math.isclose(detail.best_of_k,
                         detail.single_submission * 0.80, rel_tol=1e-6)
 
+
+# ---- Phase 2: structural bonus replaces the flat string-match bonus --------
+
+def _force_entry(pred, *, claim=None, law_id="L"):
+    e = {
+        "law_id": law_id,
+        "formula": "F = ...",
+        "_predictor": pred,
+        "inputs":  [{"name": "x", "units": "m"}],
+        "outputs": [{"name": "F", "units": DIM_FORCE}],
+        "params":  [],
+    }
+    if claim is not None:
+        e["claim_broken_symmetry"] = claim
+    return e
+
+
+def _gamma11_scoring_ctx():
+    """(spec, base_params, target_dim, grids, canonical_inputs) for hooke γ-1-1."""
+    from mirrorlab.scenarios.loader import load
+    from mirrorlab.spec import get_cell
+    from mirrorlab.runners.sprint3_pilot import _target_dim, pack_grids
+    sc = load("hooke", "gamma_1_1", seed=0)
+    sim = make("hooke", "gamma_1_1", seed=0)
+    spec = get_cell("hooke", "gamma_1_1")
+    canon = list((sc.dim_signature.get("inputs") or {}).keys())
+    return spec, sim.params, _target_dim(sc), pack_grids(sc), canon, sim.params.k
+
+
+def test_structural_bonus_full_for_oracle_claim():
+    """A correct PAR claim backed by the TRUE law (structure captured) earns
+    the full bonus and records captured_fraction≈1."""
+    from mirrorlab.eval.scoring import score_submission_detail
+    from mirrorlab.spec import make_oracle_predictor
+    spec, base, tgt, grids, canon, _ = _gamma11_scoring_ctx()
+    oracle = make_oracle_predictor(spec, base)
+
+    base_d = score_submission_detail(
+        [_force_entry(oracle)], target_dim=tgt, test_grids=grids,
+        gt_symmetry="PAR", canonical_inputs=canon, spec=spec, base_params=base)
+    claim_d = score_submission_detail(
+        [_force_entry(oracle, claim="PAR")], target_dim=tgt, test_grids=grids,
+        gt_symmetry="PAR", canonical_inputs=canon, spec=spec, base_params=base)
+
+    assert claim_d.captured_fraction is not None
+    assert claim_d.captured_fraction > 0.9
+    assert math.isclose(claim_d.single_submission - base_d.single_submission,
+                        BONUS_DEFAULT, rel_tol=1e-6)
+
+
+def test_structural_bonus_denied_for_collapsed_predictor():
+    """A predictor that NAMES PAR correctly but COLLAPSES to the unbroken
+    (pure-linear) form earns ≈0 structural bonus — the 'right label, wrong
+    physics' free-rider is closed."""
+    from mirrorlab.eval.scoring import score_submission_detail
+    spec, base, tgt, grids, canon, k = _gamma11_scoring_ctx()
+    collapsed = lambda x: -k * x  # drops the tanh parity break
+
+    no_claim = score_submission_detail(
+        [_force_entry(collapsed)], target_dim=tgt, test_grids=grids,
+        gt_symmetry="PAR", canonical_inputs=canon, spec=spec, base_params=base)
+    with_claim = score_submission_detail(
+        [_force_entry(collapsed, claim="PAR")], target_dim=tgt, test_grids=grids,
+        gt_symmetry="PAR", canonical_inputs=canon, spec=spec, base_params=base)
+
+    # Claiming PAR added essentially nothing: captured_fraction≈0 → ~0 bonus.
+    assert abs(with_claim.single_submission - no_claim.single_submission) < 0.02
+    assert with_claim.captured_fraction is not None
+    assert with_claim.captured_fraction < 0.1
+
+
+def test_structural_bonus_falls_back_to_flat_when_no_spec():
+    """Without spec/base_params the bonus is the legacy flat string-match —
+    backward compatibility for callers that don't pass a spec."""
+    from mirrorlab.eval.scoring import score_submission_detail
+    spec, base, tgt, grids, canon, k = _gamma11_scoring_ctx()
+    collapsed = lambda x: -k * x
+
+    base_d = score_submission_detail(
+        [_force_entry(collapsed)], target_dim=tgt, test_grids=grids,
+        gt_symmetry="PAR", canonical_inputs=canon)
+    claim_d = score_submission_detail(
+        [_force_entry(collapsed, claim="PAR")], target_dim=tgt, test_grids=grids,
+        gt_symmetry="PAR", canonical_inputs=canon)
+
+    # No spec → flat bonus fires on the string match, even for a collapsed fit.
+    assert claim_d.captured_fraction is None
+    assert math.isclose(claim_d.single_submission - base_d.single_submission,
+                        BONUS_DEFAULT, rel_tol=1e-6)
+
+

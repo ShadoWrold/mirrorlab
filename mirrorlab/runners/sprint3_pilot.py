@@ -332,6 +332,7 @@ def score_against_scenario_detail(
     submission: List[Mapping[str, Any]],
     *,
     gt_symmetry: Optional[str] = None,
+    structural: bool = False,
 ) -> ScoreDetail:
     """Both scoring views (single-submission + best-of-k) for one scenario.
 
@@ -339,6 +340,11 @@ def score_against_scenario_detail(
     ``ScoreDetail`` so sweeps can record the exhaustion-proof single-submission
     score alongside the legacy best-of-k. Returns an all-zero detail when the
     scenario has no target dim or empty grids.
+
+    ``structural=True`` resolves the cell's CellSpec + base params from the
+    scenario and forwards them so the symmetry bonus is gated by the structural
+    captured_fraction (Phase 2). Harmless when the cell has no probe (the bonus
+    falls back to the flat string-match).
     """
     target = _target_dim(scenario)
     if target is None:
@@ -347,12 +353,20 @@ def score_against_scenario_detail(
     if not packed:
         return ScoreDetail(best_of_k=0.0, single_submission=0.0, n_entries=0)
     canonical = list((scenario.dim_signature.get("inputs") or {}).keys())
+    spec = base_params = None
+    if structural:
+        from mirrorlab.spec import get_cell, has_cell
+        if has_cell(scenario.domain_id, scenario.shift_id):
+            spec = get_cell(scenario.domain_id, scenario.shift_id)
+            base_params = getattr(scenario.sim, "params", None)
     return score_submission_detail(
         submission,
         target_dim=target,
         test_grids=packed,
         gt_symmetry=gt_symmetry,
         canonical_inputs=canonical,
+        spec=spec,
+        base_params=base_params,
     )
 
 
