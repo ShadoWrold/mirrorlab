@@ -91,15 +91,19 @@ class StructuralResult:
                     natural normalization anchor; None if N/A).
     raw_error     : |m_pred − m_star| (None if N/A).
     captured_fraction : how much of the true break the predictor reproduced,
-                    normalized to ≈[0,1] by the unbroken anchor:
-                        (m_pred − m_unbroken) / (m_star − m_unbroken)
+                    normalized to [0,1] by the unbroken anchor and clamped:
+                        clamp01[(m_pred − m_unbroken) / (m_star − m_unbroken)]
                     ≈1.0 → captured the break (true structure); ≈0.0 →
                     collapsed to the unbroken form (the "right numbers, wrong
                     physics" cheat). This is dimensionless and cross-cell
                     comparable regardless of how small the break's magnitude is
                     — a SCALE break of metric 0.002 and a PAR break of 0.22 map
-                    to the same [0,1] scale. None if N/A or the cell's break is
-                    degenerate (m_star ≈ m_unbroken).
+                    to the same [0,1] scale. Clamped because cf measures break
+                    STRENGTH, not shape correctness: a predictor whose break is
+                    stronger than the oracle's (raw ratio > 1) has not captured
+                    "more than the truth", so it is capped at 1.0 — inspect the
+                    raw ``m_pred`` / ``m_star`` to detect overshoot. None if N/A
+                    or the cell's break is degenerate (m_star ≈ m_unbroken).
     note          : human-readable reason when not applicable.
     """
 
@@ -498,6 +502,17 @@ def structural_score(
     captured = (
         (float(m_pred) - m_unbroken) / signal if abs(signal) > 1e-9 else None
     )
+    # Clamp the reported fraction to [0,1]. The raw ratio can overshoot 1 (a
+    # predictor whose break is STRONGER than the oracle's — e.g. an x² parity
+    # term that is harsher than the true tanh) or go slightly negative (a
+    # collapse below the unbroken anchor). Neither is "more captured than the
+    # truth": cf measures break STRENGTH, not shape correctness, so a raw 2.0
+    # would misread as rewarding a wrong-but-strong break. The scored bonus
+    # already clamps identically (scoring.py); we clamp the observable too so
+    # the reported number cannot look like it credits wrong physics. The raw
+    # m_pred / m_star are kept on the result for anyone diagnosing overshoot.
+    if captured is not None:
+        captured = max(0.0, min(1.0, captured))
 
     return StructuralResult(
         symmetry=sym, probe_name=probe_name, applicable=True,

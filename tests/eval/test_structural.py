@@ -108,6 +108,25 @@ def test_normalization_is_cross_cell_comparable():
     assert abs(scale_o.captured_fraction - 1.0) < 0.05
 
 
+def test_stronger_than_oracle_break_clamps_at_one():
+    """A predictor whose break is STRONGER than the oracle's must not report a
+    captured_fraction above 1.0. The hooke γ-1-1 truth is a tanh parity break;
+    an x² term is a harsher parity break whose raw ratio overshoots (≈2.0). cf
+    measures break STRENGTH, not shape correctness, so 'stronger than truth' is
+    capped at 1.0 — the raw m_pred/m_star still expose the overshoot. This is
+    the visual-target fix: the reported fraction never looks like it credits a
+    wrong-but-strong break with more than full capture."""
+    sim = make("hooke", "gamma_1_1", seed=0)
+    k, c = sim.params.k, 50.0
+    # An x² parity break (even), harsher than the true tanh break.
+    r, _, _ = _oracle_and_result("hooke", "gamma_1_1", lambda x: -k * x - c * x * x)
+    assert r.applicable
+    assert r.captured_fraction is not None
+    assert r.captured_fraction <= 1.0          # clamped, never overshoots
+    # Raw metrics still reveal that the break was actually stronger than truth.
+    assert r.m_pred > r.m_star or abs(r.m_pred - r.m_star) < abs(r.m_star)
+
+
 # ---- Honest coverage: no probe-able axis ⇒ not applicable -------------------
 
 def test_no_axis_reports_not_applicable():
