@@ -479,7 +479,11 @@ class LLMAgent:
             # already submit on their own.
             wall_left = deadline - time.monotonic()
             near_tool_cap = trace.tool_calls >= max(1, self.max_tool_calls - 3)
-            near_wall = wall_left <= max(30.0, 0.15 * float(self.max_wall_seconds))
+            # Fire with 25% of the wall budget left, not 15%: Claude's forced
+            # "submit now" turn itself runs a long thinking pass (~90s+), so a
+            # late nudge gets cut off by the hard wall before the submission
+            # lands. A quarter-budget head start leaves room for that turn.
+            near_wall = wall_left <= max(45.0, 0.25 * float(self.max_wall_seconds))
             if not submit_forced and (near_tool_cap or near_wall):
                 submit_forced = True
                 messages.append({
