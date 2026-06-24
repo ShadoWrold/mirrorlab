@@ -1,0 +1,3352 @@
+{
+  "meta": {
+    "schema_version": 1,
+    "xy_version": 1,
+    "n_models": 1,
+    "n_cells": 48,
+    "n_runs_planned": 48,
+    "seed": 0,
+    "hard_cap": 8000,
+    "hard_cap_overrun": 9600,
+    "max_tool_calls": 80,
+    "max_wall_seconds": 600,
+    "budget_mode": "measurement",
+    "stopped_at_cap": false,
+    "started_at": "2026-06-24T09:36:13+0000",
+    "n_turns_so_far": 873,
+    "n_completed": 48,
+    "n_turns_total": 873,
+    "elapsed_s": 16995.228,
+    "finished_at": "2026-06-24T14:19:28+0000"
+  },
+  "entries": [
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "coulomb",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 29,
+      "n_llm_turns": 21,
+      "elapsed_s": 138.7927,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F = k_e * q1 * q2 / r^2",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m*s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "kg*m^3*s^-2*C^-2",
+              "value": 8987551787.368176
+            }
+          ],
+          "predictor": {
+            "code": "def f(r, q1, q2):\n    k_e = 8987551787.368176\n    return k_e * q1 * q2 / (r**2)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "coulomb",
+      "shift_id": "delta_5_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 49,
+      "n_llm_turns": 22,
+      "elapsed_s": 597.5138,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F = k_e * q1 * q2 / r**2",
+          "inputs": [
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            },
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "N*m**2*C**-2",
+              "value": 8987551787.368176
+            }
+          ],
+          "predictor": {
+            "code": "def f(q1, q2, r, k_e=8987551787.368176):\n    return k_e * q1 * q2 / r**2",
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F = k_e * q1 * q2 / r**n_exp",
+          "inputs": [
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            },
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "N*m**2*C**-2",
+              "value": 8987551787.368176
+            },
+            {
+              "name": "n_exp",
+              "units": "dimensionless",
+              "value": 1.123
+            }
+          ],
+          "predictor": {
+            "code": "def f(q1, q2, r, k_e=8987551787.368176, n_exp=1.123):\n    return k_e * q1 * q2 / r**n_exp",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 57,
+      "n_llm_turns": 38,
+      "elapsed_s": 473.1269,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "PAR",
+          "formula": "F = k_e * q_src * q_test / r^2",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "q_src",
+              "units": "C"
+            },
+            {
+              "name": "q_test",
+              "units": "C"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "kg*m**3*s**-2*C**-2",
+              "value": 0.010648
+            }
+          ],
+          "predictor": {
+            "code": "def f(r, q_src=1.0, q_test=1.0, k_e=0.010648):\n    return k_e * q_src * q_test / (r**2)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 25,
+      "n_llm_turns": 17,
+      "elapsed_s": 626.0939,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F = K / r**2  (Coulomb inverse-square, K = k_e*q1*q2)",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "K",
+              "units": "N*m^2",
+              "value": 0.00493
+            }
+          ],
+          "predictor": {
+            "code": "def f(r):\n    K = 0.00493\n    return K / r**2",
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F = k_e*q1*q2/r**2 (explicit Coulomb form)",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "N*m^2*C^-2",
+              "value": 8987551787.368176
+            }
+          ],
+          "predictor": {
+            "code": "def f(r, q1=1.0, q2=1.0, k_e=8.9875517873681764e9):\n    return k_e*q1*q2/r**2",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "damped_ho",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.881753,
+      "n_tool_calls": 5,
+      "n_llm_turns": 4,
+      "elapsed_s": 83.7237,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "F = -k*x - c*v",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m/s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m/s^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "kg/s^2",
+              "value": 18.79
+            },
+            {
+              "name": "c",
+              "units": "kg/s",
+              "value": 0.172
+            }
+          ],
+          "predictor": {
+            "code": "def f(x, v):\n    k = 18.79\n    c = 0.172\n    return -k*x - c*v",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.881753,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "damped_ho",
+      "shift_id": "delta_3_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.723922,
+      "n_tool_calls": 27,
+      "n_llm_turns": 21,
+      "elapsed_s": 593.1229,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "F = -k*x + (c0 - c1*abs(x))*v   (van der Pol-type: negative damping near x=0, positive damping for |x|>c0/c1, with linear restoring)",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m/s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 11.34
+            },
+            {
+              "name": "c0",
+              "units": "kg/s",
+              "value": 6.13
+            },
+            {
+              "name": "c1",
+              "units": "kg/(s*m)",
+              "value": 54.4
+            }
+          ],
+          "predictor": {
+            "code": "def f(x, v):\n    k = 11.34\n    c0 = 6.13\n    c1 = 54.4\n    return -k*x + (c0 - c1*abs(x))*v",
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "F = -k*x + c0*(1 - (x/x0)**2)*v   (classic van der Pol nonlinear damping form, alternative parametrization)",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m/s"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 11.34
+            },
+            {
+              "name": "c0",
+              "units": "kg/s",
+              "value": 6.13
+            },
+            {
+              "name": "x0",
+              "units": "m",
+              "value": 0.1127
+            }
+          ],
+          "predictor": {
+            "code": "def f(x, v):\n    k = 11.34\n    c0 = 6.13\n    x0 = 0.1127\n    return -k*x + c0*(1.0 - (x/x0)**2)*v",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.762024,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.212502,
+      "n_tool_calls": 61,
+      "n_llm_turns": 18,
+      "elapsed_s": 491.6363,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "F = -k*x - c*v",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m/s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 11.36
+            },
+            {
+              "name": "c",
+              "units": "N*s/m",
+              "value": 0.166
+            }
+          ],
+          "predictor": {
+            "code": "def f(x, v):\n    k = 11.36\n    c = 0.166\n    return -k*x - c*v",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.212502,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.098086,
+      "n_tool_calls": 15,
+      "n_llm_turns": 10,
+      "elapsed_s": 356.6609,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "F = -k*x - c*v   (linear restoring + linear viscous damping; m=1 kg)",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m/s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 43.72
+            },
+            {
+              "name": "c",
+              "units": "N*s/m",
+              "value": 2.73
+            },
+            {
+              "name": "m",
+              "units": "kg",
+              "value": 1
+            }
+          ],
+          "predictor": {
+            "code": "def f(x, v):\n    k = 43.72   # N/m (restoring stiffness)\n    c = 2.73    # N*s/m (damping coefficient)\n    return -k*x - c*v",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.098086,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "decay",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.980694,
+      "n_tool_calls": 4,
+      "n_llm_turns": 4,
+      "elapsed_s": 31.3769,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "N(t) = N0 * exp(-k*t), with k = 0.6373 1/s, N0 = 1e6",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "N0",
+              "units": "1",
+              "value": 1000000
+            },
+            {
+              "name": "k",
+              "units": "1/s",
+              "value": 0.637338
+            }
+          ],
+          "predictor": {
+            "code": "def f(t):\n    import math\n    N0 = 1.0e6\n    k = 0.637338\n    return N0 * math.exp(-k * t)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.980694,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "decay",
+      "shift_id": "delta_12_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.71963,
+      "n_tool_calls": 12,
+      "n_llm_turns": 9,
+      "elapsed_s": 148.4711,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "N(t) = N0 * exp(-k * t)",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "N0",
+              "units": "1"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "1/s",
+              "value": 0.00153013
+            }
+          ],
+          "predictor": {
+            "code": "def f(t, N0):\n    import math\n    k = 0.00153013\n    return float(N0 * math.exp(-k * t))",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.71963,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "decay",
+      "shift_id": "gamma_12_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.867087,
+      "n_tool_calls": 20,
+      "n_llm_turns": 9,
+      "elapsed_s": 608.0924,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "N(t) = N0 * exp( -[ hmin*t + ((hmax-hmin)/k) * ( softplus(k*(t-t0)) - softplus(-k*t0) ) ] ), where softplus(x)=ln(1+e^x) and the bracket is the cumulative time-dependent (logistic) hazard. Per-capita decay rate h(t) = -dlnN/dt = hmin + (hmax-hmin)/(1+exp(-k*(t-t0))) rises sigmoidally from hmin to hmax.",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "N0",
+              "units": "1",
+              "value": 1000000
+            },
+            {
+              "name": "hmin",
+              "units": "1/s",
+              "value": 0.000312
+            },
+            {
+              "name": "hmax",
+              "units": "1/s",
+              "value": 0.0015145
+            },
+            {
+              "name": "k",
+              "units": "1/s",
+              "value": 0.00075
+            },
+            {
+              "name": "t0",
+              "units": "s",
+              "value": 3400
+            }
+          ],
+          "predictor": {
+            "code": "def f(t):\n    import math\n    N0 = 1.0e6\n    hmin = 3.12e-4\n    hmax = 1.5145e-3\n    k = 7.5e-4\n    t0 = 3400.0\n    def softplus(x):\n        if x > 30.0:\n            return x\n        return math.log1p(math.exp(x))\n    a = (hmax - hmin) / k\n    C = hmin * t + a * (softplus(k * (t - t0)) - softplus(-k * t0))\n    return N0 * math.exp(-C)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.867087,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "decay",
+      "shift_id": "gamma_12_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.950105,
+      "n_tool_calls": 20,
+      "n_llm_turns": 15,
+      "elapsed_s": 216.7623,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "N(t) = N0 * exp(-k * t)",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "N0",
+              "units": "1",
+              "value": 1000000
+            },
+            {
+              "name": "k",
+              "units": "1/s",
+              "value": 0.00203065
+            }
+          ],
+          "predictor": {
+            "code": "def f(t):\n    import math\n    N0 = 1000000.0\n    k = 0.00203065\n    return N0 * math.exp(-k * t)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.950105,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "fluid",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.978452,
+      "n_tool_calls": 26,
+      "n_llm_turns": 10,
+      "elapsed_s": 78.9707,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "p2 = p1 + 0.5*rho*(v1^2 - v2^2) + rho*g*(h1 - h2)",
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "Pa"
+            },
+            {
+              "name": "v1",
+              "units": "m/s"
+            },
+            {
+              "name": "v2",
+              "units": "m/s"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho",
+              "units": "kg/m^3",
+              "value": 1054.784675
+            },
+            {
+              "name": "g",
+              "units": "m/s^2",
+              "value": 9.81
+            }
+          ],
+          "predictor": {
+            "code": "def f(p1, v1, v2, h1, h2):\n    rho = 1054.784675\n    g = 9.81\n    return p1 + 0.5*rho*(v1**2 - v2**2) + rho*g*(h1 - h2)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.978452,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "fluid",
+      "shift_id": "delta_10_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.852169,
+      "n_tool_calls": 49,
+      "n_llm_turns": 20,
+      "elapsed_s": 676.6664,
+      "terminated_by": "submit",
+      "submission_len": 3,
+      "submission": [
+        {
+          "formula": "p2 = p1 + rho_g*(h1-h2) + a*v1 + b*v1^2 + c*v2 + d*v2^2 + e*v1*v2",
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "Pa"
+            },
+            {
+              "name": "v1",
+              "units": "m/s"
+            },
+            {
+              "name": "v2",
+              "units": "m/s"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho_g",
+              "units": "Pa/m",
+              "value": 8008.78
+            },
+            {
+              "name": "a",
+              "units": "Pa*s/m",
+              "value": -2267.7
+            },
+            {
+              "name": "b",
+              "units": "Pa*s^2/m^2",
+              "value": -1445.24
+            },
+            {
+              "name": "c",
+              "units": "Pa*s/m",
+              "value": -1908.5
+            },
+            {
+              "name": "d",
+              "units": "Pa*s^2/m^2",
+              "value": -2299.4
+            },
+            {
+              "name": "e",
+              "units": "Pa*s^2/m^2",
+              "value": -1996.7
+            }
+          ],
+          "predictor": {
+            "code": "def f(p1, v1, v2, h1, h2):\n    rho_g = 8008.78\n    a = -2267.7\n    b = -1445.24\n    c = -1908.5\n    d = -2299.4\n    e = -1996.7\n    return float(p1 + rho_g*(h1-h2) + a*v1 + b*v1*v1 + c*v2 + d*v2*v2 + e*v1*v2)",
+            "lang": "python"
+          }
+        },
+        {
+          "formula": "p2 = p1 + rho*g*(h1-h2) - 0.5*K*(v1^2 + v2^2)",
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "Pa"
+            },
+            {
+              "name": "v1",
+              "units": "m/s"
+            },
+            {
+              "name": "v2",
+              "units": "m/s"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho_g",
+              "units": "Pa/m",
+              "value": 8008.78
+            },
+            {
+              "name": "K",
+              "units": "kg/m^3",
+              "value": 4600
+            }
+          ],
+          "predictor": {
+            "code": "def f(p1, v1, v2, h1, h2):\n    rho_g = 8008.78\n    K = 4600.0\n    return float(p1 + rho_g*(h1-h2) - 0.5*K*(v1*v1 + v2*v2))",
+            "lang": "python"
+          }
+        },
+        {
+          "formula": "Bernoulli baseline: p2 = p1 + 0.5*rho*(v1^2-v2^2) + rho*g*(h1-h2)",
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "Pa"
+            },
+            {
+              "name": "v1",
+              "units": "m/s"
+            },
+            {
+              "name": "v2",
+              "units": "m/s"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            }
+          ],
+          "law_id": "L3",
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho",
+              "units": "kg/m^3",
+              "value": 816.4
+            },
+            {
+              "name": "g",
+              "units": "m/s^2",
+              "value": 9.81
+            }
+          ],
+          "predictor": {
+            "code": "def f(p1, v1, v2, h1, h2):\n    rho = 816.4\n    g = 9.81\n    return float(p1 + 0.5*rho*(v1*v1 - v2*v2) + rho*g*(h1-h2))",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.946855,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 3.2e-05,
+      "n_tool_calls": 54,
+      "n_llm_turns": 37,
+      "elapsed_s": 462.8594,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "p2 = p1 + 0.5*rho*(v1**2 - v2**2) + rho*g*(h1 - h2)",
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "kg*m**-1*s**-2"
+            },
+            {
+              "name": "v1",
+              "units": "m*s**-1"
+            },
+            {
+              "name": "v2",
+              "units": "m*s**-1"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "kg*m**-1*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho",
+              "units": "kg*m**-3",
+              "value": 1000
+            },
+            {
+              "name": "g",
+              "units": "m*s**-2",
+              "value": 9.81
+            }
+          ],
+          "predictor": {
+            "code": "def f(p1, v1, v2, h1, h2, rho=1000.0, g=9.81):\n    return p1 + 0.5*rho*(v1**2 - v2**2) + rho*g*(h1 - h2)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 3.2e-05,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.68231,
+      "n_tool_calls": 30,
+      "n_llm_turns": 18,
+      "elapsed_s": 151.5816,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "p2 = p1 + 0.5*rho*(v1**2 - v2**2) + rho*g*(h1 - h2)",
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "Pa"
+            },
+            {
+              "name": "v1",
+              "units": "m/s"
+            },
+            {
+              "name": "v2",
+              "units": "m/s"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho",
+              "units": "kg/m^3",
+              "value": 1125.308
+            },
+            {
+              "name": "g",
+              "units": "m/s^2",
+              "value": 18.1013
+            }
+          ],
+          "predictor": {
+            "code": "def f(p1, v1, v2, h1, h2):\n    rho = 1125.308\n    g = 18.1013\n    return p1 + 0.5*rho*(v1**2 - v2**2) + rho*g*(h1 - h2)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.68231,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "gravity",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.791035,
+      "n_tool_calls": 25,
+      "n_llm_turns": 15,
+      "elapsed_s": 87.4337,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F = -G*M*m/r^2  (attractive inverse-square central force)",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "GM",
+              "units": "m**3*s**-2",
+              "value": 2356418767000
+            }
+          ],
+          "predictor": {
+            "code": "def f(r, m, GM=2.356418767e12):\n    return -GM*m/(r**2)",
+            "lang": "python",
+            "params_note": "GM is the source strength (gravitational parameter)"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.791035,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "gravity",
+      "shift_id": "delta_2_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.321669,
+      "n_tool_calls": 39,
+      "n_llm_turns": 13,
+      "elapsed_s": 285.9295,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F = -k / r^2,  k = 1.17188e11 N*m^2",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N*m^2",
+              "value": 117188349916.956
+            }
+          ],
+          "predictor": {
+            "code": "def f(r):\n    k = 1.17188349916956e11\n    return -k / (r**2)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.321669,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 19,
+      "n_llm_turns": 15,
+      "elapsed_s": 584.4569,
+      "terminated_by": "submit",
+      "submission_len": 3,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F = G0*M*m / r^2  (central, attractive inverse-square)",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "GM",
+              "units": "m^3 s^-2",
+              "value": 95000000000
+            }
+          ],
+          "predictor": {
+            "code": "def f(r, m, GM=9.5e10):\n    # GM = G0*M product fitted from rest-drop accelerations (a*r^2)\n    # along y-axis (9.51e10) and far x-axis (9.48e10): ~9.5e10 m^3/s^2\n    return GM * m / (r*r)",
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "PAR",
+          "formula": "F = G0*M*m/r^2 * (1 + xi*cos^2(theta))  (anisotropic enhancement along preferred axis n_hat)",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            },
+            {
+              "name": "costheta",
+              "units": "dimensionless"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "GM",
+              "units": "m^3 s^-2",
+              "value": 95000000000
+            },
+            {
+              "name": "xi",
+              "units": "dimensionless",
+              "value": 9
+            }
+          ],
+          "predictor": {
+            "code": "def f(r, m, costheta=0.0, GM=9.5e10, xi=9.0):\n    # costheta = n_hat . r_hat, n_hat ~ x-axis (preferred direction)\n    # Near r=1e7 the x-axis acceleration (9.48e-3) is ~10x the y-axis\n    # baseline (9.5e-4), implying xi ~ 9 directional enhancement.\n    return GM * m / (r*r) * (1.0 + xi*costheta*costheta)",
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F = C*m / r^n  (empirical power-law fit to strong-axis radial falloff)",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            }
+          ],
+          "law_id": "L3",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "C",
+              "units": "N m^n kg^-1",
+              "value": 1.7e+35
+            },
+            {
+              "name": "n",
+              "units": "dimensionless",
+              "value": 5.32
+            }
+          ],
+          "predictor": {
+            "code": "def f(r, m, C=1.7e35, n=5.32):\n    # Strong-axis (x) accelerations: 9.481e-3 @1e7, 2.370e-4 @2e7\n    # => n = log2(40) = 5.32; C = a0 * r0^n with a0=9.481e-3, r0=1e7\n    return C * m / (r**n)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.328693,
+      "n_tool_calls": 54,
+      "n_llm_turns": 32,
+      "elapsed_s": 490.065,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "claim_broken_symmetry": "scale",
+          "formula": "F(r) = -(A/r^2) * (1 + B*cos(omega*ln(r) + phi)),  omega = 2*pi/ln(5)",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "N*m^2",
+              "value": 98000000000
+            },
+            {
+              "name": "B",
+              "units": "dimensionless",
+              "value": 0.29
+            },
+            {
+              "name": "omega",
+              "units": "dimensionless",
+              "value": 3.9043
+            },
+            {
+              "name": "phi",
+              "units": "rad",
+              "value": -0.534
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(r):\n    A = 9.8e10\n    B = 0.29\n    omega = 2*math.pi/math.log(5.0)\n    phi = -0.534\n    return -(A/r**2)*(1.0 + B*math.cos(omega*math.log(r) + phi))",
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F(r) = -A/r^2 (mean inverse-square baseline)",
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "N*m^2",
+              "value": 98000000000
+            }
+          ],
+          "predictor": {
+            "code": "def f(r):\n    A = 9.8e10\n    return -A/r**2",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.285028,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "hooke",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.857846,
+      "n_tool_calls": 6,
+      "n_llm_turns": 6,
+      "elapsed_s": 52.3338,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "F = -k * x, with k = 18.789852661 N/m",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 18.789852661499
+            }
+          ],
+          "predictor": {
+            "code": "def f(x):\n    k = 18.789852661499\n    return -k * x",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.857846,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "hooke",
+      "shift_id": "delta_1_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.875573,
+      "n_tool_calls": 25,
+      "n_llm_turns": 20,
+      "elapsed_s": 158.1071,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "F = -k*x - c*x^2*v",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m/s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 18.79
+            },
+            {
+              "name": "c",
+              "units": "kg/(m^2*s)",
+              "value": 1.1354
+            }
+          ],
+          "predictor": {
+            "code": "def f(x, v):\n    k = 18.79\n    c = 1.1354\n    return -k*x - c*x*x*v",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.875573,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 19,
+      "n_llm_turns": 15,
+      "elapsed_s": 424.6274,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "PAR",
+          "formula": "F = -k*x - c*x^2",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N/m",
+              "value": 18.79
+            },
+            {
+              "name": "c",
+              "units": "N/m^2",
+              "value": 87.45
+            }
+          ],
+          "predictor": {
+            "code": "def f(x):\n    k = 18.79\n    c = 87.45\n    return -k*x - c*x*x",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.004189,
+      "n_tool_calls": 38,
+      "n_llm_turns": 24,
+      "elapsed_s": 297.8762,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "Fx = -(kxx*x + kxy*y), kxx=23.548, kxy=1.253",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "y",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "Fx",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "kxx",
+              "units": "N/m",
+              "value": 23.548
+            },
+            {
+              "name": "kxy",
+              "units": "N/m",
+              "value": 1.253
+            }
+          ],
+          "predictor": {
+            "code": "def f(x, y):\n    kxx = 23.548\n    kxy = 1.253\n    return -(kxx*x + kxy*y)",
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "Fy = -(kyx*x + kyy*y), kyx=1.253, kyy=14.031",
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "y",
+              "units": "m"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "Fy",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "kyx",
+              "units": "N/m",
+              "value": 1.253
+            },
+            {
+              "name": "kyy",
+              "units": "N/m",
+              "value": 14.031
+            }
+          ],
+          "predictor": {
+            "code": "def f(x, y):\n    kyx = 1.253\n    kyy = 14.031\n    return -(kyx*x + kyy*y)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "kinetics",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 6,
+      "n_llm_turns": 4,
+      "elapsed_s": 38.0029,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "C(t) = C0 / (1 + k*C0*t)  with rate = -k*C^2 (second-order decay), k = 0.32211 m^3/(mol*s)",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol/m^3"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol/m^3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "m^3/(mol*s)",
+              "value": 0.32211122678751297
+            }
+          ],
+          "predictor": {
+            "code": "def f(t, C0, k=0.32211122678751297):\n    return C0 / (1.0 + k*C0*t)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "kinetics",
+      "shift_id": "delta_11_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.125711,
+      "n_tool_calls": 25,
+      "n_llm_turns": 14,
+      "elapsed_s": 360.6377,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "C(t) = [C0^(1-n) + (n-1)*k*t]^(1/(1-n)), with rate dC/dt = -k*C^n",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol/m^3"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol/m^3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "(mol/m^3)^(1-n)/s",
+              "value": 0.0006448
+            },
+            {
+              "name": "n",
+              "units": "dimensionless",
+              "value": 1.5644
+            }
+          ],
+          "predictor": {
+            "code": "def f(t, C0=1.0, k=0.0006448, n=1.5644):\n    return (C0**(1.0-n) + (n-1.0)*k*t)**(1.0/(1.0-n))",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.125711,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.840856,
+      "n_tool_calls": 24,
+      "n_llm_turns": 12,
+      "elapsed_s": 473.1424,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "C(t) = C0 * exp(-k * t^beta)",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol/m^3"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol/m^3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "s^-beta",
+              "value": 0.00014592
+            },
+            {
+              "name": "beta",
+              "units": "dimensionless",
+              "value": 0.7088
+            }
+          ],
+          "predictor": {
+            "code": "def f(t, C0=1.0, k=1.4592e-4, beta=0.7088):\n    import math\n    return C0 * math.exp(-k * (t ** beta))",
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "C(t) = C0 * exp(-k_eff * t)  (simple first-order baseline)",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol/m^3"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol/m^3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_eff",
+              "units": "1/s",
+              "value": 2.85e-05
+            }
+          ],
+          "predictor": {
+            "code": "def f(t, C0=1.0, k_eff=2.85e-5):\n    import math\n    return C0 * math.exp(-k_eff * t)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.885112,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 34,
+      "n_llm_turns": 29,
+      "elapsed_s": 577.7036,
+      "terminated_by": "submit",
+      "submission_len": 3,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "dC/dt = -k*C^n/(C_sat^m + C^m); C(t) obtained by integrating from C0",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol/m^3"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol/m^3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "(mol/m^3)^(1-n+m)/s",
+              "value": 5.5e-06
+            },
+            {
+              "name": "n",
+              "units": "dimensionless",
+              "value": 2.37
+            },
+            {
+              "name": "m",
+              "units": "dimensionless",
+              "value": 2
+            },
+            {
+              "name": "C_sat",
+              "units": "mol/m^3",
+              "value": 0.218
+            }
+          ],
+          "predictor": {
+            "code": "def f(t, C0, k=5.5e-6, n=2.37, m=2.0, C_sat=0.218):\n    C = float(C0)\n    if t <= 0:\n        return C\n    N = 2000\n    dt = t / N\n    for _ in range(N):\n        denom = C_sat**m + C**m\n        C = C - k * (C**n) / denom * dt\n        if C < 0:\n            C = 0.0\n    return C",
+            "inputs": [
+              "t",
+              "C0"
+            ],
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "Linearized (short-time) saturating decay: C = C0 - k*C0^n/(C_sat^m + C0^m)*t",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol/m^3"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol/m^3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "(mol/m^3)^(1-n+m)/s",
+              "value": 5.5e-06
+            },
+            {
+              "name": "n",
+              "units": "dimensionless",
+              "value": 2.37
+            },
+            {
+              "name": "m",
+              "units": "dimensionless",
+              "value": 2
+            },
+            {
+              "name": "C_sat",
+              "units": "mol/m^3",
+              "value": 0.218
+            }
+          ],
+          "predictor": {
+            "code": "def f(t, C0, k=5.5e-6, n=2.37, m=2.0, C_sat=0.218):\n    C0 = float(C0)\n    rate = -k * (C0**n) / (C_sat**m + C0**m)\n    C = C0 + rate * t\n    return C if C > 0 else 0.0",
+            "inputs": [
+              "t",
+              "C0"
+            ],
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "Effective power-law decay (mid-range fit): C = C0 - k*C0^p*t",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol/m^3"
+            }
+          ],
+          "law_id": "L3",
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol/m^3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "(mol/m^3)^(1-p)/s",
+              "value": 5.259e-06
+            },
+            {
+              "name": "p",
+              "units": "dimensionless",
+              "value": 0.72
+            }
+          ],
+          "predictor": {
+            "code": "def f(t, C0, k=5.259e-6, p=0.72):\n    C0 = float(C0)\n    C = C0 - k * (C0**p) * t\n    return C if C > 0 else 0.0",
+            "inputs": [
+              "t",
+              "C0"
+            ],
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "optics",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 15,
+      "n_llm_turns": 12,
+      "elapsed_s": 92.8586,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "theta2 = arcsin( (n1/n2) * sin(theta1) )   [Snell's law: n1 sin(theta1) = n2 sin(theta2)]",
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "rad"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "rad"
+            }
+          ],
+          "params": [
+            {
+              "name": "n1",
+              "units": "dimensionless",
+              "value": 1
+            },
+            {
+              "name": "n2",
+              "units": "dimensionless",
+              "value": 1.5
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(theta1, n1=1.0, n2=1.5):\n    return math.asin((n1/n2)*math.sin(theta1))",
+            "lang": "python",
+            "params": {
+              "n1": 1,
+              "n2": 1.5
+            }
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "optics",
+      "shift_id": "delta_9_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 40,
+      "n_llm_turns": 29,
+      "elapsed_s": 532.3828,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "theta2 = arcsin( (n1/n2) * sin(theta1) )  (Snell's law of refraction)",
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "rad"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "rad"
+            }
+          ],
+          "params": [
+            {
+              "name": "n1",
+              "units": "dimensionless",
+              "value": 1
+            },
+            {
+              "name": "n2",
+              "units": "dimensionless",
+              "value": 1.5
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(theta1, n1=1.0, n2=1.5):\n    s = (n1/n2) * math.sin(theta1)\n    # clamp to valid domain (total internal reflection guard)\n    if s > 1.0: s = 1.0\n    if s < -1.0: s = -1.0\n    return math.asin(s)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "optics",
+      "shift_id": "gamma_9_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 49,
+      "n_llm_turns": 37,
+      "elapsed_s": 519.96,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "theta2 = arcsin((n0/n1) * sin(theta1)), with n0/n1 = 0.2597",
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "rad"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "rad"
+            }
+          ],
+          "params": [
+            {
+              "name": "n_ratio",
+              "units": "dimensionless",
+              "value": 0.2597
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(theta1):\n    ratio = 0.2597\n    s = ratio * math.sin(theta1)\n    if s > 1.0:\n        s = 1.0\n    return math.asin(s)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "optics",
+      "shift_id": "gamma_9_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 41,
+      "n_llm_turns": 27,
+      "elapsed_s": 616.9672,
+      "terminated_by": "wall",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "saturated": true,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "pendulum",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 22,
+      "n_llm_turns": 12,
+      "elapsed_s": 80.5438,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "theta_ddot = -(g/L) * sin(theta) = -14.553 * sin(theta)",
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "omega",
+              "units": "rad/s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "theta_ddot",
+              "units": "rad/s^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "s^-2",
+              "value": 14.553
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(theta, omega=0.0):\n    k = 14.553\n    return -k * math.sin(theta)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "pendulum",
+      "shift_id": "delta_4_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 22,
+      "n_llm_turns": 19,
+      "elapsed_s": 177.6047,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "theta_ddot = -k * sin(theta), with k = 28.300 s^-2",
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "omega",
+              "units": "rad/s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "theta_ddot",
+              "units": "rad/s^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "s^-2",
+              "value": 28.3
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(theta, omega=0.0):\n    k = 28.300\n    return -k * math.sin(theta)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 34,
+      "n_llm_turns": 27,
+      "elapsed_s": 343.7427,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "PAR",
+          "formula": "theta_ddot = -g_over_L*(sin(theta) + alpha*(1 - cos(theta)))",
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "omega",
+              "units": "rad/s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "theta_ddot",
+              "units": "rad/s^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "g_over_L",
+              "units": "1/s^2",
+              "value": 1
+            },
+            {
+              "name": "alpha",
+              "units": "dimensionless",
+              "value": 0.5
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(theta, omega=0.0, g_over_L=1.0, alpha=0.5):\n    return -g_over_L*(math.sin(theta) + alpha*(1.0 - math.cos(theta)))",
+            "lang": "python",
+            "py": "f"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 40,
+      "n_llm_turns": 25,
+      "elapsed_s": 493.8904,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "theta_ddot = -(a + b*cos(theta))*sin(theta) = -a*sin(theta) - (b/2)*sin(2*theta)",
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "theta_ddot",
+              "units": "rad/s^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "a",
+              "units": "s^-2",
+              "value": 11.25335288007248
+            },
+            {
+              "name": "b",
+              "units": "s^-2",
+              "value": 7.53635888937828
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(theta):\n    a = 11.25335288007248\n    b = 7.53635888937828\n    return -(a + b*math.cos(theta))*math.sin(theta)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "rlc",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.741309,
+      "n_tool_calls": 39,
+      "n_llm_turns": 25,
+      "elapsed_s": 395.7452,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "didt = -q/(L*C) - (R/L)*i",
+          "inputs": [
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "didt",
+              "units": "A/s"
+            }
+          ],
+          "params": [
+            {
+              "name": "L",
+              "units": "H",
+              "value": 0.0187904
+            },
+            {
+              "name": "C",
+              "units": "F",
+              "value": 3.46396e-06
+            },
+            {
+              "name": "R",
+              "units": "ohm",
+              "value": 0.50563789
+            }
+          ],
+          "predictor": {
+            "code": "def f(q, i):\n    L = 0.0187904\n    C = 3.46396e-6\n    R = 0.50563789\n    return -q/(L*C) - (R/L)*i",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.741309,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "rlc",
+      "shift_id": "delta_6_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.181786,
+      "n_tool_calls": 31,
+      "n_llm_turns": 16,
+      "elapsed_s": 483.3858,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "didt = -(R/L)*i - (1/(L*C))*q = a*i + b*q, with a=-2.072e4 1/s, b=-7.83e8 1/(s*F-equiv)",
+          "inputs": [
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "didt",
+              "units": "A/s"
+            }
+          ],
+          "params": [
+            {
+              "name": "a",
+              "units": "1/s",
+              "value": -20720
+            },
+            {
+              "name": "b",
+              "units": "A/(s*C)",
+              "value": -783000000
+            }
+          ],
+          "predictor": {
+            "code": "def f(q, i):\n    a = -2.072e4   # = -R/L  [1/s]\n    b = -7.83e8    # = -1/(L*C)  [A/(s*C)]\n    return a*i + b*q",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.181786,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 2e-06,
+      "n_tool_calls": 28,
+      "n_llm_turns": 19,
+      "elapsed_s": 554.3976,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "didt = -(q/(L0*C) + (R/L0)*i) * (1 + (i/Isat)^2)",
+          "inputs": [
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "didt",
+              "units": "A/s"
+            }
+          ],
+          "params": [
+            {
+              "name": "a",
+              "units": "s^-2",
+              "value": 8418231000
+            },
+            {
+              "name": "b",
+              "units": "s^-1",
+              "value": 12.1726
+            },
+            {
+              "name": "Isat",
+              "units": "A",
+              "value": 0.014492
+            }
+          ],
+          "predictor": {
+            "code": "def f(q, i):\n    a = 8.418231e9   # 1/(L0*C), s^-2\n    b = 12.1726      # R/L0, s^-1\n    Isat = 0.014492  # A\n    return -(a*q + b*i) * (1.0 + (i/Isat)**2)",
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "didt = -(q/(L0*C) + (R/L0)*i)  [linear RLC, no saturation]",
+          "inputs": [
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "didt",
+              "units": "A/s"
+            }
+          ],
+          "params": [
+            {
+              "name": "a",
+              "units": "s^-2",
+              "value": 8418231000
+            },
+            {
+              "name": "b",
+              "units": "s^-1",
+              "value": 12.1726
+            }
+          ],
+          "predictor": {
+            "code": "def f(q, i):\n    a = 8.418231e9\n    b = 12.1726\n    return -(a*q + b*i)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 42,
+      "n_llm_turns": 33,
+      "elapsed_s": 534.6062,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "didt = -(1/(L*C))*q - (R/L)*i  (series RLC: L di/dt + R i + q/C = 0)",
+          "inputs": [
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "didt",
+              "units": "A/s"
+            }
+          ],
+          "params": [
+            {
+              "name": "inv_LC",
+              "units": "s^-2",
+              "value": 6840750
+            },
+            {
+              "name": "R_over_L",
+              "units": "s^-1",
+              "value": 1.66
+            }
+          ],
+          "predictor": {
+            "code": "def f(q, i):\n    a = 6.84075e6   # 1/(L*C), units s^-2\n    b = 1.66        # R/L, units s^-1\n    return -a*q - b*i",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "thermal",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 1.0,
+      "n_tool_calls": 22,
+      "n_llm_turns": 14,
+      "elapsed_s": 84.0923,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "q = k * (T_hot - T_cold) / L",
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W*m^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "W*m^-1*K^-1",
+              "value": 254.82097875985
+            }
+          ],
+          "predictor": {
+            "code": "def f(T_hot, T_cold, L, k=254.82097875985):\n    return k * (T_hot - T_cold) / L",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 1.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "thermal",
+      "shift_id": "delta_7_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 34,
+      "n_llm_turns": 18,
+      "elapsed_s": 476.8565,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "q = kappa*(T_hot - T_cold)/L",
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W/m^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "kappa",
+              "units": "W/(m*K)",
+              "value": 1
+            }
+          ],
+          "predictor": {
+            "code": "def f(T_hot, T_cold, L, kappa=1.0):\n    return kappa*(T_hot - T_cold)/L",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.044146,
+      "n_tool_calls": 30,
+      "n_llm_turns": 18,
+      "elapsed_s": 112.6691,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "q = k * (T_hot - T_cold) / L",
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W/m^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "W/(m*K)",
+              "value": 9.821082416253626
+            }
+          ],
+          "predictor": {
+            "code": "def f(T_hot, T_cold, L, k=9.821082416253626):\n    return k * (T_hot - T_cold) / L",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.044146,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.000995,
+      "n_tool_calls": 29,
+      "n_llm_turns": 17,
+      "elapsed_s": 97.944,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "q = k*(T_hot - T_cold)/L",
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W/m^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "W/(m*K)",
+              "value": 0.5887860534967949
+            }
+          ],
+          "predictor": {
+            "code": "def f(T_hot, T_cold, L, k=0.5887860534967949):\n    return k*(T_hot - T_cold)/L",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.000995,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "wave",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 14,
+      "n_llm_turns": 11,
+      "elapsed_s": 470.7424,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "u(t) = A*cos(omega*t + phi), with A=0.67328, omega=51.464 rad/s, phi=-0.14324 rad",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "u",
+              "units": "dimensionless"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "dimensionless",
+              "value": 0.67328
+            },
+            {
+              "name": "omega",
+              "units": "rad/s",
+              "value": 51.464
+            },
+            {
+              "name": "phi",
+              "units": "rad",
+              "value": -0.14324
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(t):\n    A = 0.67328\n    omega = 51.464\n    phi = -0.14324\n    return A*math.cos(omega*t + phi)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "wave",
+      "shift_id": "delta_8_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 10,
+      "n_llm_turns": 6,
+      "elapsed_s": 357.0661,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "claim_broken_symmetry": "TR",
+          "formula": "u(t) = cos(omega * t) / (1 + gamma * t)",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "u",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 120.766
+            },
+            {
+              "name": "gamma",
+              "units": "s^-1",
+              "value": 0.0635
+            }
+          ],
+          "predictor": {
+            "code": "def f(t):\n    import math\n    omega = 120.766   # rad/s (angular frequency, f ~ 19.22 Hz)\n    gamma = 0.0635    # 1/s (algebraic damping rate)\n    return math.cos(omega * t) / (1.0 + gamma * t)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "wave",
+      "shift_id": "gamma_8_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 25,
+      "n_llm_turns": 18,
+      "elapsed_s": 476.1501,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "formula": "u(t) = A * sin(phi - omega * t), with A=1, omega=139.139 rad/s, phi=1 rad",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "u",
+              "units": "dimensionless"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "dimensionless",
+              "value": 1
+            },
+            {
+              "name": "omega",
+              "units": "rad/s",
+              "value": 139.139
+            },
+            {
+              "name": "phi",
+              "units": "rad",
+              "value": 1
+            }
+          ],
+          "predictor": {
+            "code": "def f(t):\n    import math\n    A = 1.0\n    omega = 139.139\n    phi = 1.0\n    return A * math.sin(phi - omega * t)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "claude-opus-4.8",
+      "provider": "anthropic",
+      "domain_id": "wave",
+      "shift_id": "gamma_8_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 27,
+      "n_llm_turns": 18,
+      "elapsed_s": 515.1955,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "u(t) = A*sin(omega*t + phi), A=1, omega=3.421 rad/s, phi=1.0 rad",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "law_id": "L1",
+          "outputs": [
+            {
+              "name": "u",
+              "units": "dimensionless"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "dimensionless",
+              "value": 1
+            },
+            {
+              "name": "omega",
+              "units": "rad/s",
+              "value": 3.421
+            },
+            {
+              "name": "phi",
+              "units": "rad",
+              "value": 1
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(t):\n    A = 1.0\n    omega = 3.421\n    phi = 1.0\n    return A*math.sin(omega*t + phi)",
+            "lang": "python"
+          }
+        },
+        {
+          "claim_broken_symmetry": "none",
+          "formula": "u(t) = A*sin(omega*t + phi) with k-dependent omega (dispersive); default-config fit",
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "law_id": "L2",
+          "outputs": [
+            {
+              "name": "u",
+              "units": "dimensionless"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "dimensionless",
+              "value": 1
+            },
+            {
+              "name": "omega",
+              "units": "rad/s",
+              "value": 3.421
+            },
+            {
+              "name": "phi",
+              "units": "rad",
+              "value": 1
+            }
+          ],
+          "predictor": {
+            "code": "import math\ndef f(t):\n    # default-configuration sinusoid at the fixed probe location\n    return math.sin(3.421*t + 1.0)",
+            "lang": "python"
+          }
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    }
+  ]
+}
