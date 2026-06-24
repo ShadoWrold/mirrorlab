@@ -57,6 +57,13 @@ _NAMED_UNITS: dict[str, Dim7] = {
     "Ω":  (1, 2, -3, -2, 0, 0, 0),
 }
 
+# SI dimensionless DERIVED units: physically a ratio of like quantities, so
+# they carry no dimension but are still legal unit tokens. An LLM that writes
+# an angle as "rad" (or angular acceleration as "rad/s^2") is dimensionally
+# correct — radian = m/m — and must not be rejected as an unknown unit. These
+# contribute the zero tuple to every dimension while keeping the token valid.
+_DIMENSIONLESS_UNITS: frozenset[str] = frozenset({"rad", "sr"})
+
 _TOKEN_RE = re.compile(
     r"(?P<unit>[A-Za-zΘ]+)\s*(?:(?:\*\*|\^)\s*(?P<exp>[+-]?\d+))?"
 )
@@ -113,6 +120,10 @@ def parse_dim(spec: str) -> Dim7:
             if named is not None:
                 for i, e in enumerate(named):
                     exps[i] += sign * exp * e
+                continue
+            # Dimensionless derived units (rad, sr) are valid tokens that add no
+            # dimension: "rad/s^2" → s^-2, "rad" → ZERO. Skip without error.
+            if not abstract_form and unit in _DIMENSIONLESS_UNITS:
                 continue
             if unit not in _UNIT_TO_INDEX:
                 raise ValueError(f"unknown unit token {unit!r} in {spec!r}")

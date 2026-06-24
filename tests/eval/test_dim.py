@@ -42,6 +42,31 @@ def test_parse_unknown_unit_raises():
         parse_dim("foo*bar")
 
 
+# ---- Dimensionless derived units (rad, sr): SI angle is length/length -------
+
+def test_parse_radian_is_dimensionless():
+    # A radian is m/m — dimensionless. An LLM writing "rad" for an angle must
+    # not be rejected as an unknown unit.
+    assert parse_dim("rad") == ZERO
+    assert parse_dim("sr") == ZERO
+
+
+def test_parse_angular_acceleration_equals_inverse_s_squared():
+    # rad/s^2 is physically s^-2 (angular acceleration). A pendulum predictor
+    # that outputs "rad/s^2" must match a target written as "s**-2".
+    assert parse_dim("rad/s^2") == (0, 0, -2, 0, 0, 0, 0)
+    assert parse_dim("rad/s**2") == (0, 0, -2, 0, 0, 0, 0)
+
+
+def test_match_dim_radian_units_against_si_target():
+    # The exact false-reject from the claude sweep: correct physics, units
+    # written in non-canonical (angular) form.
+    assert match_dim({"outputs": [{"name": "a", "units": "rad/s^2"}]},
+                     "s**-2") is True
+    assert match_dim({"outputs": [{"name": "th", "units": "rad"}]},
+                     "1") is True
+
+
 def test_match_dim_correct():
     entry = {"outputs": [{"name": "F", "units": "kg*m*s**-2"}]}
     assert match_dim(entry, "kg*m*s**-2") is True
