@@ -1,0 +1,392 @@
+{
+ "meta": {
+  "scoring": "radfix+phase2+clamp",
+  "source": "s0-gpt + claude-full"
+ },
+ "rows": [
+  {
+   "domain": "coulomb",
+   "shift": "baseline",
+   "gpt": 0.8049,
+   "claude": 0.8327,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "coulomb",
+   "shift": "delta_5_1",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "coulomb",
+   "shift": "gamma_5_1",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "coulomb",
+   "shift": "gamma_5_2",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "damped_ho",
+   "shift": "baseline",
+   "gpt": 0.8827,
+   "claude": 0.8818,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "damped_ho",
+   "shift": "delta_3_1",
+   "gpt": 0.0714,
+   "claude": 0.8239,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "damped_ho",
+   "shift": "gamma_3_1",
+   "gpt": 0.2,
+   "claude": 0.2125,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "damped_ho",
+   "shift": "gamma_3_2",
+   "gpt": 0.0052,
+   "claude": 0.0981,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "decay",
+   "shift": "baseline",
+   "gpt": 1.0317,
+   "claude": 0.9807,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "decay",
+   "shift": "delta_12_1",
+   "gpt": 0.6836,
+   "claude": 0.7196,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "decay",
+   "shift": "gamma_12_1",
+   "gpt": 0.1891,
+   "claude": 0.8671,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "decay",
+   "shift": "gamma_12_2",
+   "gpt": 0.0061,
+   "claude": 0.9501,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "fluid",
+   "shift": "baseline",
+   "gpt": 0.9457,
+   "claude": 1.0785,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "fluid",
+   "shift": "delta_10_1",
+   "gpt": 0.0,
+   "claude": 0.8522,
+   "gpt_term": "score_error:IndentationError",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "fluid",
+   "shift": "gamma_10_1",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "fluid",
+   "shift": "gamma_10_2",
+   "gpt": 0.1126,
+   "claude": 0.6823,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "gravity",
+   "shift": "baseline",
+   "gpt": 0.891,
+   "claude": 0.891,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "gravity",
+   "shift": "delta_2_1",
+   "gpt": 0.3211,
+   "claude": 0.3217,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "gravity",
+   "shift": "gamma_2_1",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "gravity",
+   "shift": "gamma_2_2",
+   "gpt": 0.2119,
+   "claude": 0.3287,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "hooke",
+   "shift": "baseline",
+   "gpt": 0.9578,
+   "claude": 0.9578,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "hooke",
+   "shift": "delta_1_1",
+   "gpt": 0.7366,
+   "claude": 0.9756,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "hooke",
+   "shift": "gamma_1_1",
+   "gpt": 0.198,
+   "claude": 0.1,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "hooke",
+   "shift": "gamma_1_2",
+   "gpt": 0.0,
+   "claude": 0.0042,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "kinetics",
+   "shift": "baseline",
+   "gpt": 0.1,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "kinetics",
+   "shift": "delta_11_1",
+   "gpt": 0.0355,
+   "claude": 0.1257,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "kinetics",
+   "shift": "gamma_11_1",
+   "gpt": 0.0,
+   "claude": 0.8409,
+   "gpt_term": "wall",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "kinetics",
+   "shift": "gamma_11_2",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "optics",
+   "shift": "baseline",
+   "gpt": 0.932,
+   "claude": 0.932,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "optics",
+   "shift": "delta_9_1",
+   "gpt": 0.0,
+   "claude": 0.0034,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "optics",
+   "shift": "gamma_9_1",
+   "gpt": 0.0,
+   "claude": 0.0007,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "optics",
+   "shift": "gamma_9_2",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "wall"
+  },
+  {
+   "domain": "pendulum",
+   "shift": "baseline",
+   "gpt": 0.1,
+   "claude": 0.9459,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "pendulum",
+   "shift": "delta_4_1",
+   "gpt": 0.0536,
+   "claude": 0.0564,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "pendulum",
+   "shift": "gamma_4_1",
+   "gpt": 0.0528,
+   "claude": 0.1002,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "pendulum",
+   "shift": "gamma_4_2",
+   "gpt": 0.0,
+   "claude": 0.859,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "rlc",
+   "shift": "baseline",
+   "gpt": 0.1,
+   "claude": 0.8413,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "rlc",
+   "shift": "delta_6_1",
+   "gpt": 0.0,
+   "claude": 0.1818,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "rlc",
+   "shift": "gamma_6_1",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "rlc",
+   "shift": "gamma_6_2",
+   "gpt": 0.0,
+   "claude": 0.1,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "thermal",
+   "shift": "baseline",
+   "gpt": 0.9521,
+   "claude": 1.1,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "thermal",
+   "shift": "delta_7_1",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "thermal",
+   "shift": "gamma_7_1",
+   "gpt": 0.3404,
+   "claude": 0.0441,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "thermal",
+   "shift": "gamma_7_2",
+   "gpt": 0.0,
+   "claude": 0.001,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "wave",
+   "shift": "baseline",
+   "gpt": 0.1,
+   "claude": 0.1,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "wave",
+   "shift": "delta_8_1",
+   "gpt": 0.0,
+   "claude": 0.1,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "wave",
+   "shift": "gamma_8_1",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  },
+  {
+   "domain": "wave",
+   "shift": "gamma_8_2",
+   "gpt": 0.0,
+   "claude": 0.0,
+   "gpt_term": "submit",
+   "claude_term": "submit"
+  }
+ ]
+}

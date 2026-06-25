@@ -1,0 +1,57 @@
+{
+ "domain_id": "hooke",
+ "shift_id": "gamma_1_1",
+ "model": "gpt-5.5",
+ "terminated_by": "submit",
+ "s_scen": 0.9931242423448496,
+ "submission": [
+  {
+   "law_id": "L1",
+   "formula": "Let q = x - x_eq. The restoring force is F = -q * (k0 + k1*tanh(beta*q)). Equivalently, F = -k0*q - k1*q*tanh(beta*q).",
+   "predictor": {
+    "lang": "python",
+    "code": "def f(x):\n    import math\n    x_eq = 0.0\n    k0 = 18.78985266149949\n    k1 = 5.42746\n    beta = 17.1949\n    q = x - x_eq\n    return -q * (k0 + k1 * math.tanh(beta * q))"
+   },
+   "inputs": [
+    {
+     "name": "x",
+     "units": "m"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "F",
+     "units": "kg m s^-2"
+    }
+   ],
+   "params": [
+    {
+     "name": "x_eq",
+     "units": "m",
+     "value": 0
+    },
+    {
+     "name": "k0",
+     "units": "kg s^-2",
+     "value": 18.78985266149949
+    },
+    {
+     "name": "k1",
+     "units": "kg s^-2",
+     "value": 5.42746
+    },
+    {
+     "name": "beta",
+     "units": "m^-1",
+     "value": 17.1949
+    }
+   ],
+   "claim_broken_symmetry": "PAR"
+  }
+ ],
+ "n_tool_calls": 65,
+ "n_llm_turns": 41,
+ "parse_errors": 0,
+ "saturated": false,
+ "tier": "gamma"
+}

@@ -1,0 +1,3108 @@
+{
+  "meta": {
+    "schema_version": 1,
+    "xy_version": 1,
+    "n_models": 1,
+    "n_cells": 48,
+    "n_runs_planned": 48,
+    "seed": 0,
+    "hard_cap": 8000,
+    "hard_cap_overrun": 9600,
+    "max_tool_calls": 80,
+    "max_wall_seconds": 600,
+    "budget_mode": "measurement",
+    "stopped_at_cap": false,
+    "started_at": "2026-06-25T07:54:37+0000",
+    "n_turns_so_far": 1232,
+    "n_completed": 48,
+    "n_turns_total": 1232,
+    "elapsed_s": 19294.503,
+    "finished_at": "2026-06-25T13:16:11+0000"
+  },
+  "entries": [
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "coulomb",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 25,
+      "n_llm_turns": 9,
+      "elapsed_s": 135.0854,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F = k_e * |q1*q2| / r**2  (Coulomb force magnitude in empty medium)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, q1, q2):\n    k_e = 8987551787.368176\n    return float(k_e * abs(q1 * q2) / (r * r))"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "q1",
+              "units": "A*s"
+            },
+            {
+              "name": "q2",
+              "units": "A*s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "kg*m**3*s**-4*A**-2",
+              "value": 8987551787.368176
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "coulomb",
+      "shift_id": "delta_5_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 78,
+      "n_llm_turns": 19,
+      "elapsed_s": 417.0729,
+      "terminated_by": "submit",
+      "submission_len": 3,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F(t,r;q1_0,q2_0)=k_e*abs(q1(t)*q2(t))/r**2, with q1(t)=q1_0/(1+alpha*t) and q2(t)=q2_0/(1+alpha*t). This is Coulomb's inverse-square force magnitude with the observed slow charge decay folded in.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, r, q1_0, q2_0):\n    k_e = 8987551787.368176\n    alpha = 2.25e-3\n    q1 = q1_0/(1.0 + alpha*t)\n    q2 = q2_0/(1.0 + alpha*t)\n    return k_e*abs(q1*q2)/(r*r)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "q1_0",
+              "units": "C = A*s"
+            },
+            {
+              "name": "q2_0",
+              "units": "C = A*s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N = kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "N*m**2*C**-2 = kg*m**3*s**-4*A**-2",
+              "value": 8987551787.368176
+            },
+            {
+              "name": "alpha",
+              "units": "s**-1",
+              "value": 0.00225
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "L2",
+          "formula": "F(r,q1,q2)=k_e*abs(q1*q2)/r**2, using the instantaneous charge magnitudes if q1 and q2 are supplied directly.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, q1, q2):\n    k_e = 8987551787.368176\n    return k_e*abs(q1*q2)/(r*r)"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "q1",
+              "units": "C = A*s"
+            },
+            {
+              "name": "q2",
+              "units": "C = A*s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N = kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "N*m**2*C**-2 = kg*m**3*s**-4*A**-2",
+              "value": 8987551787.368176
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "L3",
+          "formula": "Signed one-dimensional/vector-axis Coulomb component: F=k_e*q1*q2/r**2. The magnitude is |F|; the sign distinguishes attraction from repulsion along the chosen separation axis.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, q1, q2):\n    k_e = 8987551787.368176\n    return k_e*q1*q2/(r*r)"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "q1",
+              "units": "C = A*s"
+            },
+            {
+              "name": "q2",
+              "units": "C = A*s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N = kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "N*m**2*C**-2 = kg*m**3*s**-4*A**-2",
+              "value": 8987551787.368176
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 74,
+      "n_llm_turns": 33,
+      "elapsed_s": 605.7116,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "Force magnitude from generalized Coulomb law with a fixed anisotropy axis: F = |k_e q_src q_test|/r^2 * || (1 - chi/3 + 3 chi mu^2) r_hat - 2 chi mu m_hat ||, where r = sqrt(x^2+y^2+z^2), r_hat=(x,y,z)/r, m_hat=(mx,my,mz)/sqrt(mx^2+my^2+mz^2), and mu = r_hat\u00b7m_hat. For chi=0 this reduces to ordinary Coulomb: F = k_e |q_src q_test|/r^2.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, y, z, q_src, q_test, chi, mx, my, mz):\n    import math\n    k_e = 8987551787.368176\n    r2 = x*x + y*y + z*z\n    if r2 <= 0.0:\n        return float('inf')\n    r = math.sqrt(r2)\n    nx, ny, nz = x/r, y/r, z/r\n    mnorm = math.sqrt(mx*mx + my*my + mz*mz)\n    if mnorm <= 0.0:\n        ux, uy, uz = 1.0, 0.0, 0.0\n    else:\n        ux, uy, uz = mx/mnorm, my/mnorm, mz/mnorm\n    mu = nx*ux + ny*uy + nz*uz\n    A = 1.0 - chi/3.0 + 3.0*chi*mu*mu\n    bx = A*nx - 2.0*chi*mu*ux\n    by = A*ny - 2.0*chi*mu*uy\n    bz = A*nz - 2.0*chi*mu*uz\n    shape = math.sqrt(bx*bx + by*by + bz*bz)\n    return (k_e * abs(q_src*q_test) / r2) * shape"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "y",
+              "units": "m"
+            },
+            {
+              "name": "z",
+              "units": "m"
+            },
+            {
+              "name": "q_src",
+              "units": "A*s"
+            },
+            {
+              "name": "q_test",
+              "units": "A*s"
+            },
+            {
+              "name": "chi",
+              "units": "1"
+            },
+            {
+              "name": "mx",
+              "units": "1"
+            },
+            {
+              "name": "my",
+              "units": "1"
+            },
+            {
+              "name": "mz",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "kg*m**3*s**-4*A**-2",
+              "value": 8987551787.368176
+            }
+          ],
+          "claim_broken_symmetry": "ROT: nonzero chi with fixed m_hat breaks full rotational isotropy (ordinary Coulomb recovered for chi=0)."
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "coulomb",
+      "shift_id": "gamma_5_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 31,
+      "n_llm_turns": 17,
+      "elapsed_s": 365.688,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F = k_e*abs(q1*q2)/r**2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, q1, q2, k_e=8987551787.368176):\n    return k_e*abs(q1*q2)/(r**2)"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "q1",
+              "units": "C"
+            },
+            {
+              "name": "q2",
+              "units": "C"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_e",
+              "units": "N*m**2*C**-2",
+              "value": 8987551787.368176
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "damped_ho",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.882725,
+      "n_tool_calls": 21,
+      "n_llm_turns": 21,
+      "elapsed_s": 144.3826,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F = -k*(x - x_eq) - gamma*v, with x_eq = 0",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v):\n    k = 18.78985266149949\n    gamma = 0.17140402119374165\n    x_eq = 0.0\n    return -k*(x - x_eq) - gamma*v"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N m^-1",
+              "value": 18.78985266149949
+            },
+            {
+              "name": "gamma",
+              "units": "N s m^-1",
+              "value": 0.17140402119374165
+            },
+            {
+              "name": "x_eq",
+              "units": "m",
+              "value": 0
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.882725,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "damped_ho",
+      "shift_id": "delta_3_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.768764,
+      "n_tool_calls": 54,
+      "n_llm_turns": 44,
+      "elapsed_s": 545.4977,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F(x,v)=m[mu*(1 - abs(x)/L)*v - omega2*x] = c0*(1 - abs(x)/L)*v - k*x",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v):\n    m = 1.0\n    mu = 6.12        # s^-1\n    L = 0.11306      # m\n    omega2 = 11.36   # s^-2\n    return m*(mu*(1.0 - abs(x)/L)*v - omega2*x)"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg m s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "m",
+              "units": "kg",
+              "value": 1
+            },
+            {
+              "name": "mu",
+              "units": "s^-1",
+              "value": 6.12
+            },
+            {
+              "name": "L",
+              "units": "m",
+              "value": 0.11306
+            },
+            {
+              "name": "omega2",
+              "units": "s^-2",
+              "value": 11.36
+            },
+            {
+              "name": "c0=m*mu",
+              "units": "kg s^-1",
+              "value": 6.12
+            },
+            {
+              "name": "k=m*omega2",
+              "units": "kg s^-2",
+              "value": 11.36
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.768764,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.212449,
+      "n_tool_calls": 31,
+      "n_llm_turns": 20,
+      "elapsed_s": 597.901,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F(x,v) = -k*x - c*v = -m*(omega0**2*x + gamma*v)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v):\n    k = 11.36  # N/m\n    c = 0.17   # kg/s\n    return -k*x - c*v"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg m s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "kg s^-2",
+              "value": 11.36
+            },
+            {
+              "name": "c",
+              "units": "kg s^-1",
+              "value": 0.17
+            },
+            {
+              "name": "m",
+              "units": "kg",
+              "value": 1
+            },
+            {
+              "name": "omega0",
+              "units": "s^-1",
+              "value": 3.3705
+            },
+            {
+              "name": "gamma",
+              "units": "s^-1",
+              "value": 0.17
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.212449,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "damped_ho",
+      "shift_id": "gamma_3_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 80,
+      "n_llm_turns": 29,
+      "elapsed_s": 261.4624,
+      "terminated_by": "budget",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "saturated": true,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "decay",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.022472,
+      "n_tool_calls": 34,
+      "n_llm_turns": 13,
+      "elapsed_s": 203.6284,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "N(t) = N0 * exp(-lam * t)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, N0=1000000.0, lam=0.6373247256341329):\n    import math\n    return float(N0 * math.exp(-lam * t))"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "N0",
+              "units": "1",
+              "value": 1000000
+            },
+            {
+              "name": "lam",
+              "units": "s^-1",
+              "value": 0.6373247256341329
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.022472,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "decay",
+      "shift_id": "delta_12_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.020863,
+      "n_tool_calls": 33,
+      "n_llm_turns": 19,
+      "elapsed_s": 318.1421,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "N(t) = N0 * exp(-k*t), equivalently dN/dt = -k*N",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, N0=1000000.0, k=0.00153041226):\n    import math\n    return float(N0 * math.exp(-k * t))"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "N0",
+              "units": "1",
+              "value": 1000000
+            },
+            {
+              "name": "k",
+              "units": "s^-1",
+              "value": 0.00153041226
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        },
+        {
+          "law_id": "L2",
+          "formula": "rate = dN/dt = -k*N, so N = |rate|/k (using the magnitude of the instantaneous count-rate)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(rate, k=0.00153041226):\n    return float(abs(rate) / k)"
+          },
+          "inputs": [
+            {
+              "name": "rate",
+              "units": "s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "s^-1",
+              "value": 0.00153041226
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.021961,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "decay",
+      "shift_id": "gamma_12_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.953271,
+      "n_tool_calls": 40,
+      "n_llm_turns": 13,
+      "elapsed_s": 836.061,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "First-order independent removal with a time-dependent per-entity hazard: dN/dt = -k(t) N, k(t)=k_low + (k_high-k_low)/(1 + exp(-(t-t_c)/tau)). Integrated predictor: N(t)=N0*exp(-k_low*t - (k_high-k_low)*tau*(softplus((t-t_c)/tau)-softplus(-t_c/tau))).",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t):\n    import math\n    N0 = 1000000.0\n    k_low = 1.15e-5\n    k_high = 1.5305e-3\n    t_c = 2590.0\n    tau = 1850.0\n    def softplus(x):\n        if x > 50.0:\n            return x\n        if x < -50.0:\n            return math.exp(x)\n        return math.log1p(math.exp(x))\n    dh = k_high - k_low\n    H = k_low*t + dh*tau*(softplus((t - t_c)/tau) - softplus(-t_c/tau))\n    return N0*math.exp(-H)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "N0",
+              "units": "1",
+              "value": 1000000
+            },
+            {
+              "name": "k_low",
+              "units": "s^-1",
+              "value": 1.15e-05
+            },
+            {
+              "name": "k_high",
+              "units": "s^-1",
+              "value": 0.0015305
+            },
+            {
+              "name": "t_c",
+              "units": "s",
+              "value": 2590
+            },
+            {
+              "name": "tau",
+              "units": "s",
+              "value": 1850
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.953271,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "decay",
+      "shift_id": "gamma_12_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.00637,
+      "n_tool_calls": 26,
+      "n_llm_turns": 21,
+      "elapsed_s": 481.8434,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "N(t)=N0*exp(-lam0*(t + eps*sin(omega*t)/omega)) for omega != 0; with continuous limit N(t)=N0*exp(-lam0*(1+eps)*t) as omega -> 0. Equivalently dN/dt = -lam0*(1 + eps*cos(omega*t))*N.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, N0, lam0, eps, omega):\n    import math\n    if abs(omega) < 1e-12:\n        integral = (1.0 + eps) * t\n    else:\n        integral = t + eps * math.sin(omega * t) / omega\n    return float(N0 * math.exp(-lam0 * integral))"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "N0",
+              "units": "1"
+            },
+            {
+              "name": "lam0",
+              "units": "s^-1"
+            },
+            {
+              "name": "eps",
+              "units": "1"
+            },
+            {
+              "name": "omega",
+              "units": "rad s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "N",
+              "units": "1"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 1,
+      "saturated": false,
+      "s_single": 0.00637,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "fluid",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.978452,
+      "n_tool_calls": 44,
+      "n_llm_turns": 26,
+      "elapsed_s": 126.55,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "p2 = p1 + 0.5*rho*(v1**2 - v2**2) + rho*g*(h1 - h2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(p1, v1, v2, h1, h2):\n    rho = 1054.7846749285818\n    g = 9.81\n    return float(p1 + 0.5*rho*(v1**2 - v2**2) + rho*g*(h1 - h2))"
+          },
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "kg*m**-1*s**-2"
+            },
+            {
+              "name": "v1",
+              "units": "m*s**-1"
+            },
+            {
+              "name": "v2",
+              "units": "m*s**-1"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "kg*m**-1*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho",
+              "units": "kg*m**-3",
+              "value": 1054.7846749285818
+            },
+            {
+              "name": "g",
+              "units": "m*s**-2",
+              "value": 9.81
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.978452,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "fluid",
+      "shift_id": "delta_10_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.974736,
+      "n_tool_calls": 77,
+      "n_llm_turns": 69,
+      "elapsed_s": 664.261,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "p2 = p1 + rho*g*(h1 - h2) + 0.5*rho*(v1**2 - v2**2) - k_sum*(v1 + v2)**n - k_ind*(v1**n + v2**n), for nonnegative station speeds v1,v2",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(p1, v1, v2, h1, h2):\n    rho = 816.389409574478\n    g = 9.81\n    n = 1.85072\n    k_sum = 1553.13\n    k_ind = 1380.35\n    v1a = abs(v1)\n    v2a = abs(v2)\n    loss = k_sum * (v1a + v2a)**n + k_ind * (v1a**n + v2a**n)\n    return float(p1 + rho*g*(h1 - h2) + 0.5*rho*(v1a*v1a - v2a*v2a) - loss)"
+          },
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "kg*m^-1*s^-2"
+            },
+            {
+              "name": "v1",
+              "units": "m*s^-1"
+            },
+            {
+              "name": "v2",
+              "units": "m*s^-1"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "kg*m^-1*s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho",
+              "units": "kg*m^-3",
+              "value": 816.389409574478
+            },
+            {
+              "name": "g",
+              "units": "m*s^-2",
+              "value": 9.81
+            },
+            {
+              "name": "n",
+              "units": "1",
+              "value": 1.85072
+            },
+            {
+              "name": "k_sum",
+              "units": "kg*m^-2.85072*s^-0.14928",
+              "value": 1553.13
+            },
+            {
+              "name": "k_ind",
+              "units": "kg*m^-2.85072*s^-0.14928",
+              "value": 1380.35
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.974736,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 3.2e-05,
+      "n_tool_calls": 29,
+      "n_llm_turns": 15,
+      "elapsed_s": 275.7229,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "p2 = p1 + (1/2)*rho*(v1**2 - v2**2) + rho*g*(h1 - h2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(p1, v1, v2, h1, h2, rho=1000.0, g=9.80665):\n    return float(p1 + 0.5*rho*(v1**2 - v2**2) + rho*g*(h1 - h2))"
+          },
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "kg*m^-1*s^-2"
+            },
+            {
+              "name": "v1",
+              "units": "m*s^-1"
+            },
+            {
+              "name": "v2",
+              "units": "m*s^-1"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "kg*m^-1*s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "rho",
+              "units": "kg*m^-3",
+              "value": 1000
+            },
+            {
+              "name": "g",
+              "units": "m*s^-2",
+              "value": 9.80665
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 3.2e-05,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "fluid",
+      "shift_id": "gamma_10_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.978703,
+      "n_tool_calls": 63,
+      "n_llm_turns": 52,
+      "elapsed_s": 739.9987,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "Generalized Bernoulli pressure balance: p2 = p1 + c_v*(v1^2 - v2^2) + Phi(h1) - Phi(h2), where c_v = 562.6540478400546 kg m^-3 and Phi(h) is the height-pressure potential (Pa) represented by local cubic interpolation through the measured nodes (h,Phi) = (0,0), (1,11366.20255160968), (2,23871.69560126844), (3,37970.68854014794), (4,53992.18695700774), (5,72207.58861372474), (6,92852.72780808073), (7,116138.64956210548), (8,142257.85240607508), (10,203696.1268235538).",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(p1, v1, v2, h1, h2):\n    c_v = 562.6540478400546\n    xs = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 10.0]\n    ys = [0.0, 11366.20255160968, 23871.69560126844, 37970.68854014794, 53992.18695700774, 72207.58861372474, 92852.72780808073, 116138.64956210548, 142257.85240607508, 203696.1268235538]\n    def phi(h):\n        x = float(h)\n        n = len(xs)\n        if x <= xs[1]:\n            idx = [0, 1, 2, 3]\n        elif x >= xs[-2]:\n            idx = [n-4, n-3, n-2, n-1]\n        else:\n            j = 0\n            for k in range(n-1):\n                if xs[k] <= x <= xs[k+1]:\n                    j = k\n                    break\n            start = max(0, min(n-4, j-1))\n            idx = [start, start+1, start+2, start+3]\n        total = 0.0\n        for i in idx:\n            term = ys[i]\n            for m in idx:\n                if m != i:\n                    term *= (x - xs[m])/(xs[i] - xs[m])\n            total += term\n        return total\n    return float(p1 + c_v*(v1*v1 - v2*v2) + phi(h1) - phi(h2))"
+          },
+          "inputs": [
+            {
+              "name": "p1",
+              "units": "Pa = kg m^-1 s^-2"
+            },
+            {
+              "name": "v1",
+              "units": "m s^-1"
+            },
+            {
+              "name": "v2",
+              "units": "m s^-1"
+            },
+            {
+              "name": "h1",
+              "units": "m"
+            },
+            {
+              "name": "h2",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "p2",
+              "units": "Pa = kg m^-1 s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "c_v",
+              "units": "kg m^-3 (Pa per (m^2 s^-2))",
+              "value": 562.6540478400545
+            },
+            {
+              "name": "Phi_0_at_h_0",
+              "units": "Pa at m",
+              "value": 0
+            },
+            {
+              "name": "Phi_1_at_h_1m",
+              "units": "Pa",
+              "value": 11366.20255160968
+            },
+            {
+              "name": "Phi_2_at_h_2m",
+              "units": "Pa",
+              "value": 23871.69560126844
+            },
+            {
+              "name": "Phi_3_at_h_3m",
+              "units": "Pa",
+              "value": 37970.68854014794
+            },
+            {
+              "name": "Phi_4_at_h_4m",
+              "units": "Pa",
+              "value": 53992.18695700774
+            },
+            {
+              "name": "Phi_5_at_h_5m",
+              "units": "Pa",
+              "value": 72207.58861372474
+            },
+            {
+              "name": "Phi_6_at_h_6m",
+              "units": "Pa",
+              "value": 92852.72780808073
+            },
+            {
+              "name": "Phi_7_at_h_7m",
+              "units": "Pa",
+              "value": 116138.64956210548
+            },
+            {
+              "name": "Phi_8_at_h_8m",
+              "units": "Pa",
+              "value": 142257.85240607508
+            },
+            {
+              "name": "Phi_10_at_h_10m",
+              "units": "Pa",
+              "value": 203696.1268235538
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.978703,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "gravity",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 1.2e-05,
+      "n_tool_calls": 46,
+      "n_llm_turns": 22,
+      "elapsed_s": 217.4396,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F(r;G,M,m) = - G M m / r^2 (attractive radial force; negative sign denotes inward direction for positive separation r)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m, M, G=6.67430e-11):\n    return -G * M * m / (r * r)"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            },
+            {
+              "name": "M",
+              "units": "kg"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg m s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "G",
+              "units": "m^3 kg^-1 s^-2",
+              "value": 6.6743e-11
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 1.2e-05,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "gravity",
+      "shift_id": "delta_2_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.321669,
+      "n_tool_calls": 58,
+      "n_llm_turns": 35,
+      "elapsed_s": 563.4235,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F(r) = - m*mu/r**2, where mu is the effective gravitational parameter of the central source (mu = G_eff*M for the tested source). The negative sign denotes attraction toward decreasing r.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m=1.0, mu=1.171883520529643e11):\n    return -m * mu / (r * r)\n"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "m",
+              "units": "kg",
+              "value": 1
+            },
+            {
+              "name": "mu",
+              "units": "m**3*s**-2",
+              "value": 117188352052.9643
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.321669,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 47,
+      "n_llm_turns": 13,
+      "elapsed_s": 412.3341,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F(r,m) = mu*m/r**2 (attractive central inverse-square force magnitude; radial vector form would be F_vec = -mu*m*r_hat/r**2)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, m, mu=9.48223e10):\n    return mu * m / (r * r)"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            },
+            {
+              "name": "m",
+              "units": "kg"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m*s**-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "mu",
+              "units": "m**3*s**-2",
+              "value": 94822300000
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "gravity",
+      "shift_id": "gamma_2_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.074821,
+      "n_tool_calls": 14,
+      "n_llm_turns": 15,
+      "elapsed_s": 500.9768,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F(r) = -F0 * (r0 / r)**p, with F directed inward for positive radial coordinate r",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(r, F0=0.0012417658670743816, r0=10000000.0, p=2.42094):\n    return float(-F0 * (r0 / r)**p)"
+          },
+          "inputs": [
+            {
+              "name": "r",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg m s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "F0",
+              "units": "kg m s^-2",
+              "value": 0.0012417658670743816
+            },
+            {
+              "name": "r0",
+              "units": "m",
+              "value": 10000000
+            },
+            {
+              "name": "p",
+              "units": "1",
+              "value": 2.42094
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.074821,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "hooke",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.857846,
+      "n_tool_calls": 21,
+      "n_llm_turns": 18,
+      "elapsed_s": 157.6951,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F = -k (x - x_eq), with k = 18.789852661499488 N/m and x_eq = 0 m",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x):\n    k = 18.789852661499488\n    x_eq = 0.0\n    return -k * (x - x_eq)"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "N"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "N m^-1",
+              "value": 18.789852661499488
+            },
+            {
+              "name": "x_eq",
+              "units": "m",
+              "value": 0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.857846,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "hooke",
+      "shift_id": "delta_1_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.996322,
+      "n_tool_calls": 46,
+      "n_llm_turns": 41,
+      "elapsed_s": 412.1684,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F = -k*(x - x_eq) - gamma*(x - x_eq)**2*v",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, v, k=18.789852661499488, gamma=1.135439361434532, x_eq=0.0):\n    dx = x - x_eq\n    return -k*dx - gamma*(dx**2)*v"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "v",
+              "units": "m*s^-1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg*m*s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "kg*s^-2",
+              "value": 18.789852661499488
+            },
+            {
+              "name": "gamma",
+              "units": "kg*m^-2*s^-1",
+              "value": 1.135439361434532
+            },
+            {
+              "name": "x_eq",
+              "units": "m",
+              "value": 0
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.996322,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 37,
+      "n_llm_turns": 36,
+      "elapsed_s": 696.5168,
+      "terminated_by": "llm_error",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": "RuntimeError: anthropic proxy HTTP 500: {\"error\":{\"message\":\"The operation timed out.\",\"type\":\"error\"}}"
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "hooke",
+      "shift_id": "gamma_1_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 47,
+      "n_llm_turns": 20,
+      "elapsed_s": 585.3292,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "F = -k (x - x_eq); for the observed 1-D equilibrium x_eq = 0, F = -k x",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x):\n    k = 23.548227570942\n    x_eq = 0.0\n    return -k * (x - x_eq)"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg m s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "kg s^-2",
+              "value": 23.548227570942
+            },
+            {
+              "name": "x_eq",
+              "units": "m",
+              "value": 0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "L2",
+          "formula": "F_x = -k_xx x - k_xy y (linear coupled restoring law seen in the exposed backend; reduces to L1 on the 1-D axis y=0)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(x, y=0.0):\n    k_xx = 23.548227570942\n    k_xy = 1.252817180767\n    return -k_xx * x - k_xy * y"
+          },
+          "inputs": [
+            {
+              "name": "x",
+              "units": "m"
+            },
+            {
+              "name": "y",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "F",
+              "units": "kg m s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_xx",
+              "units": "kg s^-2",
+              "value": 23.548227570942
+            },
+            {
+              "name": "k_xy",
+              "units": "kg s^-2",
+              "value": 1.252817180767
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "kinetics",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 16,
+      "n_llm_turns": 7,
+      "elapsed_s": 78.0894,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "Second-order irreversible decay: dC/dt = -k C^2, integrated as C(t) = C0 / (1 + k*C0*t).",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, C0):\n    k = 0.32211122678751264  # m^3 mol^-1 s^-1\n    return C0 / (1.0 + k * C0 * t)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol m^-3"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "m^3 mol^-1 s^-1",
+              "value": 0.32211122678751264
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "kinetics",
+      "shift_id": "delta_11_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.119917,
+      "n_tool_calls": 31,
+      "n_llm_turns": 14,
+      "elapsed_s": 538.4256,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "dC/dt = -k*C^n; integrated for n != 1 as C(t) = [C0^(1-n) + (n-1)*k*t]^(-1/(n-1)). Best fit from observed trajectory: n = 1.5654766813, k = 6.43836e-4 (mol m^-3)^(1-n) s^-1, C0 = 1.0 mol m^-3.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, C0=1.0, k=6.43836e-4, n=1.5654766813):\n    if abs(n - 1.0) < 1e-12:\n        import math\n        return C0 * math.exp(-k * t)\n    return (C0**(1.0 - n) + (n - 1.0) * k * t) ** (-1.0 / (n - 1.0))"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol m^-3"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "(mol m^-3)^(1-n) s^-1",
+              "value": 0.000643836
+            },
+            {
+              "name": "n",
+              "units": "dimensionless",
+              "value": 1.5654766813
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "L2",
+          "formula": "First-order limiting model: dC/dt = -k*C, so C(t) = C0*exp(-k*t). Fit to ln(C) over the observed run gives k = 6.44121e-4 s^-1.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, C0=1.0, k=6.44121e-4):\n    import math\n    return C0 * math.exp(-k * t)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol m^-3"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "s^-1",
+              "value": 0.000644121
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.126228,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 34,
+      "n_llm_turns": 15,
+      "elapsed_s": 652.3148,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "Integrated nonautonomous power-law kinetics: dC/dt = -k C^n (t + tau_min)^(-beta), so for n != 1, C(t;C0) = [ C0^(1-n) + (n-1) k ((t+tau_min)^(1-beta) - tau_min^(1-beta))/(1-beta) ]^(1/(1-n)). Best-fit values: n\u22481.0396, beta\u22480.2912, tau_min\u22480 s.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, C0):\n    import math\n    k = 1.0337e-4\n    n = 1.0396\n    beta = 0.2912\n    tau_min = 0.0\n    if t <= 0.0:\n        return float(C0)\n    p = 1.0 - beta\n    I = ((t + tau_min)**p - (tau_min**p if tau_min > 0.0 else 0.0)) / p\n    if abs(n - 1.0) < 1e-12:\n        return float(C0) * math.exp(-k * I)\n    base = float(C0)**(1.0 - n) + (n - 1.0) * k * I\n    return float(base**(1.0 / (1.0 - n)))"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol m^-3"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "(mol m^-3)^(1-n) s^(beta-1) = (mol m^-3)^-0.0396 s^-0.7088",
+              "value": 0.00010337
+            },
+            {
+              "name": "n",
+              "units": "dimensionless",
+              "value": 1.0396
+            },
+            {
+              "name": "beta",
+              "units": "dimensionless",
+              "value": 0.2912
+            },
+            {
+              "name": "tau_min",
+              "units": "s",
+              "value": 0
+            }
+          ],
+          "claim_broken_symmetry": "time-translation"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "kinetics",
+      "shift_id": "gamma_11_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 40,
+      "n_llm_turns": 27,
+      "elapsed_s": 510.8766,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "dC/dt = - k*C^m/(1 + (C/C_sat)^n), with C(0)=C0. The submitted predictor returns C(t) obtained by direct RK4 integration of this ODE; for the common first-order saturation special case m=n=1 this is equivalent to C + C_sat*ln(C) = C0 + C_sat*ln(C0) - k*C_sat*t.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, C0, k, C_sat, m, n):\n    import math\n    # Concentration decay in an isolated well-mixed reactor with saturating kinetics.\n    # Units: t [s], C0 and C_sat [mol m^-3], k [mol^(1-m) m^(3*(m-1)) s^-1].\n    t = float(t); C0 = float(C0); k = float(k); C_sat = float(C_sat); m = float(m); n = float(n)\n    if t <= 0.0:\n        return max(C0, 0.0)\n    if C0 <= 0.0 or k == 0.0:\n        return max(C0, 0.0)\n    Csat = max(abs(C_sat), 1e-300)\n    # Adaptive RK4; derivative is negative and clipped at zero concentration.\n    N = int(max(32, min(20000, math.ceil(abs(t) * 200.0))))\n    h = t / N\n    C = max(C0, 0.0)\n    def rhs(x):\n        x = max(x, 0.0)\n        denom = 1.0 + (x / Csat)**n\n        return -k * (x**m) / denom\n    for _ in range(N):\n        if C <= 0.0:\n            return 0.0\n        k1 = rhs(C)\n        k2 = rhs(C + 0.5*h*k1)\n        k3 = rhs(C + 0.5*h*k2)\n        k4 = rhs(C + h*k3)\n        C += (h/6.0)*(k1 + 2.0*k2 + 2.0*k3 + k4)\n        if C < 0.0:\n            C = 0.0\n    return float(C)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol m^-3"
+            },
+            {
+              "name": "k",
+              "units": "(mol m^-3)^(1-m) s^-1"
+            },
+            {
+              "name": "C_sat",
+              "units": "mol m^-3"
+            },
+            {
+              "name": "m",
+              "units": "1"
+            },
+            {
+              "name": "n",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "L2",
+          "formula": "Alternative saturating depletion law: dC/dt = -k*C^m*(1 - C/C_sat)^n, C(0)=C0, valid for 0 <= C <= C_sat; C(t) is computed by RK4 integration.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, C0, k, C_sat, m, n):\n    import math\n    t = float(t); C0 = float(C0); k = float(k); C_sat = float(C_sat); m = float(m); n = float(n)\n    if t <= 0.0:\n        return max(C0, 0.0)\n    if C0 <= 0.0 or k == 0.0:\n        return max(C0, 0.0)\n    Csat = max(abs(C_sat), 1e-300)\n    N = int(max(32, min(20000, math.ceil(abs(t) * 200.0))))\n    h = t / N\n    C = min(max(C0, 0.0), Csat)\n    def rhs(x):\n        x = min(max(x, 0.0), Csat)\n        sat = max(0.0, 1.0 - x/Csat)\n        return -k * (x**m) * (sat**n)\n    for _ in range(N):\n        if C <= 0.0:\n            return 0.0\n        a = rhs(C)\n        b = rhs(C + 0.5*h*a)\n        c = rhs(C + 0.5*h*b)\n        d = rhs(C + h*c)\n        C += (h/6.0)*(a + 2*b + 2*c + d)\n        if C < 0.0:\n            C = 0.0\n    return float(C)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            },
+            {
+              "name": "C0",
+              "units": "mol m^-3"
+            },
+            {
+              "name": "k",
+              "units": "(mol m^-3)^(1-m) s^-1"
+            },
+            {
+              "name": "C_sat",
+              "units": "mol m^-3"
+            },
+            {
+              "name": "m",
+              "units": "1"
+            },
+            {
+              "name": "n",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "C",
+              "units": "mol m^-3"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "optics",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.830895,
+      "n_tool_calls": 34,
+      "n_llm_turns": 30,
+      "elapsed_s": 344.1147,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "Snell refraction at a planar interface: n1*sin(theta1)=n2*sin(theta2), hence theta2=asin(eta*sin(theta1)) with eta=n1/n2\u22481.19. No measurable dependence on nu or T was exposed in the probed system.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta1, nu=0.0, T=0.0):\n    import math\n    eta = 1.19\n    x = eta * math.sin(theta1)\n    # transmitted-ray domain; clamp only to avoid numerical spillover at critical incidence\n    if x > 1.0:\n        x = 1.0\n    elif x < -1.0:\n        x = -1.0\n    return float(math.asin(x))"
+          },
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "rad"
+            },
+            {
+              "name": "nu",
+              "units": "Hz"
+            },
+            {
+              "name": "T",
+              "units": "K"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "rad"
+            }
+          ],
+          "params": [
+            {
+              "name": "eta",
+              "units": "dimensionless",
+              "value": 1.19
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.830895,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "optics",
+      "shift_id": "delta_9_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.00328,
+      "n_tool_calls": 70,
+      "n_llm_turns": 45,
+      "elapsed_s": 575.0203,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "Snell refraction at a stationary planar interface: theta2 = asin(eta * sin(theta1)), where eta = n1/n2. The wave frequency nu and the transmission coefficient T do not enter the ray direction for a nondispersive lossless interface; they are independent observables for this predictor.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta1, eta=0.6666666666666666):\n    import math\n    x = eta * math.sin(theta1)\n    if x > 1.0:\n        x = 1.0\n    elif x < -1.0:\n        x = -1.0\n    return float(math.asin(x))"
+          },
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "rad"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "rad"
+            }
+          ],
+          "params": [
+            {
+              "name": "eta",
+              "units": "1",
+              "value": 0.6666666666666666
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.00328,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "optics",
+      "shift_id": "gamma_9_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 58,
+      "n_llm_turns": 21,
+      "elapsed_s": 471.3995,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "Snell refraction at a planar interface: sin(theta2) = sin(theta1)/nu, equivalently theta2 = asin(sin(theta1)/nu), where nu is the dimensionless index ratio n2/n1.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta1, nu):\n    import math\n    x = math.sin(theta1) / nu\n    if x > 1.0:\n        x = 1.0\n    if x < -1.0:\n        x = -1.0\n    return math.asin(x)"
+          },
+          "inputs": [
+            {
+              "name": "theta1",
+              "units": "rad (dimensionless SI)"
+            },
+            {
+              "name": "nu",
+              "units": "1"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta2",
+              "units": "rad (dimensionless SI)"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "optics",
+      "shift_id": "gamma_9_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 76,
+      "n_llm_turns": 43,
+      "elapsed_s": 690.3054,
+      "terminated_by": "wall",
+      "submission_len": 0,
+      "submission": [],
+      "parse_errors": 0,
+      "saturated": true,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "pendulum",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.326424,
+      "n_tool_calls": 40,
+      "n_llm_turns": 30,
+      "elapsed_s": 296.7552,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "theta_ddot = -(g/L) * sin(theta)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta, g, L):\n    import math\n    return -(g / L) * math.sin(theta)"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "g",
+              "units": "m s^-2"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta_ddot",
+              "units": "rad s^-2"
+            }
+          ],
+          "params": [],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.326424,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "pendulum",
+      "shift_id": "delta_4_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.100114,
+      "n_tool_calls": 67,
+      "n_llm_turns": 24,
+      "elapsed_s": 600.2217,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "theta_ddot = - (k0 + k1*cos(Omega*t)) * sin(theta)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta, t):\n    import math\n    k0 = 20.0\n    k1 = 8.30\n    Omega = 3.0\n    return -(k0 + k1*math.cos(Omega*t))*math.sin(theta)"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad (dimensionless)"
+            },
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta_ddot",
+              "units": "rad s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k0",
+              "units": "s^-2",
+              "value": 20
+            },
+            {
+              "name": "k1",
+              "units": "s^-2",
+              "value": 8.3
+            },
+            {
+              "name": "Omega",
+              "units": "s^-1",
+              "value": 3
+            }
+          ],
+          "claim_broken_symmetry": "time-translation broken by explicit t-dependence; parity preserved as odd restoring torque"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.100114,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.01135,
+      "n_tool_calls": 34,
+      "n_llm_turns": 13,
+      "elapsed_s": 210.8037,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "theta_ddot = -k*sin(theta), with k = m*g*d/I_pivot (equivalently g/L for a point-mass pendulum).",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta, k=9.81):\n    import math\n    return -k * math.sin(theta)"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta_ddot",
+              "units": "rad*s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k",
+              "units": "s^-2",
+              "value": 9.81
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.01135,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "pendulum",
+      "shift_id": "gamma_4_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 70,
+      "n_llm_turns": 62,
+      "elapsed_s": 505.1445,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "theta_ddot = - g0_over_L * sin(theta) * cos(theta)**2 / (1 - alpha * sin(theta)**2), with alpha \u2248 0.5 for the probed body, equivalently theta_ddot \u2248 -g0_over_L*sin(theta)/(1 + tan(theta)^2/2).",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(theta, g0_over_L, alpha=0.5):\n    import math\n    s = math.sin(theta)\n    c = math.cos(theta)\n    return -g0_over_L * s * c*c / (1.0 - alpha*s*s)"
+          },
+          "inputs": [
+            {
+              "name": "theta",
+              "units": "rad"
+            },
+            {
+              "name": "g0_over_L",
+              "units": "s^-2"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "theta_ddot",
+              "units": "rad s^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "alpha",
+              "units": "dimensionless",
+              "value": 0.5
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "rlc",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.741399,
+      "n_tool_calls": 69,
+      "n_llm_turns": 40,
+      "elapsed_s": 479.1463,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "didt = -(1/(L*C))*q - (R/L)*i = -alpha*q - beta*i",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(q, i):\n    alpha = 15363961.062263293  # s^-2\n    beta = 26.91015708413453    # s^-1\n    return -alpha*q - beta*i"
+          },
+          "inputs": [
+            {
+              "name": "q",
+              "units": "C = A*s"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "didt",
+              "units": "A/s"
+            }
+          ],
+          "params": [
+            {
+              "name": "alpha",
+              "units": "s^-2",
+              "value": 15363961.062263293
+            },
+            {
+              "name": "beta",
+              "units": "s^-1",
+              "value": 26.91015708413453
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.741399,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "rlc",
+      "shift_id": "delta_6_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.18159,
+      "n_tool_calls": 49,
+      "n_llm_turns": 35,
+      "elapsed_s": 520.2655,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "didt = -k_q*q - k_i*i  (series RLC form: L*didt + R*i + q/C = 0, with k_q = 1/(L*C) and k_i = R/L)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(q, i):\n    k_q = 7.833869e8   # s^-2\n    k_i = 2.071263e4   # s^-1\n    return -k_q*q - k_i*i"
+          },
+          "inputs": [
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "didt",
+              "units": "A s^-1"
+            }
+          ],
+          "params": [
+            {
+              "name": "k_q",
+              "units": "s^-2",
+              "value": 783386900
+            },
+            {
+              "name": "k_i",
+              "units": "s^-1",
+              "value": 20712.63
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.18159,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 36,
+      "n_llm_turns": 21,
+      "elapsed_s": 657.3792,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "didt = -(alpha*q + beta*i) * (1 + (i/I_sat)^2), equivalent to a series R-C loop with a saturating inductor L(i)=L0/(1+(i/I_sat)^2), where alpha=1/(L0*C) and beta=R/L0.",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(q, i):\n    alpha = 8.42e9      # s^-2\n    beta = 8.4          # s^-1\n    I_sat = 1.5e-2      # A\n    return -(alpha*q + beta*i) * (1.0 + (i/I_sat)**2)"
+          },
+          "inputs": [
+            {
+              "name": "q",
+              "units": "C = A*s"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "didt",
+              "units": "A/s"
+            }
+          ],
+          "params": [
+            {
+              "name": "alpha",
+              "units": "s^-2",
+              "value": 8420000000
+            },
+            {
+              "name": "beta",
+              "units": "s^-1",
+              "value": 8.4
+            },
+            {
+              "name": "I_sat",
+              "units": "A",
+              "value": 0.015
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "rlc",
+      "shift_id": "gamma_6_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 45,
+      "n_llm_turns": 27,
+      "elapsed_s": 472.4998,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "didt = -alpha*q - beta*i, equivalently L*didt + R*i + q/C = 0 with alpha = 1/(L*C) and beta = R/L",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(q, i):\n    alpha = 7.53224823e6  # s^-2\n    beta = 1.79034       # s^-1\n    return -alpha*q - beta*i"
+          },
+          "inputs": [
+            {
+              "name": "q",
+              "units": "C"
+            },
+            {
+              "name": "i",
+              "units": "A"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "didt",
+              "units": "A/s"
+            }
+          ],
+          "params": [
+            {
+              "name": "alpha",
+              "units": "s^-2",
+              "value": 7532248.23
+            },
+            {
+              "name": "beta",
+              "units": "s^-1",
+              "value": 1.79034
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "thermal",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.852142,
+      "n_tool_calls": 45,
+      "n_llm_turns": 23,
+      "elapsed_s": 130.6222,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "q = kappa * (T_hot - T_cold) / L",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L):\n    kappa = 254.82097875984957  # W/(m*K)\n    return kappa * (T_hot - T_cold) / L"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W/m^2"
+            }
+          ],
+          "params": [
+            {
+              "name": "kappa",
+              "units": "W/(m*K)",
+              "value": 254.82097875984957
+            }
+          ],
+          "claim_broken_symmetry": "TR"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.852142,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "thermal",
+      "shift_id": "delta_7_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 68,
+      "n_llm_turns": 29,
+      "elapsed_s": 518.123,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "q = kappa*(T_hot - T_cold)/L  (positive from hot face to cold face)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L, kappa=1.0e-4):\n    return kappa*(T_hot - T_cold)/L"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W m^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "kappa",
+              "units": "W m^-1 K^-1",
+              "value": 0.0001
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.044278,
+      "n_tool_calls": 28,
+      "n_llm_turns": 20,
+      "elapsed_s": 169.9141,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "q = kappa * (T_hot - T_cold) / L  (steady 1-D Fourier conduction through a slab; q is positive from hot face to cold face)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L, kappa=9.821082416253626):\n    return float(kappa * (T_hot - T_cold) / L)"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W m^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "kappa",
+              "units": "W m^-1 K^-1",
+              "value": 9.821082416253626
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.044278,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "thermal",
+      "shift_id": "gamma_7_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.000127,
+      "n_tool_calls": 67,
+      "n_llm_turns": 39,
+      "elapsed_s": 625.355,
+      "terminated_by": "submit",
+      "submission_len": 2,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "q = kappa*(T_hot - T_cold)/L",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L):\n    kappa = 1.0\n    return kappa*(T_hot - T_cold)/L"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W m^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "kappa",
+              "units": "W m^-1 K^-1",
+              "value": 1
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        },
+        {
+          "law_id": "L2",
+          "formula": "q = (k0/((p + 1)*L))*(T_hot**(p + 1) - T_cold**(p + 1)); equivalently k(T)=k0*T**p in Fourier conduction",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(T_hot, T_cold, L):\n    k0 = 1.0\n    p = 0.5\n    return (k0/((p + 1.0)*L))*(T_hot**(p + 1.0) - T_cold**(p + 1.0))"
+          },
+          "inputs": [
+            {
+              "name": "T_hot",
+              "units": "K"
+            },
+            {
+              "name": "T_cold",
+              "units": "K"
+            },
+            {
+              "name": "L",
+              "units": "m"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "q",
+              "units": "W m^-2"
+            }
+          ],
+          "params": [
+            {
+              "name": "k0",
+              "units": "W m^-1 K^-1.5",
+              "value": 1
+            },
+            {
+              "name": "p",
+              "units": "dimensionless",
+              "value": 0.5
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.000134,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "wave",
+      "shift_id": "baseline",
+      "tier": "baseline",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 48,
+      "n_llm_turns": 12,
+      "elapsed_s": 417.8192,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "u(t)=u0*cos(omega*t)+(v0/omega)*sin(omega*t), equivalently d^2u/dt^2 + omega^2 u = 0 at the fixed probe",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t):\n    import math\n    u0 = 0.666370017479036\n    v0 = 4.946444574022663\n    omega = 51.465583498\n    return float(u0*math.cos(omega*t) + (v0/omega)*math.sin(omega*t))"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "u",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "u0",
+              "units": "1",
+              "value": 0.666370017479036
+            },
+            {
+              "name": "v0",
+              "units": "s^-1",
+              "value": 4.946444574022663
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 51.465583498
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "wave",
+      "shift_id": "delta_8_1",
+      "tier": "delta",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 27,
+      "n_llm_turns": 12,
+      "elapsed_s": 662.1055,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "u(t) = A (1 + t/tau)^(-p) cos(omega t + phi)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t, A=1.0, tau=13.333333333333334, p=0.89, omega=4.8973, phi=0.0):\n    import math\n    return float(A * (1.0 + t/tau)**(-p) * math.cos(omega*t + phi))"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "u",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "1",
+              "value": 1
+            },
+            {
+              "name": "tau",
+              "units": "s",
+              "value": 13.333333333333334
+            },
+            {
+              "name": "p",
+              "units": "1",
+              "value": 0.89
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 4.8973
+            },
+            {
+              "name": "phi",
+              "units": "rad",
+              "value": 0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "wave",
+      "shift_id": "gamma_8_1",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 14,
+      "n_llm_turns": 15,
+      "elapsed_s": 348.6279,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "u(t) = A * sin(phi - omega*t) + u0, with A=1, phi=1 rad, omega=139.13830262758464 s^-1, u0=0",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t):\n    import math\n    A = 1.0\n    phi = 1.0\n    omega = 139.13830262758464\n    u0 = 0.0\n    return A * math.sin(phi - omega * t) + u0"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "u",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "1",
+              "value": 1
+            },
+            {
+              "name": "phi",
+              "units": "rad",
+              "value": 1
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 139.13830262758464
+            },
+            {
+              "name": "u0",
+              "units": "1",
+              "value": 0
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    },
+    {
+      "model": "gpt-5.5",
+      "provider": "anthropic",
+      "domain_id": "wave",
+      "shift_id": "gamma_8_2",
+      "tier": "gamma",
+      "seed": 0,
+      "ok": true,
+      "s_scen": 0.0,
+      "n_tool_calls": 36,
+      "n_llm_turns": 8,
+      "elapsed_s": 216.6125,
+      "terminated_by": "submit",
+      "submission_len": 1,
+      "submission": [
+        {
+          "law_id": "L1",
+          "formula": "u(t) = A * sin(phi0 - omega * t)",
+          "predictor": {
+            "lang": "python",
+            "code": "def f(t):\n    import math\n    A = 1.0\n    phi0 = 1.0\n    omega = 122.27209\n    return A * math.sin(phi0 - omega * t)"
+          },
+          "inputs": [
+            {
+              "name": "t",
+              "units": "s"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "u",
+              "units": "1"
+            }
+          ],
+          "params": [
+            {
+              "name": "A",
+              "units": "1",
+              "value": 1
+            },
+            {
+              "name": "phi0",
+              "units": "1",
+              "value": 1
+            },
+            {
+              "name": "omega",
+              "units": "s^-1",
+              "value": 122.27209
+            }
+          ],
+          "claim_broken_symmetry": "none"
+        }
+      ],
+      "parse_errors": 0,
+      "saturated": false,
+      "s_single": 0.0,
+      "error": null
+    }
+  ]
+}
