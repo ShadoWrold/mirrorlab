@@ -299,3 +299,39 @@ def test_structural_bonus_falls_back_to_flat_when_no_spec():
                         BONUS_DEFAULT, rel_tol=1e-6)
 
 
+# ---- A malformed entry must not crash the whole submission set -------------
+
+def test_broken_predictor_code_does_not_crash_set():
+    """A predictor body with a Python IndentationError scores 0 for that entry
+    but must NOT zero (or crash) a sibling entry that is well-formed. Mirrors
+    the observed gpt fluid/delta_10_1 case where a broken-indent entry dropped a
+    sibling worth 0.067."""
+    from mirrorlab.eval.scoring import score_submission_detail
+    sim = make("hooke", "baseline", seed=1)
+    grids = _grids(sim)
+    good = {
+        "law_id": "good",
+        "formula": "F = -k*x",
+        "predictor": {"lang": "python", "code": "def f(x):\n    return -%r*x" % sim.params.k},
+        "inputs":  [{"name": "x", "units": "m"}],
+        "outputs": [{"name": "F", "units": DIM_FORCE}],
+        "params":  [],
+    }
+    broken = {
+        "law_id": "broken",
+        "formula": "F = ...",
+        # second statement is wrongly indented → IndentationError on exec
+        "predictor": {"lang": "python",
+                      "code": "def f(x):\n    a = 1.0\n   b = 2.0\n    return a*x"},
+        "inputs":  [{"name": "x", "units": "m"}],
+        "outputs": [{"name": "F", "units": DIM_FORCE}],
+        "params":  [],
+    }
+    # broken first, good second — the bad one must not take the good one down.
+    detail = score_submission_detail([broken, good], target_dim=DIM_FORCE,
+                                     test_grids=grids)
+    assert detail.best_of_k > 0.7      # the good entry scored normally
+    assert detail.n_entries == 2
+
+
+

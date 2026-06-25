@@ -70,9 +70,18 @@ def _entry_score(
     test_grids: TestGrids,
     canonical_inputs: Optional[Sequence[str]],
 ) -> float:
-    if match_dim(e, target_dim):
+    if not match_dim(e, target_dim):
+        return 0.0
+    try:
         return evaluate_entry(e, test_grids, canonical_inputs=canonical_inputs)
-    return 0.0
+    except Exception:
+        # A single malformed entry (e.g. a predictor body with a Python
+        # SyntaxError / IndentationError) scores 0 — it must NOT crash the whole
+        # submission set. Observed: a gpt fluid/delta_10_1 entry with a broken
+        # indent zeroed the entire cell, dropping a sibling entry that scored
+        # 0.067. The §5 contract evaluates entries independently; a bad one is
+        # just an unscorable entry, not a fatal error for the set.
+        return 0.0
 
 
 def _claim_matches(e: Mapping[str, Any], gt_symmetry: Optional[str]) -> bool:
